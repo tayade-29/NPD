@@ -1,13 +1,38 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("admin");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  
+  const navigate = useNavigate(); // Hook for navigation
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Username:", username, "Password:", password, "Role:", role);
+    setError("");
+    setLoading(true);
+
+    if (!username || !password) {
+      setError("Username and password are required.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("Logging in:", { username, role });
+
+      // Navigate to Dashboard after successful login
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Login failed. Please check your credentials.");
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -16,9 +41,12 @@ const Login = () => {
         <h2 className="text-3xl font-semibold text-gray-900 text-center mb-6 font-sans">
           Login
         </h2>
+        {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
         <form onSubmit={handleLogin} className="space-y-6">
-        <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">Login as</label>
+          <div>
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Login as
+            </label>
             <select
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -32,7 +60,9 @@ const Login = () => {
             </select>
           </div>
           <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">Username</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Username
+            </label>
             <input
               type="text"
               value={username}
@@ -43,7 +73,9 @@ const Login = () => {
             />
           </div>
           <div>
-            <label className="block text-gray-700 text-sm font-medium mb-2">Password</label>
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Password
+            </label>
             <input
               type="password"
               value={password}
@@ -53,12 +85,15 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition duration-300 shadow-md hover:shadow-lg"
+            className={`w-full ${
+              loading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
+            } text-white py-3 rounded-lg font-medium transition duration-300 shadow-md hover:shadow-lg`}
+            disabled={loading}
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>
