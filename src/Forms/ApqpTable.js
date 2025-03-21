@@ -167,8 +167,10 @@ export default function APQPTable() {
                           >
                             <Trash2 size={18} />
                           </button>
-                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-max px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                            Delete this activity and all its sub-activities
+                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1 bg-gray-800 text-white text-xs rounded shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap max-w-xs">
+
+
+                            Delete activity
                           </span>
                         </div>
 
