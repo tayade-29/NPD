@@ -4,6 +4,8 @@ import './App.css';
 import Login from './Pages/Login';
 import APQPTable from './Forms/ApqpTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReview';
+import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
+
 
 function App() {
   return (
@@ -13,6 +15,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/apqpform" element={<APQPTable />} />
           <Route path="/reviewform" element={<FeasibilityReviewPage />} />
+          <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
         </Routes>
       </div>
     </Router>
