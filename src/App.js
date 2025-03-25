@@ -5,6 +5,8 @@ import Login from './Pages/Login';
 import APQPTable from './Forms/ApqpTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReview';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
+import EnquiryManagement from './Pages/EnquiryDetails';  // Remove curly braces
+
 
 
 function App() {
@@ -16,6 +18,7 @@ function App() {
           <Route path="/apqpform" element={<APQPTable />} />
           <Route path="/reviewform" element={<FeasibilityReviewPage />} />
           <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
+          <Route path="/enquirydetails" element={<EnquiryManagement/>} />
         </Routes>
       </div>
     </Router>
