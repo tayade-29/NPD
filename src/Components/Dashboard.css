@@ -1,0 +1,29 @@
+Dashboard.css
+.meeting-scheduled {
+    background-color: #ffeb3b; 
+    border-radius: 5px;
+    padding: 2px;
+    text-align: center;
+  }
+  
+  .meeting-completed {
+    background-color: #d3d3d3; 
+    border-radius: 5px;
+    padding: 2px;
+    text-align: center;
+  }
+  
+  .highlight {
+    background-color: #ffcc00 !important; 
+    border-radius: 50%;
+  }
+  
+  .tooltip {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 10;
+  }

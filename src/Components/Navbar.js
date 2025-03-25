@@ -15,7 +15,7 @@ const Navbar = () => {
       {/* Company Logo and Name */}
       <div className="flex items-center space-x-4">
         <img src={logo} alt="Company Logo" className="w-12 h-12 rounded-full object-cover" />
-        <h1 className="text-2xl font-bold text-gray-800">New product Development </h1>
+        <h1 className="text-2xl font-bold text-gray-800">New Product Development </h1>
       </div>
 
       {/* Icons and User Info */}
