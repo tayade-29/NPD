@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
-import Footer from "./Components/Footer"; // ✅ Import Footer
+import Footer from "./Components/Footer"; 
 import Dashboard from "./Components/Dashboard";
 import Account from "./Components/Account";
 import Settings from "./Components/Settings";
@@ -11,7 +11,7 @@ import Login from "./Components/Login";
 
 const AppContent = () => {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/"; // ✅ Check if on login page
+  const isLoginPage = location.pathname === "/"; 
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -30,7 +30,7 @@ const AppContent = () => {
           </div>
         </div>
       </div>
-      {/* ✅ Footer should be displayed only if not on the login page */}
+      
       {!isLoginPage && <Footer />}
     </div>
   );

@@ -10,11 +10,11 @@ import {
   ArcElement,
 } from "chart.js";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from "recharts";
-import Calendar from 'react-calendar'; // Import the calendar component
-import 'react-calendar/dist/Calendar.css'; // Import calendar styles
-import './Dashboard.css'; // Import custom styles for the calendar
+ 
+import 'react-calendar/dist/Calendar.css'; 
+import './Dashboard.css'; 
 
-// Register the components
+
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, ArcElement);
 
 const months = [
@@ -59,7 +59,7 @@ const requestDataMapping = {
     { name: "New Requests", value: 30 },
     { name: "Pending Requests", value: 25 },
   ],
-  // Add similar data for other months...
+
 };
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
@@ -131,7 +131,7 @@ const Dashboard = () => {
     { name: "Rejection", value: productionData[selectedTool].rejection },
   ];
 
-  // New data for dual-axis chart
+
   const dualAxisData = {
     labels: ["Toolmaker 1", "Toolmaker 2", "Toolmaker 3"],
     datasets: [
@@ -177,14 +177,28 @@ const Dashboard = () => {
       },
     },
   };
+  const meetings = [
+    { date: new Date(2025, 2, 3), name: 'Project Kick-off', time: '10:00 AM' },
+    { date: new Date(2025, 2, 10), name: 'Budget Review', time: '2:00 PM' },
+    { date: new Date(2025, 2, 15), name: 'Design Discussion', time: '1:00 PM' },
+    { date: new Date(2025, 2, 25), name: 'Sprint Retrospective', time: '4:00 PM' },
+  ];
 
+
+  const currentYear = new Date().getFullYear();
+
+
+  const firstDayOfMonth = new Date(currentYear, selectedMonth, 1);
+  const lastDayOfMonth = new Date(currentYear, selectedMonth + 1, 0);
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
       {/* Month Selection at the Top */}
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>{selectedMonth}</h1>
+        <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
+          {months[selectedMonth]}
+        </h1>
         <select
-          value={selectedMonth}
+          value={months[selectedMonth]}
           onChange={handleMonthChange}
           style={{ padding: "8px", fontSize: "16px", borderRadius: "5px" }}
         >
@@ -254,7 +268,7 @@ const Dashboard = () => {
         <div
           style={{
             padding: "20px",
-            width: "550px",
+            width: "500px",
             borderRadius: "10px",
             boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
             background: "#fff",
@@ -292,7 +306,7 @@ const Dashboard = () => {
         style={{
           display: "flex",
           justifyContent: "center",
-          gap: "20px", // Space between calendar and graph
+          gap: "20px", 
           padding: "20px",
         }}
       >
@@ -309,7 +323,7 @@ const Dashboard = () => {
           <div
             style={{
               width: "650px",
-              height: "300px",
+              height: "380px",
               marginTop: "20px",
               padding: "10px",
               background: "#fff",
@@ -323,13 +337,31 @@ const Dashboard = () => {
           </div>
         </div>
 
-        <div style={{ marginBottom: "20px", flexShrink: 0 }}>
+        {/* <div style={{ marginBottom: "10px", flexShrink: 0 }}>
           <Calendar
             onChange={setDate}
             value={date}
+            minDate={firstDayOfMonth} 
+            maxDate={lastDayOfMonth}
+            tileContent={({ date, view }) => {
+              const meeting = meetings.find(
+                (meeting) => meeting.date.toDateString() === date.toDateString()
+              );
+
+              return meeting ? (
+                <div style={{ fontSize: "10px", color: "red", textAlign: "center" }}>
+                  📅 {meeting.name}
+                </div>
+              ) : null;
+            }}
+            tileClassName={({ date, view }) => {
+              return date.getDay() === 0 ? "sunday-black" : "";
+            }}
+            className="custom-calendar"
             style={{ border: "1px solid #ccc", borderRadius: "8px" }}
           />
-        </div>
+        </div> */}
+
       </div>
 
 
