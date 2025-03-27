@@ -1,8 +1,9 @@
-.sunday-red {
-  color: red !important;
-  font-weight: bold;
+.saturday-black {
+ color: black; /* Change this to your desired color */
+  /* Change text color for better visibility */
 }
 
-.custom-calendar .react-calendar__navigation {
-  display: none; /* Hides next & back buttons */
+.sunday-red {
+ 
+  color: rgb(231, 14, 14); /* Change text color for better visibility */
 }

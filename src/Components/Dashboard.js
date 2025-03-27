@@ -10,9 +10,10 @@ import {
   ArcElement,
 } from "chart.js";
 import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from "recharts";
- 
-import 'react-calendar/dist/Calendar.css'; 
-import './Dashboard.css'; 
+import Calendar from 'react-calendar';
+
+import 'react-calendar/dist/Calendar.css';
+import './Dashboard.css';
 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, ArcElement);
@@ -67,6 +68,7 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
 
 const Dashboard = () => {
+
   const [currentMonthIndex, setCurrentMonthIndex] = useState(new Date().getMonth());
   const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex]);
   const [selectedTool, setSelectedTool] = useState("Tool A");
@@ -137,19 +139,19 @@ const Dashboard = () => {
     datasets: [
       {
         label: "Total Orders",
-        data: [30, 40, 20], // Example data for orders given
+        data: [30, 40, 20],
         backgroundColor: "rgba(75, 192, 192, 0.6)",
         yAxisID: 'y',
       },
       {
         label: "Orders Approved",
-        data: [20, 30, 10], // Example data for orders approved
+        data: [20, 30, 10],
         backgroundColor: "rgba(255, 206, 86, 0.6)",
         yAxisID: 'y1',
       },
       {
         label: "Invoices Raised",
-        data: [10, 10, 10], // Example data for pending orders
+        data: [10, 10, 10],
         backgroundColor: "rgba(255, 99, 132, 0.6)",
         yAxisID: 'y1',
       },
@@ -167,7 +169,7 @@ const Dashboard = () => {
         type: 'linear',
         position: 'right',
         grid: {
-          drawOnChartArea: false, // only want the grid lines for one axis to show up
+          drawOnChartArea: false,
         },
       },
     },
@@ -192,7 +194,7 @@ const Dashboard = () => {
   const lastDayOfMonth = new Date(currentYear, selectedMonth + 1, 0);
   return (
     <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-      {/* Month Selection at the Top */}
+
       <div style={{ textAlign: "left", marginBottom: "20px" }}>
         <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
           {months[selectedMonth]}
@@ -210,7 +212,7 @@ const Dashboard = () => {
         </select>
       </div>
 
-      {/* KPIs Section */}
+
       <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px" }}>
         {[
           { title: "Total enquiry", value: totalEnquiryGenerated, color: "#3498db" },
@@ -236,9 +238,9 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Main Dashboard Section */}
+
       <div style={{ display: "flex", gap: "20px" }}>
-        {/* Bar Chart Section */}
+
         <div
           style={{
             padding: "20px",
@@ -264,7 +266,6 @@ const Dashboard = () => {
           </div>
         </ div>
 
-        {/* Pie Chart Section */}
         <div
           style={{
             padding: "20px",
@@ -306,7 +307,7 @@ const Dashboard = () => {
         style={{
           display: "flex",
           justifyContent: "center",
-          gap: "20px", 
+          gap: "20px",
           padding: "20px",
         }}
       >
@@ -337,11 +338,11 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* <div style={{ marginBottom: "10px", flexShrink: 0 }}>
+        <div style={{ marginBottom: "10px", flexShrink: 0 }}>
           <Calendar
             onChange={setDate}
             value={date}
-            minDate={firstDayOfMonth} 
+            minDate={firstDayOfMonth}
             maxDate={lastDayOfMonth}
             tileContent={({ date, view }) => {
               const meeting = meetings.find(
@@ -355,12 +356,22 @@ const Dashboard = () => {
               ) : null;
             }}
             tileClassName={({ date, view }) => {
-              return date.getDay() === 0 ? "sunday-black" : "";
+              if (date.getDay() === 6) { // Saturday
+                return "saturday-black";
+              } else if (date.getDay() === 0) { // Sunday
+                return "sunday-red"; // You can change this to any color you want
+              }
+              return "";
             }}
             className="custom-calendar"
-            style={{ border: "1px solid #ccc", borderRadius: "8px" }}
+            style={{
+              border: "1px solid #ccc",
+              borderRadius: "8px",
+              width: "400px", // Set your desired width
+              height: "500px" // Set your desired height
+            }}
           />
-        </div> */}
+        </div>
 
       </div>
 
