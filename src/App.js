@@ -1,35 +1,15 @@
-<<<<<<< HEAD
+
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'; // Import necessary components from react-router-dom
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
-import Login from './Pages/Login';
 import APQPTable from './Forms/ApqpActivityTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReviewCheckpoints';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
 import EnquiryManagement from './Pages/EnquiryDetails';  // Remove curly braces
 import APQPTimePlan from './Forms/APQPTimePlanChart';
-
-
-
-function App() {
-  return (
-    <Router> {/* Wrap your application in Router */}
-      <div>
-        <Routes> {/* Define your routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/apqpform" element={<APQPTable />} />
-          <Route path="/reviewform" element={<FeasibilityReviewPage />} />
-          <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
-          <Route path="/enquirydetails" element={<EnquiryManagement/>} />
-          <Route path="/apqptimeplan" element={<APQPTimePlan/>}/>
-        </Routes>
-      </div>
-=======
-import React from "react";
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
-import Footer from "./Components/Footer"; 
+import Footer from "./Components/Footer";
 import Dashboard from "./Components/Dashboard";
 import Account from "./Components/Account";
 import Settings from "./Components/Settings";
@@ -38,7 +18,7 @@ import Login from "./Components/Login";
 
 const AppContent = () => {
   const location = useLocation();
-  const isLoginPage = location.pathname === "/"; 
+  const isLoginPage = location.pathname === "/";
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -53,11 +33,16 @@ const AppContent = () => {
               <Route path="/account" element={<Account />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/logout" element={<Logout />} />
+              <Route path="/apqpform" element={<APQPTable />} />
+              <Route path="/reviewform" element={<FeasibilityReviewPage />} />
+              <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
+              <Route path="/enquirydetails" element={<EnquiryManagement />} />
+              <Route path="/apqptimeplan" element={<APQPTimePlan />} />
             </Routes>
           </div>
         </div>
       </div>
-      
+
       {!isLoginPage && <Footer />}
     </div>
   );
@@ -67,7 +52,6 @@ function App() {
   return (
     <Router>
       <AppContent />
->>>>>>> NPDS
     </Router>
   );
 }
