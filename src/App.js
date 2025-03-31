@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> e30cc094bc12a965864e80fdbca94c657a53dbbe
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
@@ -56,4 +59,4 @@ function App() {
   );
 }
 
-export default App;
+export default App;
