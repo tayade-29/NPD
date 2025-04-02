@@ -1,109 +1,10 @@
+// src/components/EnquiryDetails.js
 import React, { useState } from "react";
-import { FileCheck, Upload, X } from "lucide-react";
+import { X } from "lucide-react";
 import EnquiryTable from "../Components/EnquiryTable";
+import ProcessTracker from "../Components/ProcessTracker";
 import { downloadCSV, downloadExcel, downloadPDF } from "../utils/fileUtils";
 
-// Process Tracker Component
-const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, selectedEnquiry }) => {
-  const [completedSubProcesses, setCompletedSubProcesses] = useState({});
-  const [fileUploads, setFileUploads] = useState({});
-  const [activeTab, setActiveTab] = useState(1);
-
-  const processes = {
-    1: { name: "Plan and Define", subProcesses: { 1: "Enquiry Received", 2: "Sent to Toolmaker", 3: "Decide Feasibility", 4: "Prepare Quotation", 5: "Take Confirmation (P.O.)", 6: "Decide APQP Time Plan", 7: "Get Tool Design" } },
-    2: { name: "Product Design", subProcesses: { 1: "Initial Design Review", 2: "Design Feedback", 3: "Design Approval" } },
-    3: { name: "Process Design and Development", subProcesses: { 1: "Prepare PFD, PFMEA and Control Plan", 2: "Provide Training" } },
-    4: { name: "Product and Process Validation", subProcesses: { 1: "Inspect Mould as per Checksheet", 2: "T0", 3: "T1", 4: "T2", 5: "T3", 6: "Tfinal" } },
-    5: { name: "Feedback", subProcesses: { 1: "CFT Meeting for review" } },
-    6: { name: "APQP Review", subProcesses: { 1: "Review APQP time plan" } }
-  };
-
-  const handleFileUpload = (processId, subProcessId, event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setFileUploads((prev) => ({ ...prev, [`${processId}-${subProcessId}`]: file.name }));
-      handleSubProcessComplete(processId, subProcessId);
-    }
-  };
-
-  const handleSubProcessComplete = (processId, subProcessId) => {
-    setCompletedSubProcesses((prev) => ({ ...prev, [`${processId}-${subProcessId}`]: true }));
-
-    const allSubProcessesCompleted = Object.keys(processes[processId].subProcesses).every(
-      (subId) => completedSubProcesses[`${processId}-${subId}`] || subId == subProcessId
-    );
-
-    if (allSubProcessesCompleted) {
-      onStatusUpdate(`${processes[processId].name} Completed`);
-    }
-  };
-
-  const handleCheckboxChange = (processId, subProcessId) => {
-    setCompletedSubProcesses((prev) => ({
-      ...prev,
-      [`${processId}-${subProcessId}`]: !prev[`${processId}-${subProcessId}`]
-    }));
-    handleSubProcessComplete(processId, subProcessId);
-  };
-
-  return (
-    <div className={`w-[500px] bg-white shadow-lg rounded-lg transition-all ${isOpen ? "opacity-100" : "opacity-0 hidden"}`}>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-800">Process Tracker</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><X /></button>
-        </div>
-
-        {/* Horizontal Scrolling for Process Tabs */}
-        <div className="overflow-x-auto mb-4">
-          <div className="flex space-x-2">
-            {Object.entries(processes).map(([processId, process]) => (
-              <button
-                key={processId}
-                className={`px-4 py-2 text-sm font-semibold ${activeTab === processId ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
-                onClick={() => setActiveTab(Number(processId))}
-              >
-                {process.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {activeTab && (
-          <div className="overflow-x-auto">
-            {Object.entries(processes[activeTab].subProcesses).map(([subId, subName]) => (
-              <div key={subId} className="p-4 bg-gray-50 rounded-lg mb-3 flex justify-between items-center hover:bg-gray-100 transition-colors">
-                <div className="flex-1 flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={completedSubProcesses[`${activeTab}-${subId}`] || false}
-                    onChange={() => handleCheckboxChange(activeTab, subId)}
-                    className="mr-2"
-                  />
-                  <p className="font-medium text-gray-800">{`${subId}. ${subName}`}</p>
-                  {fileUploads[`${activeTab}-${subId}`] && (
-                    <p className="text-sm text-gray-500 mt-1 ml-2">
-                      Uploaded: {fileUploads[`${activeTab}-${subId}`]}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center space-x-3">
-                  <label className="cursor-pointer flex items-center px-3 py-1 bg-blue-50 rounded-md hover:bg-blue-100">
-                    <Upload size={16} className="text-blue-500 mr-1" />
-                    <span className="text-sm text-blue-500">Upload</span>
-                    <input type="file" className="hidden" onChange={(e) => handleFileUpload(activeTab, subId, e)} />
-                  </label>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// Enquiry Details Component
 const EnquiryDetails = () => {
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [isProcessTrackerOpen, setIsProcessTrackerOpen] = useState(false);
@@ -135,7 +36,6 @@ const EnquiryDetails = () => {
         { file: { name: "3d-model.step" }, url: "#", status: "success" },
       ],
     },
-    // Add more sample enquiries as needed
   ]);
 
   const handleViewDetails = (enquiry) => {
@@ -154,16 +54,42 @@ const EnquiryDetails = () => {
     }
   };
 
-  // Filter enquiries based on search query
-  const filteredEnquiries = enquiries.filter(enquiry =>
-    enquiry.id.toString().includes(searchQuery) // Convert ID to string for comparison
-  );
+  const handleInputChange = (e, field) => {
+    const { value } = e.target;
+    setSelectedEnquiry((prev) => ({ ...prev, [field]: value }));
+
+    setEnquiries((prev) =>
+      prev.map((enq) => (enq.id === selectedEnquiry.id ? { ...enq, [field]: value } : enq))
+    );
+  };
+
+  const filteredEnquiries = enquiries.filter((enquiry) => enquiry.id.toString().includes(searchQuery));
+
+  const [selectedFormat, setSelectedFormat] = useState("");
+
+  const handleSelectChange = (e) => {
+    setSelectedFormat(e.target.value);
+  };
+
+  const handleDownload = (format) => {
+    switch (format) {
+      case "csv":
+        downloadCSV(selectedEnquiry);
+        break;
+      case "excel":
+        downloadExcel(selectedEnquiry);
+        break;
+      case "pdf":
+        downloadPDF(selectedEnquiry);
+        break;
+      default:
+        break;
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Enquiry Management</h1>
-
-      {/* Search Input */}
       <div className="mb-4 flex justify-center">
         <input
           type="text"
@@ -174,69 +100,232 @@ const EnquiryDetails = () => {
         />
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
-        <table className="min-w-full">
-          <thead>
-            <tr className="bg-gray-50 border-b">
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">ID</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Customer</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Project</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Status</th>
-              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredEnquiries.map((enquiry) => (
-              <tr key={enquiry.id} className="border-b hover:bg-gray-50">
-                <td className="px-6 py-4 text-gray-800">{enquiry.id}</td>
-                <td className="px-6 py-4 text-gray-800">{enquiry.customerName}</td>
-                <td className="px-6 py-4 text-gray-800">{enquiry.projectVehicleProgram}</td>
-                <td className="px-6 py-4">
-                  <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
-                    {enquiry.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4">
-                  <button
-                    onClick={() => handleViewDetails(enquiry)}
-                    className="text-blue-600 hover:text-blue-900 font-medium"
-                  >
-                    View Details
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <EnquiryTable filteredEnquiries={filteredEnquiries} handleViewDetails={handleViewDetails} />
 
       {selectedEnquiry && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-          <div className="flex gap-6 max-w-[1200px]">
-            <div className="w-[600px] bg-white shadow-lg p-6 rounded-lg">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center overflow-y-auto">
+          <div className="flex gap-6 max-w-[1200px] m-4">
+            <div className="w-[600px] bg-white shadow-lg p-6 rounded-lg max-h-[80vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-800">{selectedEnquiry.projectVehicleProgram}</h3>
+                <h3 className="text-xl font-bold text-gray-800">Enquiry Details</h3>
                 <button onClick={() => setSelectedEnquiry(null)} className="text-gray-500 hover:text-gray-700">
                   <X />
                 </button>
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-1">Customer</h4>
-                  <p className="text-gray-600">{selectedEnquiry.customerName}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-1">Specifications</h4>
-                  <div className="bg-gray-50 p-3 rounded-md">
-                    {Object.entries(selectedEnquiry).map(([key, value]) => (
-                      <div key={key} className="flex justify-between py-1">
-                        <span className="text-gray-600 capitalize">{key}:</span>
-                        <span className="text-gray-800 font-medium">{value}</span>
-                      </div>
-                    ))}
+                {isEditing ? (
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Editable fields */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.customerName}
+                        onChange={(e) => handleInputChange(e, "customerName")}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Project/Vehicle Program</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.projectVehicleProgram}
+                        onChange={(e) => handleInputChange(e, 'projectVehicleProgram')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Code</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.partCode}
+                        onChange={(e) => handleInputChange(e, 'partCode')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Name</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.partName}
+                        onChange={(e) => handleInputChange(e, 'partName')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Raw Material</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.rawMaterial}
+                        onChange={(e) => handleInputChange(e, 'rawMaterial')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">SOP Date</label>
+                      <input
+                        type="date"
+                        value={selectedEnquiry.sop}
+                        onChange={(e) => handleInputChange(e, 'sop')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Colour</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.partColour}
+                        onChange={(e) => handleInputChange(e, 'partColour')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Annual Volume</label>
+                      <input
+                        type="number"
+                        value={selectedEnquiry.estimatedAnnualVolume}
+                        onChange={(e) => handleInputChange(e, 'estimatedAnnualVolume')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Enquiry Received Date</label>
+                      <input
+                        type="date"
+                        value={selectedEnquiry.enquiryReceivedDate}
+                        onChange={(e) => handleInputChange(e, 'enquiryReceivedDate')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Cost (₹)</label>
+                      <input
+                        type="number"
+                        value={selectedEnquiry.partCostEstimate}
+                        onChange={(e) => handleInputChange(e, 'partCostEstimate')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Date Quoted</label>
+                      <input
+                        type="date"
+                        value={selectedEnquiry.dateQuoted}
+                        onChange={(e) => handleInputChange(e, 'dateQuoted')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Tool Cost (₹)</label>
+                      <input
+                        type="number"
+                        value={selectedEnquiry.toolCostEstimate}
+                        onChange={(e) => handleInputChange(e, 'toolCostEstimate')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Annual Business Potential (Lac)</label>
+                      <input
+                        type="number"
+                        value={selectedEnquiry.annualBusinessPotential}
+                        onChange={(e) => handleInputChange(e, 'annualBusinessPotential')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">P.O. No.</label>
+                      <input
+                        type="text"
+                        value={selectedEnquiry.poNo}
+                        onChange={(e) => handleInputChange(e, 'poNo')}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      />
+                    </div>
                   </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Display fields */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.customerName}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Project/Vehicle Program</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.projectVehicleProgram}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Code</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.partCode}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Name</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.partName}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Raw Material</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.rawMaterial}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">SOP Date</label>
+                      <p className="mt-1 block w-full text-gray-600">{new Date(selectedEnquiry.sop).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Colour</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.partColour}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Enquiry Received Date</label>
+                      <p className="mt-1 block w-full text-gray-600">{new Date(selectedEnquiry.enquiryReceivedDate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Date Quoted</label>
+                      <p className="mt-1 block w-full text-gray-600">{new Date(selectedEnquiry.dateQuoted).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Customer PO Date</label>
+                      <p className="mt-1 block w-full text-gray-600">{new Date(selectedEnquiry.customerPODate).toLocaleDateString()}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Annual Volume</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.estimatedAnnualVolume}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Part Cost (₹)</label>
+                      <p className="mt-1 block w-full text-gray-600">₹{selectedEnquiry.partCostEstimate}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Tool Cost (₹)</label>
+                      <p className="mt-1 block w-full text-gray-600">₹{selectedEnquiry.toolCostEstimate}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Annual Business Potential (Lac)</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.annualBusinessPotential} Lac</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">P.O. No.</label>
+                      <p className="mt-1 block w-full text-gray-600">{selectedEnquiry.poNo || "-"}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-semibold text-gray-700 mb-2">Design Files</h4>
+                  {selectedEnquiry.designFiles && selectedEnquiry.designFiles.length > 0 ? (
+                    <div className="space-y-2">
+                      {selectedEnquiry.designFiles.map((fileObj, index) => (
+                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                          <span>{fileObj.file.name}</span>
+                          <a href={fileObj.url} className="text-blue-500 hover:text-blue-700">
+                            Download
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No files uploaded</p>
+                  )}
                 </div>
 
                 <div className="pt-4 border-t">
@@ -253,16 +342,52 @@ const EnquiryDetails = () => {
                     </button>
                   </div>
                 </div>
-              </div>
 
-              <ProcessTracker
-                isOpen={isProcessTrackerOpen}
-                onClose={() => setIsProcessTrackerOpen(false)}
-                currentStatus={currentStatus}
-                onStatusUpdate={handleStatusUpdate}
-                selectedEnquiry={selectedEnquiry}
-              />
+                <div className="flex flex-col gap-4">
+                  <label htmlFor="download-dropdown" className="font-medium text-gray-700">
+                    Select Download Format:
+                  </label>
+
+                  <select
+                    id="download-dropdown"
+                    className="bg-white border border-gray-300 text-gray-800 rounded-md shadow-sm p-2"
+                    onChange={handleSelectChange}
+                  >
+                    <option value="">--Choose Format--</option>
+                    <option value="csv">CSV</option>
+                    <option value="excel">Excel</option>
+                    <option value="pdf">PDF</option>
+                  </select>
+
+                  <div className="flex justify-center">
+                    <button
+                      onClick={() => handleDownload(selectedFormat)}
+                      className={`mt-4 p-2 text-white rounded-md w-60 justify-item-center 
+      ${selectedFormat ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400 cursor-not-allowed'}`}
+                      disabled={!selectedFormat}
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <button
+                    onClick={() => setIsEditing(!isEditing)}
+                    className="text-blue-500 hover:text-blue-700 font-medium"
+                  >
+                    {isEditing ? "Save Changes" : "Edit"}
+                  </button>
+                </div>
+              </div>
             </div>
+            <ProcessTracker
+              isOpen={isProcessTrackerOpen}
+              onClose={() => setIsProcessTrackerOpen(false)}
+              currentStatus={currentStatus}
+              onStatusUpdate={handleStatusUpdate}
+              selectedEnquiry={selectedEnquiry}
+            />
           </div>
         </div>
       )}

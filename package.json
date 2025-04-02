@@ -12,7 +12,6 @@
     "@testing-library/react": "^16.2.0",
     "@testing-library/user-event": "^13.5.0",
     "ajv": "^8.17.1",
-<<<<<<< HEAD
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "buffer": "^6.0.3",
@@ -20,9 +19,6 @@
     "dayjs": "^1.11.13",
     "https-browserify": "^1.0.0",
     "jspdf": "^3.0.1",
-=======
-    "bootstrap": "^5.3.3",
->>>>>>> 128766406707801868198ae6e749aac60bb34571
     "lucide-react": "^0.483.0",
     "os-browserify": "^0.3.0",
     "react": "^19.0.0",
