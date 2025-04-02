@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Plus, Trash2, FileSpreadsheet, Download, Upload, Search } from "lucide-react";
+import { Plus, Trash2, FileSpreadsheet, Download, Upload } from "lucide-react";
 
 export default function APQPTimePlan() {
   const [formData, setFormData] = useState({
@@ -39,11 +39,6 @@ export default function APQPTimePlan() {
   }]);
 
   const [searchTerm, setSearchTerm] = useState("");
-
-  const handleSearch = () => {
-    // Search functionality is already implemented through filteredRows
-    // This is just to provide a button click handler
-  };
 
   const addRow = () => {
     const newRow = {
@@ -94,7 +89,7 @@ export default function APQPTimePlan() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl">
+    <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-5xl">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">
@@ -110,7 +105,7 @@ export default function APQPTimePlan() {
         </div>
 
         {/* Form Header */}
-        <div className="grid grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
           <div className="space-y-6">
             <div>
               <label className="block text-base font-medium text-gray-700 mb-2">Part Name</label>
@@ -190,7 +185,6 @@ export default function APQPTimePlan() {
         <div className="flex justify-between items-center mb-6">
           <div className="flex gap-2">
             <div className="relative">
-              
               <input
                 type="text"
                 placeholder="Search table..."
@@ -200,7 +194,6 @@ export default function APQPTimePlan() {
               />
             </div>
             <button
-              onClick={handleSearch}
               className="px-6 py-3 bg-blue-500 text-white rounded-r-lg hover:bg-blue-400 text-base"
             >
               Search
@@ -211,10 +204,10 @@ export default function APQPTimePlan() {
               onClick={exportToCSV}
               className="flex items-center gap-2 px-6 py-3 bg-green-400 text-white rounded-lg hover:bg-green-700 text-base"
             >
-              <Download className="w-5 h-5" /> Export
+              <Upload className="w-5 h-5" /> Export
             </button>
             <label className="flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-700 cursor-pointer text-base">
-              <Upload className="w-5 h-5" /> Import
+              <Download className="w-5 h-5" /> Import
               <input type="file" className="hidden" accept=".csv" />
             </label>
             <button

@@ -13,19 +13,6 @@ const EnquiryForm = () => {
         partName: '',
         rawMaterial: '',
         sop: '',
-        estimatedAnnualVolume: '',
-        enquiryReceivedDate: '',
-        partColour: '',
-        dateQuoted: '',
-        status: 'UD',
-        reasonForLoss: '',
-        nextStep: '',
-        partCostEstimate: '',
-        toolCostEstimate: '',
-        annualBusinessPotential: '',
-        customerPODate: '',
-        poNo: '',
-        feasibilityCommitment: 'feasible',
         designFiles: [], // Store uploaded files here
     };
 
@@ -76,42 +63,16 @@ const EnquiryForm = () => {
 
     return (
         <>
-            <nav className="bg-white shadow-sm mb-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center py-4">
-                        <h1 className="text-2xl font-bold text-gray-900">Enquiry Register</h1>
-                        <div className="space-x-4">
-                            <button
-                                onClick={() => setPage('form')}
-                                className={`nav-button ${page === 'form' ? 'nav-button-active' : 'nav-button-inactive'}`}
-                            >
-                                New Enquiry
-                            </button>
-                            <button
-                                onClick={() => setPage('table')}
-                                className={`nav-button ${page === 'table' ? 'nav-button-active' : 'nav-button-inactive'}`}
-                            >
-                                View Enquiries
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </nav>
-
             <main className="max-w-7xl mx-auto">
                 {page === 'form' ? (
                     <>
-                        <div className="bg-blue-50 rounded-xl p-6 mb-8">
-                            <h2 className="text-xl font-semibold text-blue-900">New Enquiry Registration</h2>
-                            <p className="text-blue-700 mt-1">Fill in the details below to register a new enquiry</p>
-                        </div>
                         <form onSubmit={handleSubmit} className="space-y-8">
                             {/* Basic Information */}
                             <section className="form-section">
                                 <h3>Basic Information</h3>
                                 <div className="form-grid">
                                     <div className="form-group">
-                                        <label htmlFor="srNo">Sr. No.</label>
+                                        <label htmlFor="srNo">EnquiryId</label>
                                         <input
                                             className='input-field'
                                             id="srNo"
@@ -190,17 +151,6 @@ const EnquiryForm = () => {
                                     </div>
 
                                     <div className="form-group">
-                                        <label htmlFor="partColour">Part Colour</label>
-                                        <input
-                                            id="partColour"
-                                            type="text"
-                                            name="partColour"
-                                            value={formData.partColour}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
                                         <label htmlFor="designUpload" className="block text-lg font-semibold mb-2">Upload Design Files</label>
                                         <input
                                             id="designUpload"
@@ -230,7 +180,7 @@ const EnquiryForm = () => {
 
                             {/* Dates and Volume */}
                             <section className="form-section">
-                                <h3>Dates & Volume</h3>
+                                <h3>Dates </h3>
                                 <div className="form-grid">
                                     <div className="form-group">
                                         <label htmlFor="sop">SOP</label>
@@ -243,166 +193,8 @@ const EnquiryForm = () => {
                                             required
                                         />
                                     </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="enquiryReceivedDate">Enquiry Received Date</label>
-                                        <input
-                                            id="enquiryReceivedDate"
-                                            type="date"
-                                            name="enquiryReceivedDate"
-                                            value={formData.enquiryReceivedDate}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="dateQuoted">Date Quoted</label>
-                                        <input
-                                            id="dateQuoted"
-                                            type="date"
-                                            name="dateQuoted"
-                                            value={formData.dateQuoted}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="customerPODate">Customer P.O Date</label>
-                                        <input
-                                            id="customerPODate"
-                                            type="date"
-                                            name="customerPODate"
-                                            value={formData.customerPODate}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="estimatedAnnualVolume">Estimated Annual Volume</label>
-                                        <input
-                                            id="estimatedAnnualVolume"
-                                            type="number"
-                                            name="estimatedAnnualVolume"
-                                            value={formData.estimatedAnnualVolume}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
                                 </div>
                             </section>
-
-                            {/* Status and Costs */}
-                            <section className="form-section">
-                                <h3>Status & Costs</h3>
-                                <div className="form-grid">
-                                    <div className="form-group">
-                                        <label htmlFor="status">Status</label>
-                                        <select
-                                            id="status"
-                                            name="status"
-                                            value={formData.status}
-                                            onChange={handleChange}
-                                            className="capitalize"
-                                        >
-                                            <option value="Won">Won</option>
-                                            <option value="Lost">Lost</option>
-                                            <option value="UD">Under Discussion</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="feasibilityCommitment">Feasibility Commitment</label>
-                                        <select
-                                            id="feasibilityCommitment"
-                                            name="feasibilityCommitment"
-                                            value={formData.feasibilityCommitment}
-                                            onChange={handleChange}
-                                            className="capitalize"
-                                        >
-                                            <option value="feasible">Feasible</option>
-                                            <option value="not feasible">Not Feasible</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="partCostEstimate">Part Cost Estimate (₹)</label>
-                                        <input
-                                            id="partCostEstimate"
-                                            type="number"
-                                            name="partCostEstimate"
-                                            value={formData.partCostEstimate}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="toolCostEstimate">Tool Cost Estimate (₹)</label>
-                                        <input
-                                            id="toolCostEstimate"
-                                            type="number"
-                                            name="toolCostEstimate"
-                                            value={formData.toolCostEstimate}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="annualBusinessPotential">Annual Business Potential (lacs)</label>
-                                        <input
-                                            id="annualBusinessPotential"
-                                            type="number"
-                                            name="annualBusinessPotential"
-                                            value={formData.annualBusinessPotential}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="poNo">P.O. No.</label>
-                                        <input
-                                            id="poNo"
-                                            type="text"
-                                            name="poNo"
-                                            value={formData.poNo}
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Additional Information */}
-                            <section className="form-section">
-                                <h3>Additional Information</h3>
-                                <div className="space-y-6">
-                                    <div className="form-group">
-                                        <label htmlFor="reasonForLoss">Reason for Loss</label>
-                                        <textarea
-                                            id="reasonForLoss"
-                                            name="reasonForLoss"
-                                            value={formData.reasonForLoss}
-                                            onChange={handleChange}
-                                            rows="3"
-                                            className={formData.status === 'Lost' ? 'border-red-300' : ''}
-                                        />
-                                    </div>
-
-                                    <div className="form-group">
-                                        <label htmlFor="nextStep">Next Step</label>
-                                        <textarea
-                                            id="nextStep"
-                                            name="nextStep"
-                                            value={formData.nextStep}
-                                            onChange={handleChange}
-                                            rows="3"
-                                        />
-                                    </div>
-                                </div>
-                            </section>
-
                             <div className="flex justify-end">
                                 <button type="submit" className="btn-primary">
                                     Save Enquiry

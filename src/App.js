@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-
-=======
->>>>>>> e30cc094bc12a965864e80fdbca94c657a53dbbe
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 import './App.css';
@@ -18,6 +14,7 @@ import Account from "./Components/Account";
 import Settings from "./Components/Settings";
 import Logout from "./Components/Logout";
 import Login from "./Components/Login";
+import Feasibility from "../src/Forms/FeasibiltyReviewChart"
 
 const AppContent = () => {
   const location = useLocation();
@@ -41,6 +38,7 @@ const AppContent = () => {
               <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
               <Route path="/enquirydetails" element={<EnquiryManagement />} />
               <Route path="/apqptimeplan" element={<APQPTimePlan />} />
+              <Route path="/feasibilityChart" element={<Feasibility/>} />
             </Routes>
           </div>
         </div>
