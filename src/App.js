@@ -13,7 +13,7 @@ import Dashboard from "./Components/Dashboard";
 import Account from "./Components/Account";
 import Settings from "./Components/Settings";
 import Logout from "./Components/Logout";
-import Login from "./Components/Login";
+import Login from "./Pages/Login"; // Adjusted import to match the correct path
 import Feasibility from "../src/Forms/FeasibiltyReviewChart";
 
 const AppContent = () => {

@@ -3,15 +3,19 @@ import { FileCheck, Upload, X } from "lucide-react";
 import EnquiryTable from "../Components/EnquiryTable";
 import { downloadCSV, downloadExcel, downloadPDF } from "../utils/fileUtils";
 
+// Process Tracker Component
 const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, selectedEnquiry }) => {
   const [completedSubProcesses, setCompletedSubProcesses] = useState({});
   const [fileUploads, setFileUploads] = useState({});
   const [activeTab, setActiveTab] = useState(1);
 
   const processes = {
-    1: { name: "Design Review", subProcesses: { 1: "Initial Design Review", 2: "Design Feedback", 3: "Design Approval" } },
-    2: { name: "Tool Development", subProcesses: { 1: "Tool Design", 2: "Tool Manufacturing", 3: "Tool Trial" } },
-    3: { name: "Sample Development", subProcesses: { 1: "First Sample Production", 2: "Sample Testing", 3: "Customer Approval" } }
+    1: { name: "Plan and Define", subProcesses: { 1: "Enquiry Received", 2: "Sent to Toolmaker", 3: "Decide Feasibility", 4: "Prepare Quotation", 5: "Take Confirmation (P.O.)", 6: "Decide APQP Time Plan", 7: "Get Tool Design" } },
+    2: { name: "Product Design", subProcesses: { 1: "Initial Design Review", 2: "Design Feedback", 3: "Design Approval" } },
+    3: { name: "Process Design and Development", subProcesses: { 1: "Prepare PFD, PFMEA and Control Plan", 2: "Provide Training" } },
+    4: { name: "Product and Process Validation", subProcesses: { 1: "Inspect Mould as per Checksheet", 2: "T0", 3: "T1", 4: "T2", 5: "T3", 6: "Tfinal" } },
+    5: { name: "Feedback", subProcesses: { 1: "CFT Meeting for review" } },
+    6: { name: "APQP Review", subProcesses: { 1: "Review APQP time plan" } }
   };
 
   const handleFileUpload = (processId, subProcessId, event) => {
@@ -34,6 +38,14 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
     }
   };
 
+  const handleCheckboxChange = (processId, subProcessId) => {
+    setCompletedSubProcesses((prev) => ({
+      ...prev,
+      [`${processId}-${subProcessId}`]: !prev[`${processId}-${subProcessId}`]
+    }));
+    handleSubProcessComplete(processId, subProcessId);
+  };
+
   return (
     <div className={`w-[500px] bg-white shadow-lg rounded-lg transition-all ${isOpen ? "opacity-100" : "opacity-0 hidden"}`}>
       <div className="p-6">
@@ -42,40 +54,45 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
           <button onClick={onClose} className="text-gray-500 hover:text-gray-700"><X /></button>
         </div>
 
-        <div className="flex space-x-2 border-b mb-4">
-          {Object.entries(processes).map(([processId, process]) => (
-            <button
-              key={processId}
-              className={`px-4 py-2 text-sm font-semibold ${activeTab == processId ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
-              onClick={() => setActiveTab(Number(processId))}
-            >
-              {process.name}
-            </button>
-          ))}
+        {/* Horizontal Scrolling for Process Tabs */}
+        <div className="overflow-x-auto mb-4">
+          <div className="flex space-x-2">
+            {Object.entries(processes).map(([processId, process]) => (
+              <button
+                key={processId}
+                className={`px-4 py-2 text-sm font-semibold ${activeTab === processId ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-500"}`}
+                onClick={() => setActiveTab(Number(processId))}
+              >
+                {process.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         {activeTab && (
-          <div>
+          <div className="overflow-x-auto">
             {Object.entries(processes[activeTab].subProcesses).map(([subId, subName]) => (
               <div key={subId} className="p-4 bg-gray-50 rounded-lg mb-3 flex justify-between items-center hover:bg-gray-100 transition-colors">
-                <div className="flex-1">
+                <div className="flex-1 flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={completedSubProcesses[`${activeTab}-${subId}`] || false}
+                    onChange={() => handleCheckboxChange(activeTab, subId)}
+                    className="mr-2"
+                  />
                   <p className="font-medium text-gray-800">{`${subId}. ${subName}`}</p>
                   {fileUploads[`${activeTab}-${subId}`] && (
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-500 mt-1 ml-2">
                       Uploaded: {fileUploads[`${activeTab}-${subId}`]}
                     </p>
                   )}
                 </div>
                 <div className="flex items-center space-x-3">
-                  {completedSubProcesses[`${activeTab}-${subId}`] ? (
-                    <FileCheck className="text-green-500" size={20} />
-                  ) : (
-                    <label className="cursor-pointer flex items-center px-3 py-1 bg-blue-50 rounded-md hover:bg-blue-100">
-                      <Upload size={16} className="text-blue-500 mr-1" />
-                      <span className="text-sm text-blue-500">Upload</span>
-                      <input type="file" className="hidden" onChange={(e) => handleFileUpload(activeTab, subId, e)} />
-                    </label>
-                  )}
+                  <label className="cursor-pointer flex items-center px-3 py-1 bg-blue-50 rounded-md hover:bg-blue-100">
+                    <Upload size={16} className="text-blue-500 mr-1" />
+                    <span className="text-sm text-blue-500">Upload</span>
+                    <input type="file" className="hidden" onChange={(e) => handleFileUpload(activeTab, subId, e)} />
+                  </label>
                 </div>
               </div>
             ))}
@@ -86,6 +103,7 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
   );
 };
 
+// Enquiry Details Component
 const EnquiryDetails = () => {
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [isProcessTrackerOpen, setIsProcessTrackerOpen] = useState(false);
@@ -117,6 +135,7 @@ const EnquiryDetails = () => {
         { file: { name: "3d-model.step" }, url: "#", status: "success" },
       ],
     },
+    // Add more sample enquiries as needed
   ]);
 
   const handleViewDetails = (enquiry) => {
@@ -135,9 +154,25 @@ const EnquiryDetails = () => {
     }
   };
 
+  // Filter enquiries based on search query
+  const filteredEnquiries = enquiries.filter(enquiry =>
+    enquiry.id.toString().includes(searchQuery) // Convert ID to string for comparison
+  );
+
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Enquiry Management</h1>
+
+      {/* Search Input */}
+      <div className="mb-4 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search by ID"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+        />
+      </div>
 
       <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6">
         <table className="min-w-full">
@@ -151,7 +186,7 @@ const EnquiryDetails = () => {
             </tr>
           </thead>
           <tbody>
-            {enquiries.map((enquiry) => (
+            {filteredEnquiries.map((enquiry) => (
               <tr key={enquiry.id} className="border-b hover:bg-gray-50">
                 <td className="px-6 py-4 text-gray-800">{enquiry.id}</td>
                 <td className="px-6 py-4 text-gray-800">{enquiry.customerName}</td>
@@ -162,8 +197,8 @@ const EnquiryDetails = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4">
-                  <button 
-                    onClick={() => handleViewDetails(enquiry)} 
+                  <button
+                    onClick={() => handleViewDetails(enquiry)}
                     className="text-blue-600 hover:text-blue-900 font-medium"
                   >
                     View Details
