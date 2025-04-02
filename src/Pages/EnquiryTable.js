@@ -31,18 +31,7 @@ const EnquiryTable = ({ enquiries }) => {
                   <td className="px-6 py-4">{enquiry.partCode}</td>
                   <td className="px-6 py-4">{enquiry.partName}</td>
                   <td className="px-6 py-4">{enquiry.rawMaterial}</td>
-                  <td className="px-6 py-4">{new Date(enquiry.sop).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">{enquiry.estimatedAnnualVolume}</td>
-                  <td className="px-6 py-4">{new Date(enquiry.enquiryReceivedDate).toLocaleDateString()}</td>
-                  <td className="px-6 py-4">{enquiry.partColour}</td>
-                  <td className="px-6 py-4">{enquiry.dateQuoted ? new Date(enquiry.dateQuoted).toLocaleDateString() : "-"}</td>
-                  <td className="px-6 py-4">{enquiry.status}</td>
-                  <td className="px-6 py-4">{enquiry.customerPODate ? new Date(enquiry.customerPODate).toLocaleDateString() : "-"}</td>
-                  <td className="px-6 py-4">₹{enquiry.partCostEstimate}</td>
-                  <td className="px-6 py-4">₹{enquiry.toolCostEstimate}</td>
-                  <td className="px-6 py-4">{enquiry.annualBusinessPotential} Lac</td>
-                  <td className="px-6 py-4">{enquiry.poNo || "-"}</td>
-                  
+                  <td className="px-6 py-4">{new Date(enquiry.sop).toLocaleDateString()}</td> 
                   <td className="px-6 py-4">
                     {enquiry.designFiles && enquiry.designFiles.length > 0 ? (
                       <div className="flex items-center space-x-3">

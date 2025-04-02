@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { FileCheck, Upload, X } from "lucide-react";
+import EnquiryTable from "../Components/EnquiryTable";
+import { downloadCSV, downloadExcel, downloadPDF } from "../utils/fileUtils";
 
 const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, selectedEnquiry }) => {
   const [completedSubProcesses, setCompletedSubProcesses] = useState({});
@@ -84,31 +86,43 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
   );
 };
 
-const App = () => {
+const EnquiryDetails = () => {
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
   const [isProcessTrackerOpen, setIsProcessTrackerOpen] = useState(false);
   const [currentStatus, setCurrentStatus] = useState("Under Review");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
   const [enquiries, setEnquiries] = useState([
-    { 
-      id: 1, 
-      customerName: "ABC Motors", 
-      projectName: "EV Platform 2024", 
-      status: "Under Review", 
-      description: "Electric vehicle development project focusing on new platform design.",
-      specifications: {
-        material: "High-grade aluminum",
-        dimensions: "2500mm x 1800mm",
-        weight: "450kg",
-        capacity: "5 passengers"
-      },
-      timeline: "Q4 2024",
-      budget: "$2.5M"
-    }
+    {
+      id: 1,
+      srNo: "001",
+      customerName: "ABC Motors",
+      projectVehicleProgram: "EV Platform 2024",
+      partCode: "EV-2024-001",
+      partName: "Battery Housing",
+      rawMaterial: "High-grade aluminum",
+      sop: "2024-12-31",
+      estimatedAnnualVolume: "10000",
+      enquiryReceivedDate: "2024-03-01",
+      partColour: "Black",
+      dateQuoted: "2024-03-15",
+      status: "Under Review",
+      customerPODate: "2024-04-01",
+      partCostEstimate: "25000",
+      toolCostEstimate: "500000",
+      annualBusinessPotential: "250",
+      poNo: "PO-2024-001",
+      designFiles: [
+        { file: { name: "design-spec.pdf" }, url: "#", status: "success" },
+        { file: { name: "3d-model.step" }, url: "#", status: "success" },
+      ],
+    },
   ]);
 
   const handleViewDetails = (enquiry) => {
     setSelectedEnquiry(enquiry);
     setIsProcessTrackerOpen(false);
+    setIsEditing(false);
   };
 
   const handleStatusUpdate = (newStatus) => {
@@ -116,9 +130,7 @@ const App = () => {
       const updatedStatus = newStatus;
       setCurrentStatus(updatedStatus);
       setEnquiries((prevEnquiries) =>
-        prevEnquiries.map((enq) => 
-          enq.id === selectedEnquiry.id ? { ...enq, status: updatedStatus } : enq
-        )
+        prevEnquiries.map((enq) => (enq.id === selectedEnquiry.id ? { ...enq, status: updatedStatus } : enq))
       );
     }
   };
@@ -143,7 +155,7 @@ const App = () => {
               <tr key={enquiry.id} className="border-b hover:bg-gray-50">
                 <td className="px-6 py-4 text-gray-800">{enquiry.id}</td>
                 <td className="px-6 py-4 text-gray-800">{enquiry.customerName}</td>
-                <td className="px-6 py-4 text-gray-800">{enquiry.projectName}</td>
+                <td className="px-6 py-4 text-gray-800">{enquiry.projectVehicleProgram}</td>
                 <td className="px-6 py-4">
                   <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                     {enquiry.status}
@@ -168,7 +180,7 @@ const App = () => {
           <div className="flex gap-6 max-w-[1200px]">
             <div className="w-[600px] bg-white shadow-lg p-6 rounded-lg">
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-800">{selectedEnquiry.projectName}</h3>
+                <h3 className="text-xl font-bold text-gray-800">{selectedEnquiry.projectVehicleProgram}</h3>
                 <button onClick={() => setSelectedEnquiry(null)} className="text-gray-500 hover:text-gray-700">
                   <X />
                 </button>
@@ -181,14 +193,9 @@ const App = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-semibold text-gray-700 mb-1">Description</h4>
-                  <p className="text-gray-600">{selectedEnquiry.description}</p>
-                </div>
-
-                <div>
                   <h4 className="font-semibold text-gray-700 mb-1">Specifications</h4>
                   <div className="bg-gray-50 p-3 rounded-md">
-                    {Object.entries(selectedEnquiry.specifications).map(([key, value]) => (
+                    {Object.entries(selectedEnquiry).map(([key, value]) => (
                       <div key={key} className="flex justify-between py-1">
                         <span className="text-gray-600 capitalize">{key}:</span>
                         <span className="text-gray-800 font-medium">{value}</span>
@@ -197,23 +204,13 @@ const App = () => {
                   </div>
                 </div>
 
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-1">Timeline</h4>
-                  <p className="text-gray-600">{selectedEnquiry.timeline}</p>
-                </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-700 mb-1">Budget</h4>
-                  <p className="text-gray-600">{selectedEnquiry.budget}</p>
-                </div>
-
                 <div className="pt-4 border-t">
                   <h4 className="font-semibold text-gray-700 mb-2">Current Status</h4>
                   <div className="flex justify-between items-center">
                     <span className="px-3 py-1 rounded-full text-sm bg-blue-100 text-blue-800">
                       {currentStatus}
                     </span>
-                    <button 
+                    <button
                       onClick={() => setIsProcessTrackerOpen(true)}
                       className="text-blue-500 hover:text-blue-700 font-medium"
                     >
@@ -222,15 +219,15 @@ const App = () => {
                   </div>
                 </div>
               </div>
-            </div>
 
-            <ProcessTracker
-              isOpen={isProcessTrackerOpen}
-              onClose={() => setIsProcessTrackerOpen(false)}
-              currentStatus={currentStatus}
-              onStatusUpdate={handleStatusUpdate}
-              selectedEnquiry={selectedEnquiry}
-            />
+              <ProcessTracker
+                isOpen={isProcessTrackerOpen}
+                onClose={() => setIsProcessTrackerOpen(false)}
+                currentStatus={currentStatus}
+                onStatusUpdate={handleStatusUpdate}
+                selectedEnquiry={selectedEnquiry}
+              />
+            </div>
           </div>
         </div>
       )}
@@ -238,4 +235,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default EnquiryDetails;
