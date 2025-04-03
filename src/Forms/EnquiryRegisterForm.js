@@ -18,12 +18,14 @@ const EnquiryForm = () => {
 
     const [formData, setFormData] = useState(initialFormData);
     const [selectedFiles, setSelectedFiles] = useState([]);
+    const [fileInputKey, setFileInputKey] = useState(0); // Key to reset the file input
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setEnquiries([...enquiries, formData]);
-        setFormData(initialFormData);
+        setEnquiries([...enquiries, formData]); // Add the current form data to the enquiries array
+        setFormData(initialFormData); // Reset form data to initial values
         setSelectedFiles([]); // Clear the selected files
+        setFileInputKey(prevKey => prevKey + 1); // Change the key to reset the file input
         alert('Enquiry registered successfully!');
     };
 
@@ -52,12 +54,12 @@ const EnquiryForm = () => {
         });
 
         const validFiles = newFiles.filter(fileObj => fileObj.status === 'success');
-        setSelectedFiles(prevFiles => [...prevFiles, ...newFiles]);
+        setSelectedFiles(validFiles); // Only store valid files
 
         // Update formData with the valid files
         setFormData(prev => ({
             ...prev,
-            designFiles: [...prev.designFiles, ...validFiles], // Store valid files in formData
+            designFiles: [...validFiles], // Store valid files in formData
         }));
     };
 
@@ -153,6 +155,7 @@ const EnquiryForm = () => {
                                     <div className="form-group">
                                         <label htmlFor="designUpload" className="block text-lg font-semibold mb-2">Upload Design Files</label>
                                         <input
+                                            key={fileInputKey} // Use key to reset the input
                                             id="designUpload"
                                             type="file"
                                             name="designFiles"
@@ -180,7 +183,7 @@ const EnquiryForm = () => {
 
                             {/* Dates and Volume */}
                             <section className="form-section">
-                                <h3>Dates </h3>
+                                <h3>Dates</h3>
                                 <div className="form-grid">
                                     <div className="form-group">
                                         <label htmlFor="sop">SOP</label>
@@ -195,6 +198,7 @@ const EnquiryForm = () => {
                                     </div>
                                 </div>
                             </section>
+
                             <div className="flex justify-end">
                                 <button type="submit" className="btn-primary">
                                     Save Enquiry
@@ -210,4 +214,4 @@ const EnquiryForm = () => {
     );
 };
 
-export default EnquiryForm;
+export default EnquiryForm; 

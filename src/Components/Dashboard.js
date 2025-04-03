@@ -216,8 +216,8 @@ const Dashboard = () => {
       <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px" }}>
         {[
           { title: "Total enquiry", value: totalEnquiryGenerated, color: "#3498db" },
-          { title: "Number of enquiries Inprocess", value: noOfEnquiries, color: "#2ecc71" },
-          { title: "Completed Enquiries", value: completedEnquiries, color: "#f1c40f" },
+          { title: "Number of enquiries Inprocess", value: noOfEnquiries, color: "#f1c40f" },
+          { title: "Completed Enquiries", value: completedEnquiries, color: "#2ecc71" },
           { title: "Pending enquiries for feasibility", value: pendingEnquiries, color: "#e74c3c" },
         ].map((item, index) => (
           <div

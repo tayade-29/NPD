@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FaBars,
-  FaTachometerAlt,
   FaUser ,
   FaSignOutAlt,
   FaClipboardList,
-  FaFileAlt,
   FaPlusCircle,
   FaChevronDown
 } from 'react-icons/fa';
-import { ChartColumnDecreasing, CheckCircle, FileText,FileBarChart} from 'lucide-react';
+import { ChartColumnDecreasing, CheckCircle, FileText, FileBarChart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; // Import the AuthContext
 
 const Sidebar = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isFormsOpen, setFormsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
+  const { logout } = useAuth(); // Get the logout function from AuthContext
 
   const toggleSidebar = () => {
     setSidebarOpen(!isSidebarOpen);
@@ -31,8 +31,8 @@ const Sidebar = () => {
   };
 
   const confirmLogout = () => {
-    setShowLogoutConfirm(false);
-    navigate('/login');
+    logout(); // Call the logout function from context
+    navigate('/login'); // Redirect to the login page
   };
 
   return (
@@ -49,34 +49,48 @@ const Sidebar = () => {
 
         <nav className="flex-1">
           <ul className="space-y-2">
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/" className="flex items-center">
-                <ChartColumnDecreasing className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Dashboard</span>
+                <ChartColumnDecreasing className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Dashboard
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/enquiryform" className="flex items-center">
-                <FaClipboardList className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Enquiry Registration</span>
+                <FaClipboardList className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Enquiry Registration
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/enquirydetails" className="flex items-center">
-                <CheckCircle className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Enquiry Status Update</span>
+                <CheckCircle className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Enquiry Status Update
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/apqpform" className="flex items-center">
-                <FaPlusCircle className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Add APQP Activity</span>
+                <FaPlusCircle className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Add APQP Activity
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/reviewform" className="flex items-center">
-                <FaPlusCircle className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Add CheckPoints</span>
+                <FaPlusCircle className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Add CheckPoints
+                </span>
               </Link>
             </li>
 
@@ -104,21 +118,30 @@ const Sidebar = () => {
                 </li>
               </ul>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/account" className="flex items-center">
-                <FileBarChart className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Report</span>
+                <FileBarChart className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Report
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/account" className="flex items-center">
-                <FaUser  className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Account</span>
+                <FaUser  className="text-xl gap-4 min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                  Account
+                </span>
               </Link>
             </li>
-            <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 cursor-pointer" onClick={handleLogout}>
-              <FaSignOutAlt className="text-xl min-w-[24px]" />
-              <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Logout</span>
+
+            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative cursor-pointer" onClick={handleLogout}>
+              <FaSignOutAlt className="text-xl gap-4 min-w-[24px]" />
+              <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
+                Logout
+              </span>
             </li>
           </ul>
         </nav>

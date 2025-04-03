@@ -7,7 +7,7 @@ import axios from "axios";
 
 const Navbar = () => { 
   return (
-    <nav className="bg-white shadow-md  w-[calc(100%-4rem)] px-6 py-4 flex justify-between items-center mx-2">
+    <nav className="bg-white shadow-md  w-[calc(100%)] px-6 py-4 flex justify-between items-center ">
       {/* Company Logo and Name */}
       <div className="flex items-center space-x-4">
         <img src={logo} alt="Company Logo" className="w-12 h-12 rounded-full object-cover" />

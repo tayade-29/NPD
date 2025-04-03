@@ -1,6 +1,6 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
-import './App.css';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from './context/AuthContext';
 import APQPTable from './Forms/ApqpActivityTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReviewCheckpoints';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
@@ -12,48 +12,117 @@ import Footer from "./Components/Footer";
 import Dashboard from "./Components/Dashboard";
 import Account from "./Components/Account";
 import Settings from "./Components/Settings";
-import Logout from "./Components/Logout";
-import Login from "./Components/Login"; // Adjusted import to match the correct path
-import Feasibility from "../src/Forms/FeasibiltyReviewChart";
+import Login from "./Components/Login";
+import Feasibility from "./Forms/FeasibiltyReviewChart";
+
+const PrivateRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  const location = useLocation();
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  return children;
+};
 
 const AppContent = () => {
-  const location = useLocation();
-  const isLoginPage = location.pathname === "/";
+  const { isAuthenticated } = useAuth();
 
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-1">
-        {!isLoginPage && <Sidebar />}
+        {isAuthenticated && <Sidebar />}
         <div className="flex-1 flex flex-col">
-          {!isLoginPage && <Navbar />}
+          {isAuthenticated && <Navbar />}
           <div className="p-6 flex-1">
             <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/logout" element={<Logout />} />
-              <Route path="/apqpform" element={<APQPTable />} />
-              <Route path="/reviewform" element={<FeasibilityReviewPage />} />
-              <Route path="/enquiryform" element={<EnquiryRegisterForm />} />
-              <Route path="/enquirydetails" element={<EnquiryManagement />} />
-              <Route path="/apqptimeplan" element={<APQPTimePlan />} />
-              <Route path="/feasibilityChart" element={<Feasibility />} />
+              {/* Public route */}
+              <Route path="/login" element={
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />
+              } />
+
+              {/* Root redirect */}
+              <Route path="/" element={
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              } />
+
+              {/* Protected routes */}
+              <Route path="/dashboard" element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              } />
+              <Route path="/account" element={
+                <PrivateRoute>
+                  <Account />
+                </PrivateRoute>
+              } />
+              <Route path="/settings" element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              } />
+              <Route path="/account" element={
+                <PrivateRoute>
+                  <Account />
+                </PrivateRoute>
+              } />
+              <Route path="/settings" element={
+                <PrivateRoute>
+                  <Settings />
+                </PrivateRoute>
+              } />
+              <Route path="/apqpform" element={
+                <PrivateRoute>
+                  <APQPTable />
+                </PrivateRoute>
+              } />
+              <Route path="/reviewform" element={
+                <PrivateRoute>
+                  <FeasibilityReviewPage />
+                </PrivateRoute>
+              } />
+              <Route path="/enquiryform" element={
+                <PrivateRoute>
+                  <EnquiryRegisterForm />
+                </PrivateRoute>
+              } />
+              <Route path="/enquirydetails" element={
+                <PrivateRoute>
+                  <EnquiryManagement />
+                </PrivateRoute>
+              } />
+              <Route path="/apqptimeplan" element={
+                <PrivateRoute>
+                  <APQPTimePlan />
+                </PrivateRoute>
+              } />
+              <Route path="/feasibilityChart" element={
+                <PrivateRoute>
+                  <Feasibility />
+                </PrivateRoute>
+              } />
+              {/* Catch all route */}
+              <Route path="*" element={
+                isAuthenticated ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+              } />
             </Routes>
           </div>
         </div>
       </div>
-
-      {!isLoginPage && <Footer />}
+      {isAuthenticated && <Footer />}
     </div>
   );
 };
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 }
 

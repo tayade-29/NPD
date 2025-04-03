@@ -67,3 +67,23 @@
 .nav-button-inactive {
   @apply bg-white text-gray-700 hover:bg-gray-100 focus:ring-gray-500;
 }
+
+.tooltip {
+  position: absolute;
+  left: 50px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  white-space: nowrap;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+}
+
+.group:hover .tooltip {
+  opacity: 1;
+}
