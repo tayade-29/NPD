@@ -53,13 +53,14 @@ const EnquiryForm = () => {
             }
         });
 
+        // Append new valid files to the existing selected files
         const validFiles = newFiles.filter(fileObj => fileObj.status === 'success');
-        setSelectedFiles(validFiles); // Only store valid files
+        setSelectedFiles(prevFiles => [...prevFiles, ...validFiles]); // Append valid files
 
         // Update formData with the valid files
         setFormData(prev => ({
             ...prev,
-            designFiles: [...validFiles], // Store valid files in formData
+            designFiles: [...prev.designFiles, ...validFiles], // Store valid files in formData
         }));
     };
 
@@ -214,4 +215,4 @@ const EnquiryForm = () => {
     );
 };
 
-export default EnquiryForm; 
+export default EnquiryForm;

@@ -14,7 +14,7 @@ export const api = createApi({
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(payload),
-                responseHandler: (response) => response.text(), // ⬅️ Fix: get raw response text
+                responseHandler: (response) => response.text(), 
             }),
             transformResponse: (responseText) => {
                 console.log(' Raw text response:', responseText);

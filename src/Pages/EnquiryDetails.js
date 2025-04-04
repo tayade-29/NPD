@@ -1,4 +1,3 @@
-// src/components/EnquiryDetails.js
 import React, { useState } from "react";
 import { X } from "lucide-react";
 import EnquiryTable from "../Components/EnquiryTable";
