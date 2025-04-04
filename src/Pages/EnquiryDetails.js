@@ -86,6 +86,16 @@ const EnquiryDetails = () => {
         break;
     }
   };
+  const handleDeleteFile = (fileName) => {
+    if (selectedEnquiry) {
+      const updatedDesignFiles = selectedEnquiry.designFiles.filter(fileObj => fileObj.file.name !== fileName);
+      setSelectedEnquiry(prev => ({ ...prev, designFiles: updatedDesignFiles }));
+
+      setEnquiries(prev =>
+        prev.map(enq => (enq.id === selectedEnquiry.id ? { ...enq, designFiles: updatedDesignFiles } : enq))
+      );
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 bg-gray-50 min-h-screen">
@@ -309,24 +319,28 @@ const EnquiryDetails = () => {
                     </div>
                   </div>
                 )}
-
-                <div className="pt-4 border-t">
-                  <h4 className="font-semibold text-gray-700 mb-2">Design Files</h4>
-                  {selectedEnquiry.designFiles && selectedEnquiry.designFiles.length > 0 ? (
-                    <div className="space-y-2">
-                      {selectedEnquiry.designFiles.map((fileObj, index) => (
-                        <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
-                          <span>{fileObj.file.name}</span>
-                          <a href={fileObj.url} className="text-blue-500 hover:text-blue-700">
+                {selectedEnquiry.designFiles && selectedEnquiry.designFiles.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedEnquiry.designFiles.map((fileObj, index) => (
+                      <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
+                        <span>{fileObj.file.name}</span>
+                        <div className="flex items-center">
+                          <a href={fileObj.url} className="text-blue-500 hover:text-blue-700 mr-4">
                             Download
                           </a>
+                          <button
+                            onClick={() => handleDeleteFile(fileObj.file.name)}
+                            className="text-red-500 hover:text-red-700"
+                          >
+                            Delete
+                          </button>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500">No files uploaded</p>
-                  )}
-                </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500">No files uploaded</p>
+                )}
 
                 <div className="pt-4 border-t">
                   <h4 className="font-semibold text-gray-700 mb-2">Current Status</h4>

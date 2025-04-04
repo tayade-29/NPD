@@ -3,7 +3,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLoginUserMutation } from '../features/api/apiSlice';
 
-
 function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -27,7 +26,6 @@ function Login() {
       setLoading(false);
       return;
     }
-
     try {
       console.log(' Sending login request with RTK Query...');
       const payload = {
@@ -52,7 +50,6 @@ function Login() {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
