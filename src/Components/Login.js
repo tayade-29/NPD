@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLoginUserMutation } from '../features/api/apiSlice';
+
 
 function Login() {
   const [username, setUsername] = useState('');
@@ -12,6 +14,8 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
+
+  const [loginUser] = useLoginUserMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,40 +29,17 @@ function Login() {
     }
 
     try {
-      console.log('Sending login request with JSON payload...');
-
+      console.log(' Sending login request with RTK Query...');
       const payload = {
         UserName: username,
         Password: password,
       };
 
-      const response = await fetch(
-        'http://192.168.0.172:85/RIMMService.asmx/prc_prod_validate_users',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      const text = await response.text();
-      console.log(' Raw response:', text);
-
-      const match = text.match(/{.*}/);
-      if (!match) {
-        throw new Error('JSON not found in response.');
-      }
-
-      const rawData = JSON.parse(match[0]);
-      console.log(' Parsed raw data:', rawData);
-
-      const users = JSON.parse(rawData.d); // Parse the inner string to get the array
-      console.log(' Final users array:', users);
+      const users = await loginUser(payload).unwrap();
+      console.log(' RTK Response:', users);
 
       if (Array.isArray(users) && users.length > 0) {
-        login(username, role); // Login through context
+        login(username, role); // No change here
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
@@ -72,10 +53,11 @@ function Login() {
     }
   };
 
+
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
-        <h2 className="text-center text-3xl font-extrabold text-gray-900">
+        <h2 className="text-center text-2xl font-bold text-gray-900">
           Sign in to your account
         </h2>
 
@@ -132,14 +114,13 @@ function Login() {
               />
             </div>
           </div>
-
           <div>
             <button
               type="submit"
               disabled={loading}
               className={`w-full flex justify-center py-2 px-4 rounded-md text-white text-sm font-medium ${loading
-                  ? 'bg-indigo-400 cursor-not-allowed'
-                  : 'bg-indigo-600 hover:bg-indigo-700'
+                ? 'bg-blue-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
                 }`}
             >
               {loading ? 'Signing in...' : 'Sign in'}
