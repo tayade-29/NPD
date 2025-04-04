@@ -3,7 +3,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 export const api = createApi({
     reducerPath: 'api',
     baseQuery: fetchBaseQuery({
-        baseUrl: 'http://192.168.0.172:85/RIMMService.asmx/',
+        baseUrl: 'http://192.168.0.172:83/Service.asmx/',
     }),
     endpoints: (builder) => ({
         loginUser: builder.mutation({

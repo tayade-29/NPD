@@ -10,7 +10,7 @@ export default function APQPTimePlan() {
     pswApprovalDate: "",
     handoverDate: "",
   });
-  
+
   const columns = [
     "Activity",
     "Responsibility",
@@ -89,7 +89,7 @@ export default function APQPTimePlan() {
   };
 
   return (
-    <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-[1200px]">
+    <div className="w-[1200px] mx-auto p-6 bg-white shadow-xl rounded-xl">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-3">

@@ -8,12 +8,13 @@ import {
   FaPlusCircle,
   FaChevronDown
 } from 'react-icons/fa';
-import { ChartColumnDecreasing, CheckCircle, FileText, FileBarChart } from 'lucide-react';
+import { ChartColumnDecreasing, CheckCircle, FileText, FileBarChart,User } from 'lucide-react';
 import { useAuth } from '../context/AuthContext'; // Import the AuthContext
 
 const Sidebar = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isFormsOpen, setFormsOpen] = useState(false);
+  const [isLookupOpen, setLookupOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth(); // Get the logout function from AuthContext
@@ -24,6 +25,9 @@ const Sidebar = () => {
 
   const toggleForms = () => {
     setFormsOpen(!isFormsOpen);
+  };
+  const toggleLookup = () => {
+    setLookupOpen(!isLookupOpen);
   };
 
   const handleLogout = () => {
@@ -114,6 +118,37 @@ const Sidebar = () => {
                   <Link to="/feasibilityChart" className="flex items-center">
                     <FileText className="text-xl min-w-[24px]" />
                     <span className="whitespace-nowrap">Feasibility Review Form</span>
+                  </Link>
+                </li>
+              </ul>
+            </li>
+
+            <li className="flex flex-col">
+              <div
+                className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 cursor-pointer"
+                onClick={toggleLookup}
+              >
+                <User className="text-xl min-w-[24px]" />
+                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Lookups</span>
+                <FaChevronDown className={`text-sm transition-transform ${isLookupOpen ? 'rotate-180' : ''}`} />
+              </div>
+              <ul className={`ml-6 space-y-1 transition-all duration-300 ${isLookupOpen ? 'block' : 'hidden'}`}>
+                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+                  <Link to="/customer" className="flex items-center">
+                    <FileText className="text-xl min-w-[24px]" />
+                    <span className="whitespace-nowrap">Customer</span>
+                  </Link>
+                </li>
+                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+                  <Link to="/feasibilityChart" className="flex items-center">
+                    <FileText className="text-xl min-w-[24px]" />
+                    <span className="whitespace-nowrap">Toolmaker/Supplier</span>
+                  </Link>
+                </li>
+                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
+                  <Link to="/feasibilityChart" className="flex items-center">
+                    <FileText className="text-xl min-w-[24px]" />
+                    <span className="whitespace-nowrap">User</span>
                   </Link>
                 </li>
               </ul>

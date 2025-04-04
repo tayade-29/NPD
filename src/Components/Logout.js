@@ -1,13 +1,20 @@
-// src/components/Logout.js
-import React from 'react';
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-const Logout = () => {
+function LogoutButton() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true }); // Redirect to login page
+  };
+
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold">Logout</h2>
-      <p className="mt-4">You have been logged out.</p>
-    </div>
+    <button onClick={handleLogout} className="text-red-500 hover:text-red-700">
+      Logout
+    </button>
   );
-};
+}
 
-export default Logout;
+export default LogoutButton;

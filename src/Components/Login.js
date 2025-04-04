@@ -20,24 +20,27 @@ function Login() {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     if (!username || !password) {
       setError('Username and password are required.');
       setLoading(false);
       return;
     }
+  
     try {
       console.log(' Sending login request with RTK Query...');
       const payload = {
         UserName: username,
         Password: password,
       };
-
+  
       const users = await loginUser(payload).unwrap();
       console.log(' RTK Response:', users);
-
+  
       if (Array.isArray(users) && users.length > 0) {
-        login(username, role); // No change here
+        login(username, role);
+        localStorage.setItem('isAuthenticated', 'true');  // Store in localStorage
+        localStorage.setItem('userRole', role);           // Store user role
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
@@ -50,6 +53,7 @@ function Login() {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
