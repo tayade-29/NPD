@@ -15,6 +15,8 @@ import Settings from "./Components/Settings";
 import Login from "./Components/Login";
 import Feasibility from "./Forms/FeasibiltyReviewChart";
 import CustomerTable from "./Lookups/Customer";
+import UserPage from "./Lookups/User";
+import SupplierPage from "./Lookups/Supplier";
 
 
 const PrivateRoute = ({ children }) => {
@@ -67,6 +69,8 @@ const AppContent = () => {
               <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlan /></PrivateRoute>} />
               <Route path="/feasibilityChart" element={<PrivateRoute><Feasibility /></PrivateRoute>} />
               <Route path="/customer" element={<PrivateRoute><CustomerTable /></PrivateRoute>} />
+              <Route path="/supplier" element={<PrivateRoute><SupplierPage /></PrivateRoute>} />
+              <Route path="/user" element={<PrivateRoute><UserPage /></PrivateRoute>} />
 
 
               {/* Root and catch-all routes */}

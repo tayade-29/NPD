@@ -140,13 +140,13 @@ const Sidebar = () => {
                   </Link>
                 </li>
                 <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/feasibilityChart" className="flex items-center">
+                  <Link to="/supplier" className="flex items-center">
                     <FileText className="text-xl min-w-[24px]" />
                     <span className="whitespace-nowrap">Toolmaker/Supplier</span>
                   </Link>
                 </li>
                 <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/feasibilityChart" className="flex items-center">
+                  <Link to="/user" className="flex items-center">
                     <FileText className="text-xl min-w-[24px]" />
                     <span className="whitespace-nowrap">User</span>
                   </Link>
