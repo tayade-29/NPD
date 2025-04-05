@@ -33,10 +33,10 @@ const AppContent = () => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
-  // If we're at the root path and authenticated, redirect to dashboard
-  if (location.pathname === '/' && isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+  if (location.pathname === '/') {
+    return <Navigate to="/login" replace />;
   }
+
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -46,14 +46,15 @@ const AppContent = () => {
           {isAuthenticated && <Navbar />}
           <div className="p-6 flex-1">
             <Routes>
-              <Route 
-                path="/login" 
+              <Route
+                path="/login"
                 element={
-                  isAuthenticated ? 
-                    <Navigate to={location.state?.from?.pathname || "/dashboard"} replace /> 
+                  isAuthenticated ?
+                    <Navigate to={location.state?.from?.pathname || "/dashboard"} replace />
                     : <Login />
-                } 
+                }
               />
+
 
               {/* Protected routes */}
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
@@ -66,24 +67,18 @@ const AppContent = () => {
               <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlan /></PrivateRoute>} />
               <Route path="/feasibilityChart" element={<PrivateRoute><Feasibility /></PrivateRoute>} />
               <Route path="/customer" element={<PrivateRoute><CustomerTable /></PrivateRoute>} />
-          
+
 
               {/* Root and catch-all routes */}
-              <Route 
-                path="/" 
+              <Route path="/" element={<Navigate to="/login" replace />} />
+
+              <Route
+                path="*"
                 element={
-                  isAuthenticated ? 
-                    <Navigate to="/dashboard" replace /> 
+                  isAuthenticated ?
+                    <Navigate to="/dashboard" replace />
                     : <Navigate to="/login" replace />
-                } 
-              />
-              <Route 
-                path="*" 
-                element={
-                  isAuthenticated ? 
-                    <Navigate to="/dashboard" replace /> 
-                    : <Navigate to="/login" replace />
-                } 
+                }
               />
             </Routes>
           </div>

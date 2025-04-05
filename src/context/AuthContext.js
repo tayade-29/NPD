@@ -7,27 +7,26 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedAuth = localStorage.getItem('isAuthenticated');
-    if (storedAuth === 'true') {
-      setIsAuthenticated(true);
-    }
+    // Check sessionStorage on first render
+    const storedAuth = sessionStorage.getItem('isAuthenticated') === 'true';
+    setIsAuthenticated(storedAuth);
     setIsLoading(false);
   }, []);
 
   const login = (username, role) => {
     setIsAuthenticated(true);
-    localStorage.setItem('isAuthenticated', 'true');
-    localStorage.setItem('userRole', role);
+    sessionStorage.setItem('isAuthenticated', 'true');
+    sessionStorage.setItem('userRole', role);
   };
 
   const logout = () => {
     setIsAuthenticated(false);
-    localStorage.removeItem('isAuthenticated');
-    localStorage.removeItem('userRole');
+    sessionStorage.removeItem('isAuthenticated');
+    sessionStorage.removeItem('userRole');
   };
 
   if (isLoading) {
-    return null; // or a loading spinner
+    return <div className="text-center mt-20 text-xl">Loading...</div>;
   }
 
   return (
@@ -37,6 +36,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-};
+export const useAuth = () => useContext(AuthContext);
