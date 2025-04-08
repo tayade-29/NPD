@@ -14,7 +14,7 @@ function Login() {
   const location = useLocation();
   const { login } = useAuth();
 
-  const [loginUser] = useLoginUserMutation();
+  const [loginUser ] = useLoginUserMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,11 +34,12 @@ function Login() {
         Password: password,
       };
   
-      const users = await loginUser(payload).unwrap();
+      const users = await loginUser (payload).unwrap();
       console.log(' RTK Response:', users);
   
       if (Array.isArray(users) && users.length > 0) {
-        login(username, role);
+        const userData = users[0]; // Assuming the first object contains the user data
+        login(username, role, userData); // Pass user data to login
         localStorage.setItem('isAuthenticated', 'true');  // Store in localStorage
         localStorage.setItem('userRole', role);           // Store user role
         const from = location.state?.from?.pathname || '/dashboard';

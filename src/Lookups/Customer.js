@@ -20,6 +20,15 @@ const initialCustomers = [
     email: "janesmith@example.com",
     status: "inactive",
   },
+  {
+    id: "CUST003",
+    name: "Georgia",
+    address: " France",
+    contactPerson: "Emily",
+    mobile: "+1 987 654 321",
+    email: "georgia@example.com",
+    status: "inactive",
+  },
 ];
 
 const CustomerPage = () => {
