@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Pencil, Save, PlusCircle, XCircle } from "lucide-react";
+import { useAddCustomerMutation } from '../features/api/apiSlice';
 
 const initialCustomers = [
   {
@@ -20,15 +21,6 @@ const initialCustomers = [
     email: "janesmith@example.com",
     status: "inactive",
   },
-  {
-    id: "CUST003",
-    name: "Georgia",
-    address: " France",
-    contactPerson: "Emily",
-    mobile: "+1 987 654 321",
-    email: "georgia@example.com",
-    status: "inactive",
-  },
 ];
 
 const CustomerPage = () => {
@@ -37,14 +29,20 @@ const CustomerPage = () => {
   const [editedCustomer, setEditedCustomer] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
-    id: "",
-    name: "",
-    address: "",
-    contactPerson: "",
-    mobile: "",
-    email: "",
-    status: "inactive",
+    pPkCustomerId: 0,
+    pFkClientID: 1, // Set your default client ID
+    pFkPlantId: 1,  // Set your default plant ID
+    pCustomerCode: "",
+    pCustomerName: "",
+    pAddress: "",
+    pContactPerson: "",
+    pPhoneNo: "",
+    pEmailId: "",
+    pCreatedBy: 1,
+    pIsActive: 1
   });
+
+  const [addCustomer, { isLoading }] = useAddCustomerMutation();
 
   const handleChange = (e, field, id) => {
     setEditedCustomer({
@@ -73,30 +71,70 @@ const CustomerPage = () => {
     }));
   };
 
-  const handleAddCustomer = () => {
+  const handleStatusChange = (e) => {
+    setNewCustomer(prev => ({
+      ...prev,
+      pIsActive: e.target.value === "active" ? 1 : 0
+    }));
+  };
+
+  const handleAddCustomer = async () => {
     if (
-      !newCustomer.name ||
-      !newCustomer.address ||
-      !newCustomer.contactPerson ||
-      !newCustomer.mobile ||
-      !newCustomer.email
+      !newCustomer.pCustomerName ||
+      !newCustomer.pAddress ||
+      !newCustomer.pContactPerson ||
+      !newCustomer.pPhoneNo ||
+      !newCustomer.pEmailId
     ) {
-      alert("Please fill all fields!");
+      alert("Please fill all required fields!");
       return;
     }
 
-    const newId = `CUST${String(customers.length + 1).padStart(3, "0")}`;
-    setCustomers([...customers, { ...newCustomer, id: newId }]);
-    setShowForm(false);
-    setNewCustomer({
-      id: "",
-      name: "",
-      address: "",
-      contactPerson: "",
-      mobile: "",
-      email: "",
-      status: "inactive",
-    });
+    try {
+      // Generate a simple customer code
+      const customerCode = `CUST${Math.floor(Math.random() * 10000)}`;
+      
+      const response = await addCustomer({
+        ...newCustomer,
+        pCustomerCode: customerCode
+      }).unwrap();
+
+      console.log('Customer added successfully:', response);
+
+      // Add the new customer to the local state
+      const newCustomerEntry = {
+        id: customerCode,
+        name: newCustomer.pCustomerName,
+        address: newCustomer.pAddress,
+        contactPerson: newCustomer.pContactPerson,
+        mobile: newCustomer.pPhoneNo,
+        email: newCustomer.pEmailId,
+        status: newCustomer.pIsActive === 1 ? 'active' : 'inactive'
+      };
+
+      setCustomers([...customers, newCustomerEntry]);
+      
+      // Reset form and close modal
+      setNewCustomer({
+        pPkCustomerId: 0,
+        pFkClientID: 1,
+        pFkPlantId: 1,
+        pCustomerCode: "",
+        pCustomerName: "",
+        pAddress: "",
+        pContactPerson: "",
+        pPhoneNo: "",
+        pEmailId: "",
+        pCreatedBy: 1,
+        pIsActive: 1
+      });
+      setShowForm(false);
+      
+      alert("Customer added successfully!");
+    } catch (error) {
+      console.error("Failed to add customer:", error);
+      alert("Failed to add customer. Please try again.");
+    }
   };
 
   const RadioGroup = ({ value, onChange, name, disabled = false }) => (
@@ -109,7 +147,7 @@ const CustomerPage = () => {
           checked={value === "active"}
           onChange={onChange}
           disabled={disabled}
-          className="sr-only" // Hide default radio button
+          className="sr-only"
         />
         <div className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${value === "active" ? "bg-green-500 text-white" : "bg-transparent text-gray-600 hover:bg-gray-200"} ${disabled && 'opacity-50'}`}>
           Active
@@ -124,7 +162,7 @@ const CustomerPage = () => {
           checked={value === "inactive"}
           onChange={onChange}
           disabled={disabled}
-          className="sr-only" // Hide default radio button
+          className="sr-only"
         />
         <div className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${value === "inactive" ? "bg-red-500 text-white" : "bg-transparent text-gray-600 hover:bg-gray-200"} ${disabled && 'opacity-50'}`}>
           Inactive
@@ -147,6 +185,7 @@ const CustomerPage = () => {
           </button>
         </div>
 
+        {/* Table component remains the same */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -227,17 +266,9 @@ const CustomerPage = () => {
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === customer.id ? (
-                        <RadioGroup
-                          name={`status-${customer.id}`}
-                          value={editedCustomer[customer.id]?.status || customer.status}
-                          onChange={(e) => handleChange(e, 'status', customer.id)}
-                        />
-                      ) : (
-                        <span className={`inline-flex px-2 py-1 text-sm rounded-full ${customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)} {/* Capitalize the first letter */}
-                        </span>
-                      )}
+                      <span className={`inline-flex px-2 py-1 text-sm rounded-full ${customer.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                        {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
+                      </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {editId === customer.id ? (
@@ -268,7 +299,7 @@ const CustomerPage = () => {
 
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 overflow-y-auto" style={{ maxHeight: '80vh' }}>
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-xl font-semibold text-gray-900">Add New Customer</h3>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
@@ -277,30 +308,68 @@ const CustomerPage = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-              {Object.keys(newCustomer).map((field) =>
-                field !== "id" && field !== "status" ? (
-                  <div key={field}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}
-                    </label>
-                    <input
-                      type={field === "email" ? "email" : "text"}
-                      name={field}
-                      value={newCustomer[field]}
-                      onChange={handleNewCustomerChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      placeholder={`Enter ${field.charAt(0).toUpperCase() + field.slice(1).replace(/([A-Z])/g, " $1")}`}
-                    />
-                  </div>
-                ) : null
-              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+                <input
+                  type="text"
+                  name="pCustomerName"
+                  value={newCustomer.pCustomerName}
+                  onChange={handleNewCustomerChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter Customer Name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                <input
+                  type="text"
+                  name="pAddress"
+                  value={newCustomer.pAddress}
+                  onChange={handleNewCustomerChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter Address"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact Person</label>
+                <input
+                  type="text"
+                  name="pContactPerson"
+                  value={newCustomer.pContactPerson}
+                  onChange={handleNewCustomerChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter Contact Person"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone No</label>
+                <input
+                  type="text"
+                  name="pPhoneNo"
+                  value={newCustomer.pPhoneNo}
+                  onChange={handleNewCustomerChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter Phone No"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email ID</label>
+                <input
+                  type="email"
+                  name="pEmailId"
+                  value={newCustomer.pEmailId}
+                  onChange={handleNewCustomerChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Enter Email ID"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <RadioGroup
                   name="status"
-                  value={newCustomer.status}
-                  onChange={handleNewCustomerChange}
+                  value={newCustomer.pIsActive === 1 ? "active" : "inactive"}
+                  onChange={handleStatusChange}
                 />
               </div>
             </div>
@@ -314,9 +383,10 @@ const CustomerPage = () => {
               </button>
               <button
                 onClick={handleAddCustomer}
-                className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                disabled={isLoading}
+                className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${isLoading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'}`}
               >
-                Add Customer
+                {isLoading ? 'Adding...' : 'Add Customer'}
               </button>
             </div>
           </div>

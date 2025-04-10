@@ -67,6 +67,8 @@ const EnquiryForm = () => {
     return (
         <>
             <main className="max-w-7xl mx-auto">
+            <h2 className="text-2xl font-semibold text-gray-800">Enquiry Registration Form</h2>
+
                 {page === 'form' ? (
                     <>
                         <form onSubmit={handleSubmit} className="space-y-8">
