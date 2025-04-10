@@ -13,8 +13,7 @@ function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-
-  const [loginUser ] = useLoginUserMutation();
+  const [loginUser] = useLoginUserMutation();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,33 +27,50 @@ function Login() {
     }
   
     try {
-      console.log(' Sending login request with RTK Query...');
       const payload = {
         UserName: username,
         Password: password,
       };
   
-      const users = await loginUser (payload).unwrap();
-      console.log(' RTK Response:', users);
+      const users = await loginUser(payload).unwrap();
+      console.log('RTK Response:', users);
   
       if (Array.isArray(users) && users.length > 0) {
-        const userData = users[0]; // Assuming the first object contains the user data
-        login(username, role, userData); // Pass user data to login
-        localStorage.setItem('isAuthenticated', 'true');  // Store in localStorage
-        localStorage.setItem('userRole', role);           // Store user role
+        const user = users[0];
+        // Create a structured userData object with all necessary fields
+        const userData = {
+          employeeCode: user.EmployeeCode,
+          roleId: user.RoleId,
+          fullName: user.FullName,
+          contactNumber: user.ContactNumber,
+          emailAddress: user.EmailAddress,
+          isActive: user.IsActive,
+          luDetails: user.LuDetails,
+          allowLogin: user.AllowLogin,
+          userName: user.UserName,
+          clientName: user.ClientName,
+          plantName: user.PlantName,
+          clientId: user.ClientId,
+          plantId: user.PlantId,
+          locationId: user.LocationId,
+          userId: user.EmployeeCode // Using EmployeeCode as userId
+        };
+
+        login(username, role, userData);
+        localStorage.setItem('isAuthenticated', 'true');
+        localStorage.setItem('userRole', role);
         const from = location.state?.from?.pathname || '/dashboard';
         navigate(from, { replace: true });
       } else {
         setError('Invalid username or password.');
       }
     } catch (err) {
-      console.error(' Login error:', err);
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
-  
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
@@ -120,10 +136,9 @@ function Login() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex justify-center py-2 px-4 rounded-md text-white text-sm font-medium ${loading
-                ? 'bg-blue-400 cursor-not-allowed'
-                : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+              className={`w-full flex justify-center py-2 px-4 rounded-md text-white text-sm font-medium ${
+                loading ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+              }`}
             >
               {loading ? 'Signing in...' : 'Sign in'}
             </button>

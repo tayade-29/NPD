@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pencil, Save, PlusCircle, XCircle } from "lucide-react";
 import { useAddCustomerMutation } from '../features/api/apiSlice';
+import { useAuth } from '../context/AuthContext';
 
 const initialCustomers = [
   {
@@ -24,21 +25,22 @@ const initialCustomers = [
 ];
 
 const CustomerPage = () => {
+  const { userData } = useAuth();
   const [customers, setCustomers] = useState(initialCustomers);
   const [editId, setEditId] = useState(null);
   const [editedCustomer, setEditedCustomer] = useState({});
   const [showForm, setShowForm] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     pPkCustomerId: 0,
-    pFkClientID: 1, // Set your default client ID
-    pFkPlantId: 1,  // Set your default plant ID
+    pFkClientID: userData?.clientId || 0, // Get clientId from userData
+    pFkPlantId: userData?.plantId || 0,   // Get plantId from userData
     pCustomerCode: "",
     pCustomerName: "",
     pAddress: "",
     pContactPerson: "",
     pPhoneNo: "",
     pEmailId: "",
-    pCreatedBy: 1,
+    pCreatedBy: userData?.userId || 1,    // Get userId from userData
     pIsActive: 1
   });
 
@@ -79,6 +81,11 @@ const CustomerPage = () => {
   };
 
   const handleAddCustomer = async () => {
+    if (!userData) {
+      alert("Authentication data not available. Please log in again.");
+      return;
+    }
+
     if (
       !newCustomer.pCustomerName ||
       !newCustomer.pAddress ||
@@ -96,7 +103,10 @@ const CustomerPage = () => {
       
       const response = await addCustomer({
         ...newCustomer,
-        pCustomerCode: customerCode
+        pCustomerCode: customerCode,
+        pFkClientID: userData.clientId,
+        pFkPlantId: userData.plantId,
+        pCreatedBy: userData.userId
       }).unwrap();
 
       console.log('Customer added successfully:', response);
@@ -117,15 +127,15 @@ const CustomerPage = () => {
       // Reset form and close modal
       setNewCustomer({
         pPkCustomerId: 0,
-        pFkClientID: 1,
-        pFkPlantId: 1,
+        pFkClientID: userData.clientId,
+        pFkPlantId: userData.plantId,
         pCustomerCode: "",
         pCustomerName: "",
         pAddress: "",
         pContactPerson: "",
         pPhoneNo: "",
         pEmailId: "",
-        pCreatedBy: 1,
+        pCreatedBy: userData.userId,
         pIsActive: 1
       });
       setShowForm(false);
@@ -171,6 +181,16 @@ const CustomerPage = () => {
     </div>
   );
 
+  if (!userData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-gray-800">Please log in to access the customer list</h2>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -185,7 +205,6 @@ const CustomerPage = () => {
           </button>
         </div>
 
-        {/* Table component remains the same */}
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
