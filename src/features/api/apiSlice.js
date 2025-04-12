@@ -16,69 +16,97 @@ export const api = createApi({
       }),
       transformResponse: (response) => {
         try {
-          const parsedResponse = JSON.parse(response.d);
-          return parsedResponse;
+          return JSON.parse(response.d);
         } catch (error) {
-          console.error('Error parsing login response:', error);
-          throw new Error('Invalid response format from server');
+          throw new Error('Invalid response format');
         }
       },
     }),
-    
+
     getCustomer: builder.query({
       query: (params) => ({
         url: 'prc_customer_master_get',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pAction: 0,
+          pAction: params.pAction || 0,
           pLookUpId: params.pLookUpId || 0,
           pFkClientId: params.pFkClientId,
           pFkPlantId: params.pFkPlantId
         }),
       }),
       transformResponse: (response) => {
-        if (!response) return [];
         try {
-          const parsedResponse = JSON.parse(response.d);
-          return Array.isArray(parsedResponse) ? parsedResponse : [];
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed.map(customer => ({
+            pPkCustomerId: customer.pPkCustomerId,
+            CustomerCode: customer.CustomerCode,
+            CustomerName: customer.CustomerName,
+            Address: customer.Address,
+            ContactPerson: customer.ContactPerson,
+            PhoneNo: customer.PhoneNo,
+            EmailId: customer.EmailId,
+            IsActive: customer.IsActive === "Active" || customer.IsActive === 1 || customer.IsActive === "1" ? 1 : 0
+          })) : [];
         } catch (error) {
-          console.error('Error parsing customer response:', error);
+          console.error('Transform error:', error);
           return [];
         }
       },
       providesTags: ['Customer']
     }),
 
+    checkDuplicateCustomer: builder.mutation({
+      query: (data) => ({
+        url: 'prc_check_duplicate_customer_master',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pPkCustomerId: data.pPkCustomerId,
+          pFkClientID: data.pFkClientId,
+          pFkPlantId: data.pFkPlantId,
+          pCustomerCode: data.pCustomerCode,
+          pCustomerName: data.pCustomerName,
+          pAddress: data.pAddress,
+          pContactPerson: data.pContactPerson,
+          pPhoneNo: data.pPhoneNo,
+          pEmailId: data.pEmailId
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          const result = JSON.parse(response.d);
+          return { isDuplicate: result.length > 0 };
+        } catch (error) {
+          throw new Error('Invalid response format');
+        }
+      }
+    }),
+
     addCustomer: builder.mutation({
-      query: (customerData) => ({
+      query: (data) => ({
         url: 'prc_customer_master_set',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pPkCustomerId: customerData.pPkCustomerId || 0,
-          pFkClientID: customerData.pFkClientID,
-          pFkPlantId: customerData.pFkPlantId,
-          pCustomerCode: customerData.pCustomerCode,
-          pCustomerName: customerData.pCustomerName,
-          pAddress: customerData.pAddress,
-          pContactPerson: customerData.pContactPerson,
-          pPhoneNo: customerData.pPhoneNo,
-          pEmailId: customerData.pEmailId,
-          pCreatedBy: customerData.pCreatedBy,
-          pIsActive: customerData.pIsActive
-        }),
+          pPkCustomerId: data.pPkCustomerId,
+          pFkClientID: data.pFkClientID,
+          pFkPlantId: data.pFkPlantId,
+          pCustomerCode: data.pCustomerCode,
+          pCustomerName: data.pCustomerName,
+          pAddress: data.pAddress,
+          pContactPerson: data.pContactPerson,
+          pPhoneNo: data.pPhoneNo,
+          pEmailId: data.pEmailId,
+          pCreatedBy: data.pCreatedBy,
+          pIsActive: data.pIsActive === true || data.pIsActive === 1 || data.pIsActive === "1" ? 1 : 0
+        })
       }),
       transformResponse: (response) => {
-        if (!response) throw new Error('No response received');
         try {
-          const parsedResponse = JSON.parse(response.d);
-          return parsedResponse;
+          return JSON.parse(response.d);
         } catch (error) {
-          console.error('Error parsing add customer response:', error);
-          throw new Error('Failed to process server response');
+          throw new Error('Invalid response format');
         }
       },
       invalidatesTags: ['Customer']
@@ -86,8 +114,9 @@ export const api = createApi({
   }),
 });
 
-export const { 
+export const {
   useGetCustomerQuery,
   useAddCustomerMutation,
   useLoginUserMutation,
+  useCheckDuplicateCustomerMutation,
 } = api;
