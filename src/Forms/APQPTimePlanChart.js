@@ -204,10 +204,10 @@ export default function APQPTimePlan() {
               onClick={exportToCSV}
               className="flex items-center gap-2 px-6 py-3 bg-green-400 text-white rounded-lg hover:bg-green-700 text-base"
             >
-              <Download className="w-5 h-5" /> Export
+              <Upload className="w-5 h-5" /> Export
             </button>
             <label className="flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-700 cursor-pointer text-base">
-              <Upload className="w-5 h-5" /> Import
+              <Download className="w-5 h-5" /> Import
               <input type="file" className="hidden" accept=".csv" />
             </label>
             <button

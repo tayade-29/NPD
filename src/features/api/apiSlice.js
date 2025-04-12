@@ -5,49 +5,89 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://192.168.0.172:83/Service.asmx/',
   }),
+  tagTypes: ['Customer'],
   endpoints: (builder) => ({
     loginUser: builder.mutation({
       query: (payload) => ({
         url: 'prc_prod_validate_users',
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        responseHandler: (response) => response.text(),
       }),
-      transformResponse: (responseText) => {
-        console.log('Raw text response:', responseText);
-        const match = responseText.match(/{.*}/);
-        if (!match) {
-          throw new Error('JSON not found in response');
+      transformResponse: (response) => {
+        try {
+          const parsedResponse = JSON.parse(response.d);
+          return parsedResponse;
+        } catch (error) {
+          console.error('Error parsing login response:', error);
+          throw new Error('Invalid response format from server');
         }
-        const rawData = JSON.parse(match[0]);
-        const users = JSON.parse(rawData.d);
-        return users;
       },
     }),
-    addCustomer: builder.mutation({
-      query: (customerData) => ({
-        url: 'prc_customer_master_set',
+    
+    getCustomer: builder.query({
+      query: (params) => ({
+        url: 'prc_customer_master_get',
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(customerData),
-        responseHandler: (response) => response.text(),
+        body: JSON.stringify({
+          pAction: 0,
+          pLookUpId: params.pLookUpId || 0,
+          pFkClientId: params.pFkClientId,
+          pFkPlantId: params.pFkPlantId
+        }),
       }),
-      transformResponse: (responseText) => {
-        console.log('Raw customer response:', responseText);
-        const match = responseText.match(/{.*}/);
-        if (!match) {
-          throw new Error('JSON not found in response');
+      transformResponse: (response) => {
+        if (!response) return [];
+        try {
+          const parsedResponse = JSON.parse(response.d);
+          return Array.isArray(parsedResponse) ? parsedResponse : [];
+        } catch (error) {
+          console.error('Error parsing customer response:', error);
+          return [];
         }
-        const rawData = JSON.parse(match[0]);
-        return JSON.parse(rawData.d);
       },
+      providesTags: ['Customer']
+    }),
+
+    addCustomer: builder.mutation({
+      query: (customerData) => ({
+        url: 'prc_customer_master_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pPkCustomerId: customerData.pPkCustomerId || 0,
+          pFkClientID: customerData.pFkClientID,
+          pFkPlantId: customerData.pFkPlantId,
+          pCustomerCode: customerData.pCustomerCode,
+          pCustomerName: customerData.pCustomerName,
+          pAddress: customerData.pAddress,
+          pContactPerson: customerData.pContactPerson,
+          pPhoneNo: customerData.pPhoneNo,
+          pEmailId: customerData.pEmailId,
+          pCreatedBy: customerData.pCreatedBy,
+          pIsActive: customerData.pIsActive
+        }),
+      }),
+      transformResponse: (response) => {
+        if (!response) throw new Error('No response received');
+        try {
+          const parsedResponse = JSON.parse(response.d);
+          return parsedResponse;
+        } catch (error) {
+          console.error('Error parsing add customer response:', error);
+          throw new Error('Failed to process server response');
+        }
+      },
+      invalidatesTags: ['Customer']
     }),
   }),
 });
 
-export const { useLoginUserMutation, useAddCustomerMutation } = api;
+export const { 
+  useGetCustomerQuery,
+  useAddCustomerMutation,
+  useLoginUserMutation,
+} = api;
