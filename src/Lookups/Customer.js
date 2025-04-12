@@ -206,7 +206,7 @@ function App() {
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 w-24">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200 ">
                   {customers.map((customer, index) => {
                     const isActive = customer.IsActive === "Active" || customer.IsActive === 1 || customer.IsActive === "1";
                     return (
