@@ -1,75 +1,57 @@
 import React, { useState } from 'react';
-import { Pencil, Save, PlusCircle, XCircle } from 'lucide-react';
+import { Pencil, PlusCircle, XCircle, FileText } from 'lucide-react';
+import { useGetEmployeesQuery, useAddEmployeeMutation } from '../features/api/apiSlice';
+import { useAuth } from '../context/AuthContext';
 
-const initialUsers = [
-  {
-    id: "USR001",
-    locationName: "Location 1",
-    fullName: "John Doe",
-    mobileNumber: "+1 234 567 890",
-    emailAddress: "john@example.com",
-    userName: "johndoe",
-    role: "admin",
-    photo: null,
-    allowLogin: true,
-    isActive: true
-  },
-  {
-    id: "USR002",
-    locationName: "Location 2",
-    fullName: "Jane Smith",
-    mobileNumber: "+1 987 654 321",
-    emailAddress: "jane@example.com",
-    userName: "janesmith",
-    role: "user",
-    photo: null,
-    allowLogin: true,
-    isActive: true
-  },
-];
-
-const initialFormData = {
-  locationName: '',
-  fullName: '',
-  mobileNumber: '',
-  emailAddress: '',
-  userName: '',
-  role: '',
-  password: '',
-  confirmPassword: '',
-  photo: null,
-  allowLogin: false,
-  isActive: true
-};
-
-const UserPage = () => {
-  const [users, setUsers] = useState(initialUsers);
+function App() {
+  const { userData } = useAuth();
   const [editId, setEditId] = useState(null);
-  const [editedUser, setEditedUser] = useState({});
   const [showForm, setShowForm] = useState(false);
-  const [formData, setFormData] = useState(initialFormData);
   const [photoPreview, setPhotoPreview] = useState(null);
-
-  const handleChange = (e, field, id) => {
-    setEditedUser({
-      ...editedUser,
-      [id]: {
-        ...editedUser[id],
-        [field]: e.target.value
-      }
-    });
+  const [documentName, setDocumentName] = useState('');
+  
+  const generateEmployeeCode = () => {
+    return "0";
   };
 
-  const handleSave = (id) => {
-    setUsers(users.map(user => 
-      user.id === id ? { ...user, ...editedUser[id] } : user
-    ));
-    setEditId(null);
-  };
+  const [newEmployee, setNewEmployee] = useState({
+    pPkEmployeeId: 0,
+    pEmployeeCode: generateEmployeeCode(),
+    pFkClientId: userData?.ClientId || 1,
+    pFkPlantId: userData?.PlantId || 1,
+    pFkLocationId: userData?.LocationId || 1,
+    pFkRoleId: userData?.RoleId || 157,
+    pFullName: '',
+    pContactNumber: '',
+    pEmailAddress: '',
+    pUserName: '',
+    pPassword: '',
+    pConfirmPassword: '',
+    pPhoto: '',
+    pDocument: '',
+    pSkill: '',
+    pCreatedBy: userData?.EmployeeId || 157,
+    pAllowLogin: false,
+    pIsActive: true
+  });
 
-  const handleInputChange = (e) => {
+  const {
+    data: employees = [],
+    isLoading,
+    error,
+    refetch
+  } = useGetEmployeesQuery({
+    pAction: 0,
+    pLookUpId: 0,
+    pFkClientId: parseInt(userData?.ClientId) || 1,
+    pFkPlantId: parseInt(userData?.PlantId) || 1
+  });
+
+  const [addEmployee, { isLoading: isAddingEmployee }] = useAddEmployeeMutation();
+
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setNewEmployee(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value
     }));
@@ -78,369 +60,420 @@ const UserPage = () => {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setFormData(prev => ({ ...prev, photo: file }));
       const reader = new FileReader();
       reader.onloadend = () => {
+        const base64String = reader.result.split(',')[1];
+        setNewEmployee(prev => ({ ...prev, pPhoto: base64String }));
         setPhotoPreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const handleAddUser = () => {
-    if (!formData.fullName || !formData.mobileNumber || !formData.emailAddress || !formData.userName || !formData.role || !formData.password) {
-      alert("Please fill all required fields!");
-      return;
+  const handleDocumentChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setDocumentName(file.name);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result.split(',')[1];
+        setNewEmployee(prev => ({ ...prev, pDocument: base64String }));
+      };
+      reader.readAsDataURL(file);
     }
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match!");
-      return;
-    }
-
-    const newId = `USR${String(users.length + 1).padStart(3, '0')}`;
-    setUsers([...users, { ...formData, id: newId }]);
-    setShowForm(false);
-    setFormData(initialFormData);
-    setPhotoPreview(null);
   };
 
-  const handleReset = () => {
-    setFormData(initialFormData);
-    setPhotoPreview(null);
+  const handleEdit = (employee) => {
+    setEditId(employee.EmployeeId);
+    setNewEmployee({
+      pPkEmployeeId: employee.EmployeeId,
+      pEmployeeCode: employee.EmployeeCode,
+      pFkClientId: parseInt(userData?.ClientId) || 1,
+      pFkPlantId: parseInt(userData?.PlantId) || 1,
+      pFkLocationId: parseInt(userData?.LocationId) || 1,
+      pFkRoleId: parseInt(userData?.RoleId) || 157,
+      pFullName: employee.FullName || '',
+      pContactNumber: employee.ContactNumber || '',
+      pEmailAddress: employee.EmailAddress || '',
+      pUserName: employee.UserName || '',
+      pPhoto: employee.Photo || '',
+      pDocument: employee.Document || '',
+      pSkill: employee.Skill || '',
+      pCreatedBy: parseInt(userData?.EmployeeId) || 157,
+      pAllowLogin: employee.AllowLogin === 1 || employee.AllowLogin === "1" || employee.AllowLogin === true,
+      pIsActive: employee.IsActive === 1 || employee.IsActive === "1" || employee.IsActive === true
+    });
+    setShowForm(true);
+    if (employee.Photo) {
+      setPhotoPreview(`data:image/jpeg;base64,${employee.Photo}`);
+    }
+    if (employee.Document) {
+      setDocumentName('Current Document');
+    }
   };
+
+  const handleAddEmployee = async () => {
+    try {
+      if (!newEmployee.pFullName || !newEmployee.pContactNumber || !newEmployee.pEmailAddress) {
+        alert("Please fill all required fields!");
+        return;
+      }
+
+      if (!editId && newEmployee.pPassword !== newEmployee.pConfirmPassword) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      const employeeData = {
+        ...newEmployee,
+        pPkEmployeeId: editId || 0,
+        pFkClientId: parseInt(userData?.ClientId) || 1,
+        pFkPlantId: parseInt(userData?.PlantId) || 1,
+        pFkLocationId: parseInt(userData?.LocationId) || 1,
+        pFkRoleId: parseInt(userData?.RoleId) || 157,
+        pCreatedBy: parseInt(userData?.EmployeeId) || 157,
+        pAllowLogin: newEmployee.pAllowLogin ? 1 : 0,
+        pIsActive: newEmployee.pIsActive ? 1 : 0
+      };
+
+      const result = await addEmployee(employeeData).unwrap();
+
+      if (result?.success === false) {
+        throw new Error(result.message || 'Operation failed');
+      }
+
+      setNewEmployee({
+        pPkEmployeeId: 0,
+        pEmployeeCode: generateEmployeeCode(),
+        pFkClientId: userData?.ClientId || 1,
+        pFkPlantId: userData?.PlantId || 1,
+        pFkLocationId: userData?.LocationId || 1,
+        pFkRoleId: userData?.RoleId || 157,
+        pFullName: '',
+        pContactNumber: '',
+        pEmailAddress: '',
+        pUserName: '',
+        pPassword: '',
+        pConfirmPassword: '',
+        pPhoto: '',
+        pDocument: '',
+        pSkill: '',
+        pCreatedBy: userData?.EmployeeId || 157,
+        pAllowLogin: false,
+        pIsActive: true
+      });
+
+      setShowForm(false);
+      setEditId(null);
+      setPhotoPreview(null);
+      setDocumentName('');
+      await refetch();
+
+      alert(editId ? "Employee updated successfully!" : "Employee added successfully!");
+    } catch (error) {
+      console.error("Employee operation failed:", error);
+      alert(error.message || 'Operation failed. Please try again.');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <h2 className="mt-4 text-xl font-semibold text-gray-800">Loading employees...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold text-red-800">Error loading employees</h2>
+          <p className="mt-2 text-gray-600">Please try again later</p>
+          <button
+            onClick={refetch}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Employee List</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Employee Management</h2>
           <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 transition-colors"
+            onClick={() => {
+              setEditId(null);
+              setNewEmployee({
+                pPkEmployeeId: 0,
+                pEmployeeCode: generateEmployeeCode(),
+                pFkClientId: userData?.ClientId || 1,
+                pFkPlantId: userData?.PlantId || 1,
+                pFkLocationId: userData?.LocationId || 1,
+                pFkRoleId: userData?.RoleId || 157,
+                pFullName: '',
+                pContactNumber: '',
+                pEmailAddress: '',
+                pUserName: '',
+                pPassword: '',
+                pConfirmPassword: '',
+                pPhoto: '',
+                pDocument: '',
+                pSkill: '',
+                pCreatedBy: userData?.EmployeeId || 157,
+                pAllowLogin: false,
+                pIsActive: true
+              });
+              setShowForm(true);
+              setPhotoPreview(null);
+              setDocumentName('');
+            }}
+            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <PlusCircle className="w-5 h-5 mr-2" />
             Add New Employee
           </button>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{user.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <select
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.locationName || user.locationName}
-                          onChange={(e) => handleChange(e, 'locationName', user.id)}
-                        >
-                          <option value="">All Location</option>
-                          <option value="Location 1">Location 1</option>
-                          <option value="Location 2">Location 2</option>
-                        </select>
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.locationName}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <input
-                          type="text"
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.fullName || user.fullName}
-                          onChange={(e) => handleChange(e, 'fullName', user.id)}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.fullName}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <input
-                          type="text"
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.mobileNumber || user.mobileNumber}
-                          onChange={(e) => handleChange(e, 'mobileNumber', user.id)}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.mobileNumber}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <input
-                          type="email"
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.emailAddress || user.emailAddress}
-                          onChange={(e) => handleChange(e, 'emailAddress', user.id)}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.emailAddress}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <input
-                          type="text"
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.userName || user.userName}
-                          onChange={(e) => handleChange(e, 'userName', user.id)}
-                        />
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.userName}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {editId === user.id ? (
-                        <select
-                          className="w-full border rounded px-2 py-1"
-                          value={editedUser[user.id]?.role || user.role}
-                          onChange={(e) => handleChange(e, 'role', user.id)}
-                        >
-                          <option value="">Select Role</option>
-                          <option value="admin">Admin</option>
-                          <option value="user">User</option>
-                          <option value="manager">Manager</option>
-                        </select>
-                      ) : (
-                        <span className="text-sm text-gray-900">{user.role}</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-sm rounded-full ${
-                        user.isActive 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {user.isActive ? 'Active' : 'Inactive'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      {editId === user.id ? (
-                        <button
-                          onClick={() => handleSave(user.id)}
-                          className="flex items-center text-white bg-green-500 px-3 py-1 rounded-md hover:bg-green-600"
-                        >
-                          <Save className="w-4 h-4 mr-1" />
-                          Save
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => setEditId(user.id)}
-                          className="flex items-center text-gray-600 hover:text-blue-600"
-                        >
-                          <Pencil className="w-4 h-4 mr-1" />
-                          Edit
-                        </button>
-                      )}
-                    </td>
+        <div className="bg-white rounded-lg shadow-lg">
+          <div className="overflow-hidden">
+            <div className="max-h-[calc(100vh-250px)] overflow-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 w-16">Sr No.</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Code</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Full Name</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Contact</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Email</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Username</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Document</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Status</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {employees.map((employee, index) => {
+                    const isActive = employee.IsActive === 1 || employee.IsActive === "1" || employee.IsActive === true;
+                    return (
+                      <tr key={employee.EmployeeId || index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm w-16">{index + 1}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">{employee.EmployeeCode}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {employee.FullName}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.ContactNumber}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.EmailAddress}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.UserName}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {employee.Document && (
+                            <FileText className="w-5 h-5 text-blue-600" />
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {isActive ? 'Active' : 'Inactive'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleEdit(employee)}
+                            className="text-blue-600 hover:text-blue-900 flex items-center"
+                          >
+                            <Pencil className="w-4 h-4 mr-1" />
+                            Edit
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
 
-      {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full p-6 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Add New Employee</h3>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
-                <XCircle className="w-6 h-6" />
-              </button>
-            </div>
-
-            <form onSubmit={(e) => { e.preventDefault(); handleAddUser(); }} className="space-y-6">
-              {/* Employee Details Section */}
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Location Name
-                  </label>
-                  <select
-                    name="locationName"
-                    value={formData.locationName}
-                    onChange={handleInputChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        {showForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-xl font-semibold">
+                    {editId ? 'Edit Employee' : 'New Employee'}
+                  </h3>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    <option value="">All Location</option>
-                    <option value="Location 1">Location 1</option>
-                    <option value="Location 2">Location 2</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Full Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    placeholder="Enter Full Name"
-                    className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Mobile Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter Mobile Number"
-                    className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email Address <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="emailAddress"
-                    value={formData.emailAddress}
-                    onChange={handleInputChange}
-                    placeholder="Enter Email Address"
-                    className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    required
-                  />
+                    <XCircle className="w-6 h-6" />
+                  </button>
                 </div>
               </div>
 
-              {/* User Access Section */}
-              <div className="pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">User Access</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      User Name <span className="text-red-500">*</span>
+              <div className="p-6 overflow-y-auto flex-1">
+                <div className="grid grid-cols-1 gap-6">
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Employee Code
                     </label>
                     <input
                       type="text"
-                      name="userName"
-                      value={formData.userName}
-                      onChange={handleInputChange}
-                      placeholder="Enter User Name"
-                      className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      required
+                      name="pEmployeeCode"
+                      value={newEmployee.pEmployeeCode}
+                      onChange={handleChange}
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Role <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="role"
-                      value={formData.role}
-                      onChange={handleInputChange}
-                      className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      required
-                    >
-                      <option value="">Select User Role</option>
-                      <option value="admin">Admin</option>
-                      <option value="user">User</option>
-                      <option value="manager">Manager</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Password <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="Please Enter Password"
-                      className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700">
-                      Confirm Password <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleInputChange}
-                      placeholder="Enter Confirm Password"
-                      className="mt-1 block w-full rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                      required
-                    />
-                  </div>
-
-                  <div>
+                  <div className="form-group">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Attach Photo
+                      Full Name <span className="text-red-500">*</span>
                     </label>
-                    <div className="flex items-center space-x-4">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handlePhotoChange}
-                        className="hidden"
-                        id="photo-upload"
-                      />
-                      <label
-                        htmlFor="photo-upload"
-                        className="cursor-pointer bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        Choose File
-                      </label>
-                      <span className="text-sm text-gray-500">
-                        {formData.photo ? formData.photo.name : 'No file chosen'}
-                      </span>
-                    </div>
-                    {photoPreview && (
-                      <div className="mt-2">
-                        <img
-                          src={photoPreview}
-                          alt="Preview"
-                          className="h-20 w-20 object-cover rounded-md"
+                    <input
+                      type="text"
+                      name="pFullName"
+                      value={newEmployee.pFullName}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Contact Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      name="pContactNumber"
+                      value={newEmployee.pContactNumber}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="pEmailAddress"
+                      value={newEmployee.pEmailAddress}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Username
+                    </label>
+                    <input
+                      type="text"
+                      name="pUserName"
+                      value={newEmployee.pUserName}
+                      onChange={handleChange}
+                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+
+                  {!editId && (
+                    <>
+                      <div className="form-group">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Password
+                        </label>
+                        <input
+                          type="password"
+                          name="pPassword"
+                          value={newEmployee.pPassword}
+                          onChange={handleChange}
+                          className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         />
+                      </div>
+
+                      <div className="form-group">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Confirm Password
+                        </label>
+                        <input
+                          type="password"
+                          name="pConfirmPassword"
+                          value={newEmployee.pConfirmPassword}
+                          onChange={handleChange}
+                          className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Photo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoChange}
+                      className="w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-50 file:text-blue-700
+                        hover:file:bg-blue-100"
+                    />
+                    {photoPreview && (
+                      <img
+                        src={photoPreview}
+                        alt="Preview"
+                        className="mt-2 h-20 w-20 object-cover rounded-md"
+                      />
+                    )}
+                  </div>
+
+                  <div className="form-group">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Document
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleDocumentChange}
+                      className="w-full text-sm text-gray-500
+                        file:mr-4 file:py-2 file:px-4
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-semibold
+                        file:bg-blue-50 file:text-blue-700
+                        hover:file:bg-blue-100"
+                    />
+                    {documentName && (
+                      <div className="mt-2 flex items-center text-sm text-gray-500">
+                        <FileText className="w-4 h-4 mr-2" />
+                        {documentName}
                       </div>
                     )}
                   </div>
 
-                  <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-4">
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        name="allowLogin"
-                        checked={formData.allowLogin}
-                        onChange={handleInputChange}
+                        name="pAllowLogin"
+                        checked={newEmployee.pAllowLogin}
+                        onChange={handleChange}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
                       <span className="ml-2 text-sm text-gray-600">Allow Login</span>
@@ -449,39 +482,46 @@ const UserPage = () => {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
-                        name="isActive"
-                        checked={formData.isActive}
-                        onChange={handleInputChange}
+                        name="pIsActive"
+                        checked={newEmployee.pIsActive}
+                        onChange={handleChange}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Is Active</span>
+                      <span className="ml-2 text-sm text-gray-600">Active</span>
                     </label>
                   </div>
                 </div>
               </div>
 
-              {/* Form Actions */}
-              <div className="flex justify-end space-x-3 pt-6">
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-                >
-                  Reset
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  Save
-                </button>
+              <div className="p-6 border-t border-gray-200">
+                <div className="flex justify-end space-x-3">
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddEmployee}
+                    disabled={isAddingEmployee}
+                    className={`px-4 py-2 bg-blue-600 text-white rounded-md ${
+                      isAddingEmployee ? 'opacity-75 cursor-not-allowed' : 'hover:bg-blue-700'
+                    }`}
+                  >
+                    {isAddingEmployee
+                      ? 'Saving...'
+                      : editId
+                        ? 'Update Changes'
+                        : 'Create Employee'}
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
-};
+}
 
-export default UserPage;
+export default App;
