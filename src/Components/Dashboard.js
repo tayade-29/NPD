@@ -1,161 +1,273 @@
-import React, { useState } from "react";
-import { Bar } from "react-chartjs-2";
+import React from 'react';
+import { Card, CardContent, Typography, Grid, Box } from '@mui/material';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import { Bar, Doughnut } from 'react-chartjs-2';
+import 'chart.js/auto';
+import './CustomCalendar.css';
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 import {
   Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
   ArcElement,
-  Legend as ChartLegend,
-} from "chart.js";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from "recharts";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
+  Tooltip,
+  Legend,
+} from 'chart.js';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, ArcElement, ChartLegend);
-
-const COLORS = ["#3b82f6", "#60a5fa", "#93c5fd"];
-
-const meetings = [
-  { date: new Date(2025, 3, 20), name: "Design Review" },
-  { date: new Date(2025, 3, 25), name: "Final Approval" },
-];
+ChartJS.register(ArcElement, Tooltip, Legend, ChartDataLabels);
 
 const Dashboard = () => {
-  const [date, setDate] = useState(new Date());
+  const cards = [
+    { title: 'Total Enquiry', value: 97, color: '#4A90E2' },
+    { title: 'Number of enquiries Inprocess', value: 15, color: '#7ED321' },
+    { title: 'Completed Enquiries', value: 8, color: '#F5A623' },
+    { title: 'Pending enquiries for feasibility', value: 5, color: '#D0021B' },
+  ];
+
+  const cftEvents = {
+    '2025-03-04': 'Project Kick-off',
+    '2025-03-10': 'Budget Review',
+    '2025-03-15': 'Design Discussion',
+    '2025-03-17': 'CFT Meeting',
+    '2025-03-24': 'Review Meeting',
+    '2025-03-25': 'Sprint Retrospec',
+  };
+
+  const tableData = [
+    { project: 'Website Redesign', supplier: 'ABC Agency', status: 'In Progress', details: 'UI revamp phase 1', deadline: 'May 15' },
+    { project: 'Product Launch', supplier: 'XYZ Firm', status: 'Completed', details: 'Packaging finalized', deadline: 'April 30' },
+    { project: 'ERP Integration', supplier: 'Tech Solutions', status: 'Delayed', details: 'Backend issues', deadline: 'May 5' },
+    { project: 'Mobile App Development', supplier: 'Global Services', status: 'On Hold', details: 'Client feedback pending', deadline: 'June 10' },
+  ];
+
+  const barData = {
+    labels: ['T0', 'T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8'],
+    datasets: [
+      {
+        label: 'Rejected',
+        data: [2, 3, 4, 0, 1, 0, 2, 1, 0],
+        backgroundColor: '#FF4444',
+        barPercentage: 0.8,
+      },
+      {
+        label: 'Produced',
+        data: [10, 14, 10, 82, 144, 152, 160, 165, 170],
+        backgroundColor: '#4CAF50',
+        barPercentage: 0.8,
+      },
+      {
+        label: 'Target',
+        data: [200, 200, 200, 200, 200, 200, 200, 200, 200],
+        type: 'line',
+        borderColor: '#2196F3',
+        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+        borderWidth: 2,
+        pointRadius: 0,
+        fill: true,
+      },
+    ],
+  };
+
+  const barOptions = {
+    responsive: true,
+    scales: {
+      x: {
+        stacked: false,
+        grid: {
+          display: false,
+        },
+      },
+      y: {
+        stacked: false,
+        beginAtZero: true,
+        max: 250,
+        ticks: {
+          stepSize: 50,
+        },
+        grid: {
+          color: '#E0E0E0',
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+        },
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+      },
+    },
+  };
+
+  const doughnutData = {
+    labels: ['Tool A', 'Tool B', 'Tool D', 'Tool C', 'Tool E'],
+    datasets: [
+      {
+        data: [25, 24, 20, 18, 13],
+        backgroundColor: ['#22c55e', '#0ea5e9', '#f97316', '#eab308', '#1f2937'],
+        borderWidth: 2,
+        borderColor: '#fff',
+        hoverOffset: 6,
+      }
+    ]
+  };
+
+  const doughnutOptions = {
+    responsive: true,
+    cutout: '60%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: {
+          usePointStyle: true,
+          padding: 20,
+          font: {
+            size: 14,
+          },
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => `${context.label}: ${context.raw}%`
+        }
+      },
+      datalabels: {
+        color: '#fff',
+        font: {
+          weight: 'bold',
+          size: 14,
+        },
+        formatter: (value) => `${value}%`,
+      },
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'In Progress': return 'green';
+      case 'Completed': return 'orange';
+      case 'Delayed': return 'red';
+      case 'On Hold': return 'blue';
+      default: return 'black';
+    }
+  };
+
+  const tileContent = ({ date, view }) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const dateString = `${year}-${month}-${day}`;
+
+    if (view === 'month' && cftEvents[dateString]) {
+      return (
+        <div className="custom-event">
+          <div className="calendar-icon">📅</div>
+          <div className="event-name">{cftEvents[dateString]}</div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
-    <div className="p-6 font-sans bg-gray-50 min-h-screen">
-      
-      {/* === Master Cards === */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 my-6">
-        {[
-          { title: "Total Enquiries", value: 120, color: "bg-blue-500" },
-          { title: "In Process", value: 45, color: "bg-blue-400" },
-          { title: "Completed", value: 50, color: "bg-blue-300" },
-          { title: "Pending Feasibility", value: 25, color: "bg-blue-200" },
-        ].map((card, i) => (
-          <div key={i} className={`${card.color} text-white p-6 rounded-xl shadow-md`}>
-            <h3 className="text-sm font-medium">{card.title}</h3>
-            <p className="text-2xl font-bold mt-1">{card.value}</p>
-          </div>
+    <Box sx={{ p: 4 }}>
+      <Grid container spacing={4}>
+        {cards.map((card, index) => (
+          <Grid item xs={12} sm={6} md={3} key={index}>
+            <Card sx={{ backgroundColor: card.color, color: 'white', height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <CardContent sx={{ textAlign: 'center' }}>
+                <Typography variant="subtitle1">{card.title}</Typography>
+                <Typography variant="h4">{card.value}</Typography>
+              </CardContent>
+            </Card>
+          </Grid>
         ))}
-      </div>
+      </Grid>
 
-      {/* === Calendar + Ongoing Enquiries === */}
-      <div className="flex flex-col md:flex-row gap-6 my-6">
-        
-        {/* Calendar */}
-        <div className="md:w-1/3 bg-white p-4 rounded-xl shadow">
-          <h2 className="text-lg font-semibold mb-4 text-center text-blue-700">CFT Meetings</h2>
+      <Grid container spacing={3} sx={{ mt: 4 }}>
+        <Grid item xs={12} md={4}>
           <Calendar
-            onChange={setDate}
-            value={date}
-            tileContent={({ date }) => {
-              const meeting = meetings.find(
-                (m) => m.date.toDateString() === date.toDateString()
-              );
-              return meeting ? (
-                <div className="text-[10px] text-red-600 text-center">📅 {meeting.name}</div>
-              ) : null;
-            }}
+            tileContent={tileContent}
+            value={new Date(2025, 2, 27)}
           />
-        </div>
+        </Grid>
 
-        {/* Ongoing Enquiries Table */}
-        <div className="md:w-2/3 bg-white p-4 rounded-xl shadow overflow-x-auto">
-          <h2 className="text-lg font-semibold mb-4 text-blue-700">Ongoing Enquiries</h2>
-          <div className="max-h-80 overflow-y-auto custom-scrollbar">
-            <table className="w-full text-sm border border-gray-200">
-              <thead className="bg-blue-100 text-blue-800 sticky top-0">
+        <Grid item xs={12} md={8}>
+          <Typography variant="h6" gutterBottom>Ongoing Enquiries</Typography>
+          <Box sx={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead style={{ backgroundColor: '#f5f5f5' }}>
                 <tr>
-                  <th className="p-2 border">Enquiry</th>
-                  <th className="p-2 border">Supplier/Toolmaker</th>
-                  <th className="p-2 border">Status</th>
-                  <th className="p-2 border">Deadline</th>
-                  <th className="p-2 border">Actions</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Enquiries</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Supplier/ToolMaker</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Status</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Details</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Deadline</th>
+                  <th style={{ padding: '8px', textAlign: 'left' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {[
-                  { id: "ENQ001", tool: "Toolmaker A", status: "In Process", deadline: "2025-04-20" },
-                  { id: "ENQ002", tool: "Toolmaker B", status: "Pending", deadline: "2025-04-25" },
-                  { id: "ENQ003", tool: "Toolmaker C", status: "Review", deadline: "2025-04-30" },
-                  { id: "ENQ004", tool: "Toolmaker D", status: "Feasibility", deadline: "2025-05-05 "                },
-                ].map((row, i) => (
-                  <tr key={i} className="hover:bg-blue-50">
-                    <td className="p-2 border">{row.id}</td>
-                    <td className="p-2 border">{row.tool}</td>
-                    <td className="p-2 border">{row.status}</td>
-                    <td className="p-2 border">{row.deadline}</td>
-                    <td className="p-2 border text-blue-600 cursor-pointer">View</td>
+                {tableData.map((row, i) => (
+                  <tr key={i} style={{ borderBottom: '1px solid #ddd' }}>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>{row.project}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>{row.supplier}</td>
+                    <td style={{ padding: '8px', textAlign: 'left', color: getStatusColor(row.status) }}>{row.status}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>{row.details}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>{row.deadline}</td>
+                    <td style={{ padding: '8px', textAlign: 'left' }}>
+                      <button style={{ backgroundColor: '#4A90E2', color: 'white', border: 'none', padding: '5px 10px', cursor: 'pointer' }}>View</button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
+          </Box>
+        </Grid>
+      </Grid>
 
-      {/* === Testing Stages + Revenue Charts === */}
-      <div className="flex flex-col md:flex-row gap-6 my-6">
-        
-        {/* Bar Chart - Testing Stages */}
-        <div className="md:w-2/3 bg-white p-4 rounded-xl shadow">
-          <h2 className="text-lg font-semibold text-center text-blue-700 mb-2">Testing Stage Distribution</h2>
-          <Bar
-            data={{
-              labels: ["T0", "T1", "T2", "TFinal"],
-              datasets: [
-                {
-                  label: "No. of Enquiries",
-                  data: [5, 10, 7, 3],
-                  backgroundColor: [
-                    "rgba(59,130,246,0.8)",
-                    "rgba(96,165,250,0.8)",
-                    "rgba(147,197,253,0.8)",
-                    "rgba(191,219,254,0.8)"
-                  ],
-                  borderRadius: 6,
-                  barThickness: 30,
-                }
-              ],
-            }}
-            options={{
-              responsive: true,
-              plugins: { legend: { display: false } },
-              scales: { y: { beginAtZero: true } },
-            }}
-          />
-        </div>
+      <Grid container spacing={3} sx={{ mt: 4 }}>
+        <Grid item xs={12} md={7}>
+          <Box sx={{ p: 2, backgroundColor: 'white', borderRadius: 1, boxShadow: 1 }}>
+            <Typography variant="h6" gutterBottom>Production Tools Report</Typography>
+            <Bar data={barData} options={barOptions} />
+          </Box>
+        </Grid>
 
-        {/* Pie Chart - Revenue */}
-        <div className="md:w-1/3 bg-white p-4 rounded-xl shadow">
-          <h2 className="text-lg font-semibold text-center text-blue-700 mb-2">Revenue per Tool</h2>
-          <PieChart width={300} height={250}>
-            <Pie
-              data={[
-                { name: "Tool A", value: 200000 },
-                { name: "Tool B", value: 150000 },
-                { name: "Tool C", value: 180000 },
-              ]}
-              cx="50%"
-              cy="50%"
-              outerRadius={90}
-              label
+        <Grid item xs={12} md={5}>
+          <Box sx={{
+            p: 2,
+            backgroundColor: 'white',
+            borderRadius: 1,
+            boxShadow: 1,
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-start',
+          }}>
+            <Typography variant="h6" sx={{ mb: 2, textAlign: 'center', width: '100%' }}>
+              Revenue per Tool
+            </Typography>
+
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
             >
-              {COLORS.map((color, index) => (
-                <Cell key={index} fill={color} />
-              ))}
-            </Pie>
-            <RechartsTooltip />
-            <Legend />
-          </PieChart>
-        </div>
-      </div>
-    </div>
+              <Box sx={{ width: '100%', maxWidth: 300 }}>
+                <Doughnut data={doughnutData} options={doughnutOptions} />
+              </Box>
+            </Box>
+          </Box>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
