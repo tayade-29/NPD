@@ -5,8 +5,40 @@ export const api = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://192.168.0.172:83/Service.asmx/',
   }),
-  tagTypes: ['Customer', 'Employee'],
+  tagTypes: ['Customer', 'Employee', 'Roles'],
   endpoints: (builder) => ({
+    // Add the new getRoles endpoint
+    getRoles: builder.query({
+      query: (params) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 2,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 1,
+          pClientId: params.pClientId,
+          pPlantId: params.pPlantId,
+          pLocationId: params.pLocationId
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed.map(role => ({
+            label: role.DataTextField,
+            value: role.DataValueField,
+            sortBy: role.SortBy
+          })) : [];
+        } catch (error) {
+          console.error('Transform error:', error);
+          return [];
+        }
+      },
+      providesTags: ['Roles']
+    }),
+
     loginUser: builder.mutation({
       query: (payload) => ({
         url: 'prc_prod_validate_users',
@@ -111,106 +143,101 @@ export const api = createApi({
       },
       invalidatesTags: ['Customer']
     }),
-   
-    // Employee Management 
 
-
-
-getEmployee: builder.query({
-  query: (params) => ({
-    url: 'prc_employee_master_get',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      pAction: params.pAction || 0,
-      pLookUpId: params.pLookUpId || 0,
-      pFkClientId: params.pFkClientId,
-      pFkPlantId: params.pFkPlantId,
-      pFkLocationId: params.pFkLocationId || 0
+    getEmployee: builder.query({
+      query: (params) => ({
+        url: 'prc_employee_master_get',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: params.pAction || 0,
+          pLookUpId: params.pLookUpId || 0,
+          pFkClientId: params.pFkClientId,
+          pFkPlantId: params.pFkPlantId,
+          pFkLocationId: params.pFkLocationId || 0
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed.map(employee => ({
+            EmployeeCode: employee.EmployeeCode,
+            FullName: employee.FullName,
+            ContactNumber: employee.ContactNumber,
+            EmailAddress: employee.EmailAddress,
+            UserName: employee.UserName,
+            Password: employee.Password,
+            RoleId: employee.RoleId,
+            IsActive: employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1" ? 1 : 0,
+            LocationId: employee.LocationId || 0,
+            Photo: employee.Photo || ""
+          })) : [];
+        } catch (error) {
+          console.error('Transform error:', error);
+          return [];
+        }
+      },
+      providesTags: ['Employee']
     }),
-  }),
-  transformResponse: (response) => {
-    try {
-      const parsed = JSON.parse(response.d);
-      return Array.isArray(parsed) ? parsed.map(employee => ({
-        EmployeeCode: employee.EmployeeCode,
-        FullName: employee.FullName,
-        ContactNumber: employee.ContactNumber,
-        EmailAddress: employee.EmailAddress,
-        UserName: employee.UserName,
-        Password: employee.Password,
-        RoleId: employee.RoleId,
-        IsActive: employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1" ? 1 : 0,
-        LocationId: employee.LocationId || 0,
-        Photo: employee.Photo || ""
-      })) : [];
-    } catch (error) {
-      console.error('Transform error:', error);
-      return [];
-    }
-  },
-  providesTags: ['Employee']
-}),
 
-checkDuplicateEmployee: builder.mutation({
-  query: (data) => ({
-    url: 'prc_check_duplicate_employee_master',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      pEmployeeCode: data.pEmployeeCode,
-      pFkClientId: data.pFkClientId,
-      pFkLocationId: data.pFkLocationId,
-      pFkRoleId: data.pFkRoleId,
-      pFullName: data.pFullName,
-      pUserName: data.pUserName,
-      pPassword: data.pPassword,
-      pPlantId: data.pPlantId
-    })
-  }),
-  transformResponse: (response) => {
-    try {
-      const result = JSON.parse(response.d);
-      return { isDuplicate: result.length > 0 };
-    } catch (error) {
-      throw new Error('Invalid response format');
-    }
-  }
-}),
+    checkDuplicateEmployee: builder.mutation({
+      query: (data) => ({
+        url: 'prc_check_duplicate_employee_master',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pEmployeeCode: data.pEmployeeCode,
+          pFkClientId: data.pFkClientId,
+          pFkLocationId: data.pFkLocationId,
+          pFkRoleId: data.pFkRoleId,
+          pFullName: data.pFullName,
+          pUserName: data.pUserName,
+          pPassword: data.pPassword,
+          pPlantId: data.pPlantId
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          const result = JSON.parse(response.d);
+          return { isDuplicate: result.length > 0 };
+        } catch (error) {
+          throw new Error('Invalid response format');
+        }
+      }
+    }),
 
-addEmployee: builder.mutation({
-  query: (data) => ({
-    url: 'prc_employee_master_set',
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      pEmployeeCode: data.pEmployeeCode,
-      pFkClientId: data.pFkClientId,
-      pFkPlantId: data.pFkPlantId,
-      pFkLocationId: data.pFkLocationId,
-      pFkRoleId: data.pFkRoleId,
-      pFullName: data.pFullName,
-      pContactNumber: data.pContactNumber,
-      pEmailAddress: data.pEmailAddress,
-      pAllowLogin: data.pAllowLogin,
-      pUserName: data.pUserName,
-      pPassword: data.pPassword,
-      pSkill: data.pSkill,
-      pCreatedBy: data.pCreatedBy,
-      pIsActive: data.pIsActive === true || data.pIsActive === 1 || data.pIsActive === "1" ? 1 : 0,
-      pPhoto: data.pPhoto || ""
-    })
-  }),
-  transformResponse: (response) => {
-    try {
-      return JSON.parse(response.d);
-    } catch (error) {
-      throw new Error('Invalid response format');
-    }
-  },
-  invalidatesTags: ['Employee']
-}),
-
+    addEmployee: builder.mutation({
+      query: (data) => ({
+        url: 'prc_employee_master_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pEmployeeCode: data.pEmployeeCode,
+          pFkClientId: data.pFkClientId,
+          pFkPlantId: data.pFkPlantId,
+          pFkLocationId: data.pFkLocationId,
+          pFkRoleId: data.pFkRoleId,
+          pFullName: data.pFullName,
+          pContactNumber: data.pContactNumber,
+          pEmailAddress: data.pEmailAddress,
+          pAllowLogin: data.pAllowLogin,
+          pUserName: data.pUserName,
+          pPassword: data.pPassword,
+          pSkill: data.pSkill,
+          pCreatedBy: data.pCreatedBy,
+          pIsActive: data.pIsActive === true || data.pIsActive === 1 || data.pIsActive === "1" ? 1 : 0,
+          pPhoto: data.pPhoto || ""
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d);
+        } catch (error) {
+          throw new Error('Invalid response format');
+        }
+      },
+      invalidatesTags: ['Employee']
+    }),
   }),
 });
 
@@ -222,4 +249,5 @@ export const {
   useGetEmployeeQuery,
   useCheckDuplicateEmployeeMutation,
   useAddEmployeeMutation,
+  useGetRolesQuery,
 } = api;
