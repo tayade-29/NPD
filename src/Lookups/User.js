@@ -1,38 +1,34 @@
 import React, { useState } from 'react';
-import { Pencil, PlusCircle, XCircle, FileText } from 'lucide-react';
-import { useGetEmployeesQuery, useAddEmployeeMutation } from '../features/api/apiSlice';
+import { Pencil, PlusCircle, XCircle, Search, FileText } from 'lucide-react';
+import { useAddEmployeeMutation, useGetEmployeeQuery, useCheckDuplicateEmployeeMutation } from '../features/api/apiSlice';
 import { useAuth } from '../context/AuthContext';
 
-function App() {
+function EmployeePage() {
   const { userData } = useAuth();
   const [editId, setEditId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
   const [documentName, setDocumentName] = useState('');
-  
-  const generateEmployeeCode = () => {
-    return "0";
-  };
+  const [activeSearchTerm, setActiveSearchTerm] = useState('');
+
 
   const [newEmployee, setNewEmployee] = useState({
-    pPkEmployeeId: 0,
-    pEmployeeCode: generateEmployeeCode(),
+    pEmployeeCode: 0,
     pFkClientId: userData?.ClientId || 1,
     pFkPlantId: userData?.PlantId || 1,
-    pFkLocationId: userData?.LocationId || 1,
-    pFkRoleId: userData?.RoleId || 157,
-    pFullName: '',
-    pContactNumber: '',
-    pEmailAddress: '',
-    pUserName: '',
-    pPassword: '',
-    pConfirmPassword: '',
-    pPhoto: '',
-    pDocument: '',
-    pSkill: '',
-    pCreatedBy: userData?.EmployeeId || 157,
-    pAllowLogin: false,
-    pIsActive: true
+    pFkLocationId: userData?.LocationId || 0,
+    pFkRoleId: 1,
+    pFullName: "",
+    pContactNumber: "",
+    pEmailAddress: "",
+    pAllowLogin: 1,
+    pUserName: "",
+    pPassword: "",
+    pSkill: "",
+    pCreatedBy: userData?.RoleId || 1,
+    pIsActive: 1,
+    pPhoto: ""
   });
 
   const {
@@ -40,22 +36,27 @@ function App() {
     isLoading,
     error,
     refetch
-  } = useGetEmployeesQuery({
+  } = useGetEmployeeQuery({
     pAction: 0,
     pLookUpId: 0,
-    pFkClientId: parseInt(userData?.ClientId) || 1,
-    pFkPlantId: parseInt(userData?.PlantId) || 1
+    pFkClientId: userData?.ClientId || 1,
+    pFkPlantId: userData?.PlantId || 1,
+    pFkLocationId: userData?.LocationId || 0
   });
 
   const [addEmployee, { isLoading: isAddingEmployee }] = useAddEmployeeMutation();
+  const [checkDuplicate] = useCheckDuplicateEmployeeMutation();
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewEmployee(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
+    const { name, value } = e.target;
+    setNewEmployee(prev => ({ ...prev, [name]: value }));
   };
+
+  const handleStatusChange = (e) => {
+    const value = e.target.checked ? 1 : 0;
+    setNewEmployee(prev => ({ ...prev, pIsActive: value }));
+  };
+
 
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
@@ -83,90 +84,82 @@ function App() {
     }
   };
 
+
   const handleEdit = (employee) => {
-    setEditId(employee.EmployeeId);
+    setEditId(employee.EmployeeCode);
     setNewEmployee({
-      pPkEmployeeId: employee.EmployeeId,
       pEmployeeCode: employee.EmployeeCode,
-      pFkClientId: parseInt(userData?.ClientId) || 1,
-      pFkPlantId: parseInt(userData?.PlantId) || 1,
-      pFkLocationId: parseInt(userData?.LocationId) || 1,
-      pFkRoleId: parseInt(userData?.RoleId) || 157,
-      pFullName: employee.FullName || '',
-      pContactNumber: employee.ContactNumber || '',
-      pEmailAddress: employee.EmailAddress || '',
-      pUserName: employee.UserName || '',
-      pPhoto: employee.Photo || '',
-      pDocument: employee.Document || '',
-      pSkill: employee.Skill || '',
-      pCreatedBy: parseInt(userData?.EmployeeId) || 157,
-      pAllowLogin: employee.AllowLogin === 1 || employee.AllowLogin === "1" || employee.AllowLogin === true,
-      pIsActive: employee.IsActive === 1 || employee.IsActive === "1" || employee.IsActive === true
+      pFkClientId: userData?.ClientId || 1,
+      pFkPlantId: userData?.PlantId || 1,
+      pFkLocationId: userData?.LocationId || 0,
+      pFkRoleId: employee.RoleId,
+      pFullName: employee.FullName,
+      pContactNumber: employee.ContactNumber,
+      pEmailAddress: employee.EmailAddress,
+      pAllowLogin: 1,
+      pUserName: employee.UserName,
+      pPassword: employee.Password,
+      pSkill: employee.Skill || "",
+      pCreatedBy: userData?.RoleId || 1,
+      pIsActive: employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1" ? 1 : 0,
+      pPhoto: employee.Photo || ""
     });
     setShowForm(true);
-    if (employee.Photo) {
-      setPhotoPreview(`data:image/jpeg;base64,${employee.Photo}`);
-    }
-    if (employee.Document) {
-      setDocumentName('Current Document');
-    }
   };
 
   const handleAddEmployee = async () => {
     try {
-      if (!newEmployee.pFullName || !newEmployee.pContactNumber || !newEmployee.pEmailAddress) {
-        alert("Please fill all required fields!");
-        return;
+      if (!editId) {
+        const duplicateCheck = await checkDuplicate({
+          pEmployeeCode: newEmployee.pEmployeeCode,
+          pFkClientId: newEmployee.pFkClientId,
+          pFkLocationId: newEmployee.pFkLocationId,
+          pFkRoleId: newEmployee.pFkRoleId,
+          pFullName: newEmployee.pFullName,
+          pUserName: newEmployee.pUserName,
+          pPassword: newEmployee.pPassword,
+          pPlantId: newEmployee.pFkPlantId
+        }).unwrap();
+
+        const existingEmployee = employees.find(employee =>
+          employee.FullName === newEmployee.pFullName &&
+          employee.UserName === newEmployee.pUserName &&
+          employee.ContactNumber === newEmployee.pContactNumber &&
+          employee.EmailAddress === newEmployee.pEmailAddress
+        );
+
+        if (existingEmployee) {
+          alert('An employee with exactly the same details already exists!');
+          return;
+        }
       }
 
-      if (!editId && newEmployee.pPassword !== newEmployee.pConfirmPassword) {
-        alert("Passwords do not match!");
-        return;
-      }
-
-      const employeeData = {
-        ...newEmployee,
-        pPkEmployeeId: editId || 0,
-        pFkClientId: parseInt(userData?.ClientId) || 1,
-        pFkPlantId: parseInt(userData?.PlantId) || 1,
-        pFkLocationId: parseInt(userData?.LocationId) || 1,
-        pFkRoleId: parseInt(userData?.RoleId) || 157,
-        pCreatedBy: parseInt(userData?.EmployeeId) || 157,
-        pAllowLogin: newEmployee.pAllowLogin ? 1 : 0,
-        pIsActive: newEmployee.pIsActive ? 1 : 0
-      };
-
-      const result = await addEmployee(employeeData).unwrap();
+      const result = await addEmployee(newEmployee).unwrap();
 
       if (result?.success === false) {
         throw new Error(result.message || 'Operation failed');
       }
 
       setNewEmployee({
-        pPkEmployeeId: 0,
-        pEmployeeCode: generateEmployeeCode(),
+        pEmployeeCode: 0,
         pFkClientId: userData?.ClientId || 1,
         pFkPlantId: userData?.PlantId || 1,
         pFkLocationId: userData?.LocationId || 1,
-        pFkRoleId: userData?.RoleId || 157,
-        pFullName: '',
-        pContactNumber: '',
-        pEmailAddress: '',
-        pUserName: '',
-        pPassword: '',
-        pConfirmPassword: '',
-        pPhoto: '',
-        pDocument: '',
-        pSkill: '',
-        pCreatedBy: userData?.EmployeeId || 157,
-        pAllowLogin: false,
-        pIsActive: true
+        pFkRoleId: 1,
+        pFullName: "",
+        pContactNumber: "",
+        pEmailAddress: "",
+        pAllowLogin: 1,
+        pUserName: "",
+        pPassword: "",
+        pSkill: "",
+        pCreatedBy: userData?.RoleId || 1,
+        pIsActive: 1,
+        pPhoto: ""
       });
 
       setShowForm(false);
       setEditId(null);
-      setPhotoPreview(null);
-      setDocumentName('');
       await refetch();
 
       alert(editId ? "Employee updated successfully!" : "Employee added successfully!");
@@ -176,12 +169,18 @@ function App() {
     }
   };
 
+  const filteredEmployees = employees.filter(employee =>
+    employee.FullName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <h2 className="mt-4 text-xl font-semibold text-gray-800">Loading employees...</h2>
+          <h2 className="mt-4 text-xl font-semibold text-gray-800">
+            Loading employees...
+          </h2>
         </div>
       </div>
     );
@@ -191,7 +190,9 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-red-800">Error loading employees</h2>
+          <h2 className="text-xl font-semibold text-red-800">
+            Error loading employees
+          </h2>
           <p className="mt-2 text-gray-600">Please try again later</p>
           <button
             onClick={refetch}
@@ -205,42 +206,49 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen bg-gray-50 p-0">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-800">Employee Management</h2>
-          <button
-            onClick={() => {
-              setEditId(null);
-              setNewEmployee({
-                pPkEmployeeId: 0,
-                pEmployeeCode: generateEmployeeCode(),
-                pFkClientId: userData?.ClientId || 1,
-                pFkPlantId: userData?.PlantId || 1,
-                pFkLocationId: userData?.LocationId || 1,
-                pFkRoleId: userData?.RoleId || 157,
-                pFullName: '',
-                pContactNumber: '',
-                pEmailAddress: '',
-                pUserName: '',
-                pPassword: '',
-                pConfirmPassword: '',
-                pPhoto: '',
-                pDocument: '',
-                pSkill: '',
-                pCreatedBy: userData?.EmployeeId || 157,
-                pAllowLogin: false,
-                pIsActive: true
-              });
-              setShowForm(true);
-              setPhotoPreview(null);
-              setDocumentName('');
-            }}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            <PlusCircle className="w-5 h-5 mr-2" />
-            Add New Employee
-          </button>
+          <div className="flex items-center space-x-4 gap-40">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search employees by name "
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <Search className="absolute right-3 top-2.5 h-5 w-5 text-blue-600 style-bold" />
+            </div>
+            <button
+              onClick={() => {
+                setEditId(null);
+                setNewEmployee({
+                  pEmployeeCode: 0,
+                  pFkClientId: userData?.ClientId || 1,
+                  pFkPlantId: userData?.PlantId || 1,
+                  pFkLocationId: userData?.LocationId || 0,
+                  pFkRoleId: 1,
+                  pFullName: "",
+                  pContactNumber: "",
+                  pEmailAddress: "",
+                  pAllowLogin: 1,
+                  pUserName: "",
+                  pPassword: "",
+                  pSkill: "",
+                  pCreatedBy: userData?.RoleId || 1,
+                  pIsActive: 1,
+                  pPhoto: ""
+                });
+                setShowForm(true);
+              }}
+              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <PlusCircle className="w-5 h-5 mr-2" />
+              Add New Employee
+            </button>
+          </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-lg">
@@ -249,39 +257,30 @@ function App() {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 w-16">Sr No.</th>
-                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Code</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Sr No.</th>
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Full Name</th>
-                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Contact</th>
+                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Contact Number</th>
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Email</th>
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Username</th>
-                    <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Document</th>
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Status</th>
                     <th className="sticky top-0 px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {employees.map((employee, index) => {
-                    const isActive = employee.IsActive === 1 || employee.IsActive === "1" || employee.IsActive === true;
+                  {filteredEmployees.map((employee, index) => {
+                    const isActive = employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1";
                     return (
-                      <tr key={employee.EmployeeId || index}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm w-16">{index + 1}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">{employee.EmployeeCode}</td>
+                      <tr key={employee.EmployeeCode}>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
+
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {employee.FullName}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.ContactNumber}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.EmailAddress}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.UserName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                          {employee.Document && (
-                            <FileText className="w-5 h-5 text-blue-600" />
-                          )}
-                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                          }`}>
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                             {isActive ? 'Active' : 'Inactive'}
                           </span>
                         </td>
@@ -322,18 +321,6 @@ function App() {
 
               <div className="p-6 overflow-y-auto flex-1">
                 <div className="grid grid-cols-1 gap-6">
-                  <div className="form-group">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Employee Code
-                    </label>
-                    <input
-                      type="text"
-                      name="pEmployeeCode"
-                      value={newEmployee.pEmployeeCode}
-                      onChange={handleChange}
-                      className="w-full h-10 px-3 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
 
                   <div className="form-group">
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -443,30 +430,6 @@ function App() {
                       />
                     )}
                   </div>
-
-                  <div className="form-group">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Document
-                    </label>
-                    <input
-                      type="file"
-                      accept=".pdf,.doc,.docx"
-                      onChange={handleDocumentChange}
-                      className="w-full text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-semibold
-                        file:bg-blue-50 file:text-blue-700
-                        hover:file:bg-blue-100"
-                    />
-                    {documentName && (
-                      <div className="mt-2 flex items-center text-sm text-gray-500">
-                        <FileText className="w-4 h-4 mr-2" />
-                        {documentName}
-                      </div>
-                    )}
-                  </div>
-
                   <div className="flex items-center space-x-4">
                     <label className="flex items-center">
                       <input
@@ -504,9 +467,8 @@ function App() {
                   <button
                     onClick={handleAddEmployee}
                     disabled={isAddingEmployee}
-                    className={`px-4 py-2 bg-blue-600 text-white rounded-md ${
-                      isAddingEmployee ? 'opacity-75 cursor-not-allowed' : 'hover:bg-blue-700'
-                    }`}
+                    className={`px-4 py-2 bg-blue-600 text-white rounded-md ${isAddingEmployee ? 'opacity-75 cursor-not-allowed' : 'hover:bg-blue-700'
+                      }`}
                   >
                     {isAddingEmployee
                       ? 'Saving...'
@@ -524,4 +486,5 @@ function App() {
   );
 }
 
-export default App;
+export default EmployeePage;
+
