@@ -167,7 +167,8 @@ export const api = createApi({
             EmailAddress: employee.EmailAddress,
             UserName: employee.UserName,
             Password: employee.Password,
-            RoleId: employee.RoleId,
+            RoleId: employee.pFkRoleId || employee.FkRoleId || employee.RoleId,
+
             IsActive: employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1" ? 1 : 0,
             LocationId: employee.LocationId || 0,
             Photo: employee.Photo || ""

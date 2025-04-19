@@ -280,7 +280,12 @@ function EmployeePage() {
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredEmployees.map((employee, index) => {
                     const isActive = employee.IsActive === "Active" || employee.IsActive === 1 || employee.IsActive === "1";
-                    const role = roles.find(r => r.DataValueField === employee.RoleId);
+                    console.log('Employee RoleId:', employee.RoleId, typeof employee.RoleId);
+                    console.log('Roles:', roles);
+                    const role = roles.find(r => Number(r.value) === Number(employee.RoleId));
+
+
+
                     return (
                       <tr key={employee.EmployeeCode}>
                         <td className="px-6 py-4 whitespace-nowrap text-sm">{index + 1}</td>
@@ -290,7 +295,11 @@ function EmployeePage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.ContactNumber}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.EmailAddress}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{employee.UserName}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{role?.DataTextField || 'N/A'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                          {role?.label || 'N/A'}
+                        </td>
+
+
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                             {isActive ? 'Active' : 'Inactive'}
