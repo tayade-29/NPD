@@ -14,12 +14,12 @@ const EnquiryTable = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredEnquiries = Array.isArray(enquiries)
-    ? enquiries.filter(enquiry =>
-        Object.values(enquiry).some(value =>
-          String(value).toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      )
-    : [];
+  ? enquiries.filter(enquiry =>
+      (enquiry.EnquiryRegisterNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+       enquiry.ProjectName?.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
+  : [];
+
 
   if (isLoading) {
     return (
@@ -33,7 +33,7 @@ const EnquiryTable = ({
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
+    <div className=" max-w-7xl bg-white p-2 rounded-lg shadow-sm">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h2 className="text-2xl font-semibold text-gray-800">Enquiry List</h2>
         <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
@@ -43,25 +43,9 @@ const EnquiryTable = ({
               placeholder="Search enquiries..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-          <div className="flex space-x-2 w-full sm:w-auto">
-            <button
-              onClick={refetch}
-              className="px-4 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg hover:bg-gray-50 flex items-center"
-            >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </button>
-            <button
-              onClick={onNewEnquiryClick}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto justify-center"
-            >
-              <PlusCircle className="w-4 h-4 mr-2" />
-              New Enquiry
-            </button>
+            <Search className="absolute right-3 top-2.5 h-5 w-10 text-blue-600" />
           </div>
         </div>
       </div>
@@ -77,6 +61,10 @@ const EnquiryTable = ({
           <thead className="bg-gray-50">
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enquiry ID</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+  Enquiry No
+</th>
+
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Part Code</th>
@@ -90,8 +78,12 @@ const EnquiryTable = ({
             {filteredEnquiries.map((enquiry, index) => (
               <tr key={enquiry.pPkEnquiryMasterId || index} className="hover:bg-gray-50 transition-colors duration-150">
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {enquiry.pPkEnquiryMasterId || `ENQ-${index + 1}`}
+                  {enquiry.pPkEnquiryMasterId || `${index + 1}`}
                 </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+  {enquiry.EnquiryRegisterNo || '-'}
+</td>
+
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                   {customerMap[enquiry.FkCustomerId] || '-'}
                 </td>

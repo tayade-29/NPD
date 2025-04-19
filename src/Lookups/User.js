@@ -217,48 +217,53 @@ function EmployeePage() {
     <div className="min-h-screen bg-gray-50 p-0">
       <div className="max-w-7xl mx-auto">
         {/* Header section */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-semibold text-gray-800">Employee Management</h2>
-          <div className="flex items-center space-x-4 gap-40">
-            <div className="relative">
+        <div className="flex items-center justify-between px-6 py-4">
+          {/* Heading */}
+          <h2 className="text-2xl font-semibold text-gray-800">Employees</h2>
+
+          {/* Search Bar - centered and wider */}
+          <div className="flex-1 mx-10">
+            <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
                 placeholder="Search employees by name"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-80 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
-              <Search className="absolute right-3 top-2.5 h-5 w-5 text-blue-600" />
+              <Search className="absolute right-3 top-2.5 h-5 w-10 text-blue-600" />
             </div>
-            <button
-              onClick={() => {
-                setEditId(null);
-                setNewEmployee({
-                  pEmployeeCode: 0,
-                  pFkClientId: userData?.ClientId || 1,
-                  pFkPlantId: userData?.PlantId || 1,
-                  pFkLocationId: userData?.LocationId || 0,
-                  pFkRoleId: 0,
-                  pFullName: "",
-                  pContactNumber: "",
-                  pEmailAddress: "",
-                  pAllowLogin: 1,
-                  pUserName: "",
-                  pPassword: "",
-                  pSkill: "",
-                  pCreatedBy: userData?.RoleId || 1,
-                  pIsActive: 1,
-                  pPhoto: ""
-                });
-                setShowForm(true);
-              }}
-              className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <PlusCircle className="w-5 h-5 mr-2" />
-              Add New Employee
-            </button>
           </div>
+          <button
+            onClick={() => {
+              setEditId(null);
+              setNewEmployee({
+                pEmployeeCode: 0,
+                pFkClientId: userData?.ClientId || 1,
+                pFkPlantId: userData?.PlantId || 1,
+                pFkLocationId: userData?.LocationId || 0,
+                pFkRoleId: 0,
+                pFullName: "",
+                pContactNumber: "",
+                pEmailAddress: "",
+                pAllowLogin: 1,
+                pUserName: "",
+                pPassword: "",
+                pSkill: "",
+                pCreatedBy: userData?.RoleId || 1,
+                pIsActive: 1,
+                pPhoto: ""
+              });
+              setShowForm(true);
+            }}
+            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <PlusCircle className="w-5 h-5 mr-2" />
+            Add New Employee
+          </button>
         </div>
+        {/* </div>
+        </div> */}
 
         {/* Employee Table */}
         <div className="bg-white rounded-lg shadow-lg">
@@ -520,6 +525,7 @@ function EmployeePage() {
         )}
       </div>
     </div>
+
   );
 }
 

@@ -50,7 +50,6 @@ const EnquiryForm = () => {
       console.error("Failed to parse customer list", e);
     }
   }
-
   // Create customer map
   const customerMap = {};
   parsedCustomers.forEach(cust => {
@@ -162,7 +161,7 @@ const EnquiryForm = () => {
               className={`pb-4 px-1 text-sm font-medium ${page === 'form'
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+                }`}
             >
               Register Enquiry
             </button>
@@ -171,7 +170,7 @@ const EnquiryForm = () => {
               className={`pb-4 px-1 text-sm font-medium ${page === 'table'
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+                }`}
             >
               View Enquiries
             </button>
@@ -344,9 +343,8 @@ const EnquiryForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || isCheckingDuplicate}
-                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 flex items-center ${
-                    (isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
+                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 flex items-center ${(isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                 >
                   <Save className="w-4 h-4 mr-2" />
                   {isSubmitting ? 'Saving...' : isCheckingDuplicate ? 'Checking...' : (editMode ? 'Update Enquiry' : 'Save Enquiry')}

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Pencil, PlusCircle, XCircle } from 'lucide-react';
+import { Pencil, PlusCircle, XCircle, Search } from 'lucide-react';
 import { useAddCustomerMutation, useGetCustomerQuery, useCheckDuplicateCustomerMutation } from '../features/api/apiSlice';
 import { useAuth } from '../context/AuthContext';
 
 function App() {
   const { userData } = useAuth();
   const [editId, setEditId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [newCustomer, setNewCustomer] = useState({
     pPkCustomerId: 0,
@@ -127,6 +128,14 @@ function App() {
     }
   };
 
+
+  const filteredCustomers = customers.filter(customer =>
+    [customer.CustomerName, customer.CustomerCode, customer.ContactPerson]
+      .some(field => field?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -164,6 +173,18 @@ function App() {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-semibold text-gray-800">Customer Management</h2>
+          <div className="flex-1 mx-10">
+            <div className="relative max-w-2xl mx-auto">
+              <input
+                type="text"
+                placeholder="Search customer by name"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+              <Search className="absolute right-3 top-2.5 h-5 w-10 text-blue-600" />
+            </div>
+          </div>
           <button
             onClick={() => {
               setEditId(null);
@@ -207,7 +228,8 @@ function App() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 ">
-                  {customers.map((customer, index) => {
+                  {filteredCustomers.map((customer, index) => {
+
                     const isActive = customer.IsActive === "Active" || customer.IsActive === 1 || customer.IsActive === "1";
                     return (
                       <tr key={customer.pPkCustomerId}>
