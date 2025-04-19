@@ -207,7 +207,7 @@ const Dashboard = () => {
         grid: { display: false },
         ticks: {
           color: '#666',
-          font: { weight: 'bold', size: 12 }
+          font: { weight: 'bold', size: 10 }
         }
       },
       y: {
@@ -234,7 +234,7 @@ const Dashboard = () => {
   };
 
   const doughnutData = {
-    labels: ['Tool A', 'Tool B', 'Tool D', 'Tool C', 'Tool E'],
+    labels: ['Tool A', 'Tool B', 'Tool C', 'Tool D', 'Tool E'],
     datasets: [
       {
         data: [25, 24, 20, 18, 13],
@@ -249,15 +249,18 @@ const Dashboard = () => {
   const doughnutOptions = {
     responsive: true,
     maintainAspectRatio: false,
+    layout: {
+      padding: {
+        top: 60,
+        bottom: 60,
+        left: 60,
+        right: 60
+      }
+    },
     cutout: '60%',
     plugins: {
       legend: {
-        position: 'bottom',
-        labels: {
-          usePointStyle: true,
-          padding: 50,
-          font: { size: 14 }
-        }
+        display: false
       },
       tooltip: {
         callbacks: {
@@ -270,20 +273,19 @@ const Dashboard = () => {
           weight: 'bold',
           size: 12
         },
+        padding: 6,
+        backgroundColor: '#fff',
+        borderRadius: 4,
         anchor: 'end',
         align: 'end',
-        offset: 20,
+        offset: 10,
         formatter: (value, context) => {
           const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
           const percentage = ((value / total) * 100).toFixed(1);
           return `${percentage}%`;
         },
         borderColor: '#666',
-        borderWidth: 2,
-        borderRadius: 4,
-        backgroundColor: '#fff',
-        padding: 6,
-        drawTime: 'afterDatasetsDraw'
+        borderWidth: 2
       }
     }
   };
@@ -368,7 +370,7 @@ const Dashboard = () => {
         </Grid>
       </Grid>
 
-      <Grid container spacing={3} sx={{ mt: 4 }}>
+      <Grid container spacing={5} sx={{ mt: 4 }}>
         <Grid item xs={12} md={7}>
           <Box sx={{ p: 3, backgroundColor: 'white', borderRadius: 2, boxShadow: 3, position: 'relative' }}>
             <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold' }}>Production Tools Report</Typography>
@@ -383,7 +385,7 @@ const Dashboard = () => {
             <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', textAlign: 'center' }}>
               Revenue per Tool
             </Typography>
-            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '' }}>
+            <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '400px', position: 'relative' }}>
               <Doughnut data={doughnutData} options={doughnutOptions} plugins={[ChartDataLabels, connectorsPlugin]} />
             </Box>
           </Box>

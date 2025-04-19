@@ -5,7 +5,10 @@ import APQPTable from './Forms/ApqpActivityTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReviewCheckpoints';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
 import EnquiryManagement from './Pages/EnquiryDetails';
-import APQPTimePlan from './Forms/APQPTimePlanChart';
+// import APQPTimePlan from './Forms/APQPTimePlanChart';
+import TimePlanTable from './Forms/TimePlanTable';
+import APQPTimePlanChart from './Forms/APQPTimePlanChart'; // adjust path if needed
+import ActivityTable from './Components/ActivityTable';
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
 import Footer from "./Components/Footer";
@@ -17,6 +20,7 @@ import Feasibility from "./Forms/FeasibiltyReviewChart";
 import CustomerTable from "./Lookups/Customer";
 import UserPage from "./Lookups/User";
 import SupplierPage from "./Lookups/Supplier";
+
 
 
 const PrivateRoute = ({ children }) => {
@@ -66,11 +70,16 @@ const AppContent = () => {
               <Route path="/reviewform" element={<PrivateRoute><FeasibilityReviewPage /></PrivateRoute>} />
               <Route path="/enquiryform" element={<PrivateRoute><EnquiryRegisterForm /></PrivateRoute>} />
               <Route path="/enquirydetails" element={<PrivateRoute><EnquiryManagement /></PrivateRoute>} />
-              <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlan /></PrivateRoute>} />
+              {/* <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlan /></PrivateRoute>} /> */}
+              <Route path="/timeplan" element={<PrivateRoute><TimePlanTable /></PrivateRoute>} />
+              <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlanChart /></PrivateRoute>} />
+               
               <Route path="/feasibilityChart" element={<PrivateRoute><Feasibility /></PrivateRoute>} />
               <Route path="/customer" element={<PrivateRoute><CustomerTable /></PrivateRoute>} />
               <Route path="/supplier" element={<PrivateRoute><SupplierPage /></PrivateRoute>} />
               <Route path="/user" element={<PrivateRoute><UserPage /></PrivateRoute>} />
+              <Route path="/activity-table" element={<PrivateRoute><ActivityTable /></PrivateRoute>} />
+
 
 
               {/* Root and catch-all routes */}
