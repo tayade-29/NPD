@@ -33,7 +33,7 @@ const EnquiryTable = ({
   }
 
   return (
-    <div className=" max-w-7xl bg-white p-2 rounded-lg shadow-sm">
+    <div className=" max-w-7xl bg-white p-2 rounded-lg shadow-sm ml-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h2 className="text-2xl font-semibold text-gray-800">Enquiry List</h2>
         <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
@@ -56,9 +56,10 @@ const EnquiryTable = ({
         </div>
       )}
 
-      <div className="overflow-x-auto border rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+<div className="overflow-x-auto border rounded-lg max-h-[60vh] relative">
+  <table className="min-w-full divide-y divide-gray-200">
+    <thead className="bg-gray-50 sticky top-0 z-10">
+
             <tr>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Enquiry ID</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">

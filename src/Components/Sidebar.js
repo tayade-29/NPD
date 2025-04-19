@@ -2,181 +2,131 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   FaBars,
-  FaUser ,
+  FaUser,
   FaSignOutAlt,
   FaClipboardList,
   FaPlusCircle,
   FaChevronDown
 } from 'react-icons/fa';
-import { ChartColumnDecreasing, CheckCircle, FileText, FileBarChart,User } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // Import the AuthContext
+import {
+  ChartColumnDecreasing,
+  CheckCircle,
+  FileText,
+  FileBarChart,
+  User
+} from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isFormsOpen, setFormsOpen] = useState(false);
   const [isLookupOpen, setLookupOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
-  const { logout } = useAuth(); // Get the logout function from AuthContext
+  const { logout } = useAuth();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!isSidebarOpen);
-  };
-
+  const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
   const toggleForms = () => {
     setFormsOpen(!isFormsOpen);
+    if (isLookupOpen) setLookupOpen(false);
   };
   const toggleLookup = () => {
     setLookupOpen(!isLookupOpen);
+    if (isFormsOpen) setFormsOpen(false);
   };
-
-  const handleLogout = () => {
-    setShowLogoutConfirm(true);
-  };
-
+  const handleLogout = () => setShowLogoutConfirm(true);
   const confirmLogout = () => {
-    logout(); // Call the logout function from context
-    navigate('/login'); // Redirect to the login page
+    logout();
+    navigate('/login');
   };
 
   return (
-    <div className="flex">
-      <div
-        className={`bg-[#1D3461] text-white font-sans ${isSidebarOpen ? 'w-64' : 'w-16'} min-h-screen p-4 transition-all duration-300 backdrop-blur-lg bg-opacity-90`}
-      >
+    <div className="flex relative">
+      {/* Sidebar */}
+      <div className={`bg-[#1D3461] text-white font-sans ${isSidebarOpen ? 'w-64' : 'w-16'} min-h-screen p-4 transition-all duration-300`}>        
         <div className="flex justify-between items-center mb-8">
           <div className="text-xl font-bold">{isSidebarOpen && 'Dashboard'}</div>
-          <button className="text-white focus:outline-none" onClick={toggleSidebar}>
+          <button className="text-white" onClick={toggleSidebar}>
             <FaBars size={20} />
           </button>
         </div>
 
         <nav className="flex-1">
           <ul className="space-y-2">
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Dashboard" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/" className="flex items-center">
-                <ChartColumnDecreasing className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Dashboard
-                </span>
+                <ChartColumnDecreasing className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Dashboard</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Enquiry Registration" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/enquiryform" className="flex items-center">
-                <FaClipboardList className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Enquiry Registration
-                </span>
+                <FaClipboardList className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Enquiry Registration</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Enquiry Status Update" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/enquirydetails" className="flex items-center">
-                <CheckCircle className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Enquiry Status Update
-                </span>
+                <CheckCircle className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Enquiry Status Update</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Add APQP Activity" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/apqpform" className="flex items-center">
-                <FaPlusCircle className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Add APQP Activity
-                </span>
+                <FaPlusCircle className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Add APQP Activity</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Add CheckPoints" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/reviewform" className="flex items-center">
-                <FaPlusCircle className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Add CheckPoints
-                </span>
+                <FaPlusCircle className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Add CheckPoints</span>
               </Link>
             </li>
-
-            <li className="flex flex-col">
-              <div
-                className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 cursor-pointer"
-                onClick={toggleForms}
-              >
-                <FileText className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Forms</span>
-                <FaChevronDown className={`text-sm transition-transform ${isFormsOpen ? 'rotate-180' : ''}`} />
-              </div>
-              <ul className={`ml-6 space-y-1 transition-all duration-300 ${isFormsOpen ? 'block' : 'hidden'}`}>
-                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/apqptimeplan" className="flex items-center">
-                    <FileText className="text-xl min-w-[24px]" />
-                    <span className="whitespace-nowrap">APQP Time Plan Chart</span>
-                  </Link>
-                </li>
-                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/feasibilityChart" className="flex items-center">
-                    <FileText className="text-xl min-w-[24px]" />
-                    <span className="whitespace-nowrap">Feasibility Review Form</span>
-                  </Link>
-                </li>
-              </ul>
+            <li title="Forms" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative" onClick={toggleForms}>
+              <FaClipboardList className="text-xl" />
+              <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Forms</span>
+              {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isFormsOpen ? 'rotate-180' : ''}`} />}
+              {!isSidebarOpen && isFormsOpen && (
+                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                  <h3 className="text-white font-semibold mb-2"> Forms</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link to="/apqptimeplan" className="hover:text-blue-300">APQP Time Plan Chart</Link></li>
+                    <li><Link to="/feasibilityChart" className="hover:text-blue-300">Feasibility Review Form</Link></li>
+                  </ul>
+                </div>
+              )}
             </li>
-
-            <li className="flex flex-col">
-              <div
-                className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 cursor-pointer"
-                onClick={toggleLookup}
-              >
-                <User className="text-xl min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'hidden'}`}>Lookups</span>
-                <FaChevronDown className={`text-sm transition-transform ${isLookupOpen ? 'rotate-180' : ''}`} />
-              </div>
-              <ul className={`ml-6 space-y-1 transition-all duration-300 ${isLookupOpen ? 'block' : 'hidden'}`}>
-                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/customer" className="flex items-center">
-                    <FileText className="text-xl min-w-[24px]" />
-                    <span className="whitespace-nowrap">Customer</span>
-                  </Link>
-                </li>
-                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/supplier" className="flex items-center">
-                    <FileText className="text-xl min-w-[24px]" />
-                    <span className="whitespace-nowrap">Toolmaker/Supplier</span>
-                  </Link>
-                </li>
-                <li className="flex items-center gap-x-4 hover:bg-gray-700 rounded p-2">
-                  <Link to="/user" className="flex items-center">
-                    <FileText className="text-xl min-w-[24px]" />
-                    <span className="whitespace-nowrap">User</span>
-                  </Link>
-                </li>
-              </ul>
+            <li title="Lookups" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative cursor-pointer" onClick={toggleLookup}>
+              <FaUser className="text-xl" />
+              <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Lookups</span>
+              {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isLookupOpen ? 'rotate-180' : ''}`} />}
+              {!isSidebarOpen && isLookupOpen && (
+                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                  <h3 className="text-white font-semibold mb-2"> Lookups</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link to="/customer" className="hover:text-blue-300">Customer</Link></li>
+                    <li><Link to="/supplier" className="hover:text-blue-300">Toolmaker/Supplier</Link></li>
+                    <li><Link to="/user" className="hover:text-blue-300">User</Link></li>
+                  </ul>
+                </div>
+              )}
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Report" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/account" className="flex items-center">
-                <FileBarChart className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Report
-                </span>
+                <FileBarChart className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Report</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+            <li title="Account" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/account" className="flex items-center">
-                <FaUser  className="text-xl gap-4 min-w-[24px]" />
-                <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                  Account
-                </span>
+                <FaUser className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Account</span>
               </Link>
             </li>
-
-            <li className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative cursor-pointer" onClick={handleLogout}>
-              <FaSignOutAlt className="text-xl gap-4 min-w-[24px]" />
-              <span className={`${isSidebarOpen ? 'block' : 'absolute left-full bg-gray-800 text-white px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300'}`}>
-                Logout
-              </span>
+            <li title="Logout" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative cursor-pointer" onClick={handleLogout}>
+              <FaSignOutAlt className="text-xl" />
+              <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Logout</span>
             </li>
           </ul>
         </nav>
@@ -187,18 +137,8 @@ const Sidebar = () => {
           <div className="bg-white p-6 rounded shadow-lg text-black">
             <p>Are you sure you want to log out?</p>
             <div className="flex justify-end mt-4">
-              <button
-                className="bg-red-500 text-white px-4 py-2 rounded mr-2"
-                onClick={confirmLogout}
-              >
-                Yes
-              </button>
-              <button
-                className="bg-gray-300 px-4 py-2 rounded"
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                No
-              </button>
+              <button className="bg-red-500 text-white px-4 py-2 rounded mr-2" onClick={confirmLogout}>Yes</button>
+              <button className="bg-gray-300 px-4 py-2 rounded" onClick={() => setShowLogoutConfirm(false)}>No</button>
             </div>
           </div>
         </div>
