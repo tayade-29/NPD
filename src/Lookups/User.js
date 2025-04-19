@@ -219,10 +219,10 @@ function EmployeePage() {
         {/* Header section */}
         <div className="flex items-center justify-between px-6 py-4">
           {/* Heading */}
-          <h2 className="text-2xl font-semibold text-gray-800">Employees</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Employee Management</h2>
 
           {/* Search Bar - centered and wider */}
-          <div className="flex-1 mx-10">
+          <div className="flex-1 mx-40">
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
