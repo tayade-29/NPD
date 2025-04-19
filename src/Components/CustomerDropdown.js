@@ -32,6 +32,14 @@ const CustomerDropdown = ({
     setIsOpen(false);
   };
 
+
+
+
+  // Parse the customers data if it comes as a string
+  const parsedCustomers = Array.isArray(customers) 
+    ? customers 
+    : (customers?.d ? JSON.parse(customers.d) : []);
+
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <button
@@ -60,20 +68,22 @@ const CustomerDropdown = ({
             <div className="p-3 text-red-500 text-sm">
               Failed to load customers. Please try again.
             </div>
-          ) : customers.length === 0 && !isLoading ? (
+          ) : parsedCustomers.length === 0 && !isLoading ? (
             <div className="p-3 text-gray-500 text-sm">
               No customers available
             </div>
           ) : (
-            customers.map((customer, index) => (
-              <div
-                key={customer.DataValueField || index}
-                className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-800 text-sm transition-colors duration-150"
-                onClick={() => handleCustomerSelect(customer)}
-              >
-                {customer.DataTextField}
-              </div>
-            ))
+            parsedCustomers
+              .filter(customer => customer.DataValueField !== 0) // Filter out the "Select Customer" option
+              .map((customer, index) => (
+                <div
+                  key={customer.DataValueField || index}
+                  className="px-4 py-2 hover:bg-blue-50 cursor-pointer text-gray-800 text-sm transition-colors duration-150"
+                  onClick={() => handleCustomerSelect(customer)}
+                >
+                  {customer.DataTextField}
+                </div>
+              ))
           )}
         </div>
       )}

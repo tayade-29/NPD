@@ -13,7 +13,7 @@ export const apiEnquiry = createApi({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pAction: 1,
+          pAction: 0,
           pLookUpId: 0
         })
       }),
@@ -87,26 +87,19 @@ export const apiEnquiry = createApi({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          pPkEnquiryMasterId: data.pPkEnquiryMasterId || 1,
+          pPkEnquiryMasterId: data.pPkEnquiryMasterId || 0,
           pFkCustomerId: data.pFkCustomerId,
           pProjectName: data.projectVehicleProgram,
           pPartCode: data.partCode,
           pPartName: data.partName,
           pRawMaterialName: data.rawMaterial,
           pRemark: data.remark || '',
-          pIsStatus: data.isStatus || 1
+          pIsStatus: data.isStatus === 1 ? 1 : 0, 
         })
       }),
-      transformResponse: (response) => {
-        try {
-          return JSON.parse(response.d || '{}');
-        } catch (error) {
-          console.error('Transform error:', error);
-          throw new Error('Invalid response format');
-        }
-      },
-      invalidatesTags: ['Enquiry']
+      
     })
+    
   })
 });
 

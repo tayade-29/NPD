@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { 
-  useGetEnquiriesQuery, 
-  useCheckDuplicateEnquiryMutation, 
-  useAddEnquiryMutation, 
-  useGetCustomersQuery 
+import {
+  useGetEnquiriesQuery,
+  useCheckDuplicateEnquiryMutation,
+  useAddEnquiryMutation,
+  useGetCustomersQuery
 } from '../features/api/apiSliceenquiry';
 import CustomerDropdown from '../Components/CustomerDropdown';
 import FileUploader from '../Components/FileUploader';
@@ -13,7 +13,7 @@ import EnquiryTable from '../Components/EnquiryRegistrationTable';
 const EnquiryForm = () => {
   const { userData } = useAuth();
   const [page, setPage] = useState('form');
-  
+
   const initialFormData = {
     srNo: '',
     pFkCustomerId: '',
@@ -24,7 +24,7 @@ const EnquiryForm = () => {
     rawMaterial: '',
     sop: '',
     remark: '',
-    isStatus: 1
+    isStatus: 0  // Set default to active (1)
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -34,6 +34,26 @@ const EnquiryForm = () => {
 
   const { data: enquiries = [], isLoading: isLoadingEnquiries, refetch } = useGetEnquiriesQuery();
   const { data: customers = [], isLoading: isLoadingCustomers, error: customerError } = useGetCustomersQuery(userData);
+  // Safe parsing of master fill API
+let parsedCustomers = [];
+
+if (Array.isArray(customers)) {
+  parsedCustomers = customers;
+} else if (typeof customers?.d === 'string') {
+  try {
+    parsedCustomers = JSON.parse(customers.d);
+  } catch (e) {
+    console.error("Failed to parse customer list", e);
+  }
+}
+
+// Create a map from customer ID to name
+const customerMap = {};
+parsedCustomers.forEach(cust => {
+  customerMap[cust.DataValueField] = cust.DataTextField;
+});
+
+
   const [checkDuplicate, { isLoading: isCheckingDuplicate }] = useCheckDuplicateEnquiryMutation();
   const [addEnquiry, { isLoading: isSubmitting }] = useAddEnquiryMutation();
 
@@ -50,6 +70,14 @@ const EnquiryForm = () => {
     }));
   };
 
+  const handleStatusChange = (e) => {
+    const checked = e.target.checked;
+    setFormData(prev => ({
+      ...prev,
+      isStatus: checked ? 1 : 0,
+    }));
+  };
+
   const resetForm = () => {
     setFormData(initialFormData);
     setSelectedFiles([]);
@@ -60,13 +88,13 @@ const EnquiryForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitError('');
-    
+
     try {
       if (!formData.pFkCustomerId || !formData.customerName || !formData.projectVehicleProgram || !formData.partCode || !formData.partName || !formData.rawMaterial) {
         setSubmitError('Please fill in all required fields');
         return;
       }
-      
+
       // Check for duplicate entries
       const duplicateResult = await checkDuplicate({
         pFkCustomerId: formData.pFkCustomerId,
@@ -90,7 +118,7 @@ const EnquiryForm = () => {
         partName: formData.partName,
         rawMaterial: formData.rawMaterial,
         remark: formData.remark,
-        isStatus: formData.isStatus
+        isStatus: formData.isStatus // Changed from pisStatus to isStatus
       }).unwrap();
 
       resetForm();
@@ -111,21 +139,19 @@ const EnquiryForm = () => {
           <nav className="flex space-x-8">
             <button
               onClick={() => setPage('form')}
-              className={`pb-4 px-1 text-sm font-medium ${
-                page === 'form' 
-                ? 'border-b-2 border-blue-500 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`pb-4 px-1 text-sm font-medium ${page === 'form'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               Register Enquiry
             </button>
             <button
               onClick={() => { setPage('table'); refetch(); }}
-              className={`pb-4 px-1 text-sm font-medium ${
-                page === 'table' 
-                ? 'border-b-2 border-blue-500 text-blue-600'
-                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
+              className={`pb-4 px-1 text-sm font-medium ${page === 'table'
+                  ? 'border-b-2 border-blue-500 text-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
             >
               View Enquiries
             </button>
@@ -138,13 +164,13 @@ const EnquiryForm = () => {
             <h2 className="text-2xl font-semibold mb-6 text-gray-800">
               Enquiry Registration Form
             </h2>
-            
+
             {submitError && (
               <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
                 <p>{submitError}</p>
               </div>
             )}
-            
+
             <form onSubmit={handleSubmit} className="space-y-8">
               {/* Basic Information */}
               <div className="space-y-4">
@@ -225,7 +251,7 @@ const EnquiryForm = () => {
               </div>
 
               {/* File Upload */}
-              <FileUploader 
+              <FileUploader
                 selectedFiles={selectedFiles}
                 setSelectedFiles={setSelectedFiles}
                 fileInputKey={fileInputKey}
@@ -260,6 +286,17 @@ const EnquiryForm = () => {
                       rows="3"
                     />
                   </div>
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={formData.isStatus === 1}
+                        onChange={handleStatusChange}
+                      />
+
+                      <span className="ml-2 text-sm text-gray-600">Active</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 
@@ -274,9 +311,8 @@ const EnquiryForm = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting || isCheckingDuplicate}
-                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 ${
-                    (isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
-                  }`}
+                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 ${(isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
+                    }`}
                 >
                   {isSubmitting ? 'Saving...' : isCheckingDuplicate ? 'Checking...' : 'Save Enquiry'}
                 </button>
@@ -287,12 +323,15 @@ const EnquiryForm = () => {
 
         {/* Table Page */}
         {page === 'table' && (
-          <EnquiryTable 
-            enquiries={enquiries}
-            isLoading={isLoadingEnquiries}
-            refetch={refetch}
-            onNewEnquiryClick={() => setPage('form')}
-          />
+   <EnquiryTable
+   enquiries={enquiries}
+   isLoading={isLoadingEnquiries}
+   refetch={refetch}
+   onNewEnquiryClick={() => setPage('form')}
+   customerMap={customerMap}
+ />
+ 
+       
         )}
       </div>
     </div>
