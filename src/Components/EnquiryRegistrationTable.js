@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, RefreshCw, PlusCircle } from 'lucide-react';
+import { Search, RefreshCw, PlusCircle, Edit } from 'lucide-react';
 
 const EnquiryTable = ({
   enquiries = [],
@@ -7,7 +7,8 @@ const EnquiryTable = ({
   refetch,
   onNewEnquiryClick,
   selectedCustomerName,
-  customerMap = {}
+  customerMap = {},
+  onEditClick
 }) => {
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,7 +45,7 @@ const EnquiryTable = ({
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
-            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
           </div>
           <div className="flex space-x-2 w-full sm:w-auto">
             <button
@@ -82,6 +83,7 @@ const EnquiryTable = ({
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Part Name</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Raw Material</th>
               <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -91,8 +93,7 @@ const EnquiryTable = ({
                   {enquiry.pPkEnquiryMasterId || `ENQ-${index + 1}`}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                {customerMap[enquiry.FkCustomerId] || '-'}
-
+                  {customerMap[enquiry.FkCustomerId] || '-'}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                   {enquiry.ProjectName || enquiry.projectVehicleProgram || '-'}
@@ -107,14 +108,22 @@ const EnquiryTable = ({
                   {enquiry.RawMaterialName || enquiry.rawMaterial || '-'}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-  enquiry.IsStatus === 1
-    ? 'bg-green-100 text-green-800'
-    : 'bg-red-100 text-red-800'
-}`}>
-  {enquiry.IsStatus === 1 ? 'Active' : 'Inactive'}
-</span>
-
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    enquiry.IsStatus === 1
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {enquiry.IsStatus === 1 ? 'Active' : 'Inactive'}
+                  </span>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <button
+                    onClick={() => onEditClick(enquiry)}
+                    className="bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-150 rounded-lg px-3 py-1.5 inline-flex items-center"
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    Edit
+                  </button>
                 </td>
               </tr>
             ))}

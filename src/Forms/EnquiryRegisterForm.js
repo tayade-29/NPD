@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import {
   useGetEnquiriesQuery,
@@ -9,10 +9,12 @@ import {
 import CustomerDropdown from '../Components/CustomerDropdown';
 import FileUploader from '../Components/FileUploader';
 import EnquiryTable from '../Components/EnquiryRegistrationTable';
+import { ArrowLeft, Save, X } from 'lucide-react';
 
 const EnquiryForm = () => {
   const { userData } = useAuth();
   const [page, setPage] = useState('form');
+  const [editMode, setEditMode] = useState(false);
 
   const initialFormData = {
     srNo: '',
@@ -24,7 +26,7 @@ const EnquiryForm = () => {
     rawMaterial: '',
     sop: '',
     remark: '',
-    isStatus: 0  // Set default to active (1)
+    isStatus: 0
   };
 
   const [formData, setFormData] = useState(initialFormData);
@@ -34,28 +36,43 @@ const EnquiryForm = () => {
 
   const { data: enquiries = [], isLoading: isLoadingEnquiries, refetch } = useGetEnquiriesQuery();
   const { data: customers = [], isLoading: isLoadingCustomers, error: customerError } = useGetCustomersQuery(userData);
-  // Safe parsing of master fill API
-let parsedCustomers = [];
-
-if (Array.isArray(customers)) {
-  parsedCustomers = customers;
-} else if (typeof customers?.d === 'string') {
-  try {
-    parsedCustomers = JSON.parse(customers.d);
-  } catch (e) {
-    console.error("Failed to parse customer list", e);
-  }
-}
-
-// Create a map from customer ID to name
-const customerMap = {};
-parsedCustomers.forEach(cust => {
-  customerMap[cust.DataValueField] = cust.DataTextField;
-});
-
-
   const [checkDuplicate, { isLoading: isCheckingDuplicate }] = useCheckDuplicateEnquiryMutation();
   const [addEnquiry, { isLoading: isSubmitting }] = useAddEnquiryMutation();
+
+  // Parse customers data
+  let parsedCustomers = [];
+  if (Array.isArray(customers)) {
+    parsedCustomers = customers;
+  } else if (typeof customers?.d === 'string') {
+    try {
+      parsedCustomers = JSON.parse(customers.d);
+    } catch (e) {
+      console.error("Failed to parse customer list", e);
+    }
+  }
+
+  // Create customer map
+  const customerMap = {};
+  parsedCustomers.forEach(cust => {
+    customerMap[cust.DataValueField] = cust.DataTextField;
+  });
+
+  const handleEditClick = (enquiry) => {
+    setFormData({
+      srNo: enquiry.srNo || '',
+      pFkCustomerId: enquiry.FkCustomerId || '',
+      customerName: customerMap[enquiry.FkCustomerId] || '',
+      projectVehicleProgram: enquiry.ProjectName || enquiry.projectVehicleProgram || '',
+      partCode: enquiry.PartCode || enquiry.partCode || '',
+      partName: enquiry.PartName || enquiry.partName || '',
+      rawMaterial: enquiry.RawMaterialName || enquiry.rawMaterial || '',
+      sop: enquiry.sop || '',
+      remark: enquiry.remark || '',
+      isStatus: enquiry.IsStatus || 0
+    });
+    setEditMode(true);
+    setPage('form');
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -83,6 +100,7 @@ parsedCustomers.forEach(cust => {
     setSelectedFiles([]);
     setFileInputKey(prev => prev + 1);
     setSubmitError('');
+    setEditMode(false);
   };
 
   const handleSubmit = async (e) => {
@@ -95,34 +113,36 @@ parsedCustomers.forEach(cust => {
         return;
       }
 
-      // Check for duplicate entries
-      const duplicateResult = await checkDuplicate({
-        pFkCustomerId: formData.pFkCustomerId,
-        projectVehicleProgram: formData.projectVehicleProgram,
-        partCode: formData.partCode,
-        partName: formData.partName,
-        rawMaterial: formData.rawMaterial
-      }).unwrap();
+      // Check for duplicate entries only in create mode
+      if (!editMode) {
+        const duplicateResult = await checkDuplicate({
+          pFkCustomerId: formData.pFkCustomerId,
+          projectVehicleProgram: formData.projectVehicleProgram,
+          partCode: formData.partCode,
+          partName: formData.partName,
+          rawMaterial: formData.rawMaterial
+        }).unwrap();
 
-      if (duplicateResult.isDuplicate) {
-        setSubmitError('An enquiry with similar details already exists!');
-        return;
+        if (duplicateResult.isDuplicate) {
+          setSubmitError('An enquiry with similar details already exists!');
+          return;
+        }
       }
 
-      // Add new enquiry
+      // Add/Update enquiry
       await addEnquiry({
-        pPkEnquiryMasterId: 0,
+        pPkEnquiryMasterId: editMode ? formData.pPkEnquiryMasterId : 0,
         pFkCustomerId: formData.pFkCustomerId,
         projectVehicleProgram: formData.projectVehicleProgram,
         partCode: formData.partCode,
         partName: formData.partName,
         rawMaterial: formData.rawMaterial,
         remark: formData.remark,
-        isStatus: formData.isStatus // Changed from pisStatus to isStatus
+        isStatus: formData.isStatus
       }).unwrap();
 
       resetForm();
-      alert('Enquiry registered successfully!');
+      alert(editMode ? 'Enquiry updated successfully!' : 'Enquiry registered successfully!');
       setPage('table');
       refetch();
     } catch (error) {
@@ -138,20 +158,20 @@ parsedCustomers.forEach(cust => {
         <div className="mb-8 border-b border-gray-200">
           <nav className="flex space-x-8">
             <button
-              onClick={() => setPage('form')}
+              onClick={() => { setPage('form'); setEditMode(false); }}
               className={`pb-4 px-1 text-sm font-medium ${page === 'form'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
             >
               Register Enquiry
             </button>
             <button
               onClick={() => { setPage('table'); refetch(); }}
               className={`pb-4 px-1 text-sm font-medium ${page === 'table'
-                  ? 'border-b-2 border-blue-500 text-blue-600'
-                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                ? 'border-b-2 border-blue-500 text-blue-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
             >
               View Enquiries
             </button>
@@ -161,9 +181,21 @@ parsedCustomers.forEach(cust => {
         {/* Form Page */}
         {page === 'form' && (
           <div className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-800">
-              Enquiry Registration Form
-            </h2>
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center">
+                {editMode && (
+                  <button
+                    onClick={() => { setPage('table'); resetForm(); }}
+                    className="mr-4 text-gray-600 hover:text-gray-900"
+                  >
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                )}
+                <h2 className="text-2xl font-semibold text-gray-800">
+                  {editMode ? 'Edit Enquiry' : 'Register Enquiry'}
+                </h2>
+              </div>
+            </div>
 
             {submitError && (
               <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
@@ -292,8 +324,8 @@ parsedCustomers.forEach(cust => {
                         type="checkbox"
                         checked={formData.isStatus === 1}
                         onChange={handleStatusChange}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
-
                       <span className="ml-2 text-sm text-gray-600">Active</span>
                     </label>
                   </div>
@@ -304,17 +336,20 @@ parsedCustomers.forEach(cust => {
                 <button
                   type="button"
                   onClick={resetForm}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-150"
+                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-150 flex items-center"
                 >
+                  <X className="w-4 h-4 mr-2" />
                   Reset
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting || isCheckingDuplicate}
-                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 ${(isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
+                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 flex items-center ${
+                    (isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
+                  }`}
                 >
-                  {isSubmitting ? 'Saving...' : isCheckingDuplicate ? 'Checking...' : 'Save Enquiry'}
+                  <Save className="w-4 h-4 mr-2" />
+                  {isSubmitting ? 'Saving...' : isCheckingDuplicate ? 'Checking...' : (editMode ? 'Update Enquiry' : 'Save Enquiry')}
                 </button>
               </div>
             </form>
@@ -323,15 +358,14 @@ parsedCustomers.forEach(cust => {
 
         {/* Table Page */}
         {page === 'table' && (
-   <EnquiryTable
-   enquiries={enquiries}
-   isLoading={isLoadingEnquiries}
-   refetch={refetch}
-   onNewEnquiryClick={() => setPage('form')}
-   customerMap={customerMap}
- />
- 
-       
+          <EnquiryTable
+            enquiries={enquiries}
+            isLoading={isLoadingEnquiries}
+            refetch={refetch}
+            onNewEnquiryClick={() => { setPage('form'); resetForm(); }}
+            customerMap={customerMap}
+            onEditClick={handleEditClick}
+          />
         )}
       </div>
     </div>
@@ -339,3 +373,4 @@ parsedCustomers.forEach(cust => {
 };
 
 export default EnquiryForm;
+
