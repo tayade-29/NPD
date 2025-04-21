@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import APQPTable from './Forms/ApqpActivityTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReviewCheckpoints';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
-import EnquiryManagement from './Pages/EnquiryDetails';
+import EnquiryManagement from './Pages/EnquiryManagement';
 import APQPTimePlan from './Forms/APQPTimePlanChart';
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
@@ -65,7 +65,7 @@ const AppContent = () => {
               <Route path="/apqpform" element={<PrivateRoute><APQPTable /></PrivateRoute>} />
               <Route path="/reviewform" element={<PrivateRoute><FeasibilityReviewPage /></PrivateRoute>} />
               <Route path="/enquiryform" element={<PrivateRoute><EnquiryRegisterForm /></PrivateRoute>} />
-              <Route path="/enquirydetails" element={<PrivateRoute><EnquiryManagement /></PrivateRoute>} />
+              <Route path="/enquirymgt" element={<PrivateRoute><EnquiryManagement/></PrivateRoute>} />
               <Route path="/apqptimeplan" element={<PrivateRoute><APQPTimePlan /></PrivateRoute>} />
               <Route path="/feasibilityChart" element={<PrivateRoute><Feasibility /></PrivateRoute>} />
               <Route path="/customer" element={<PrivateRoute><CustomerTable /></PrivateRoute>} />

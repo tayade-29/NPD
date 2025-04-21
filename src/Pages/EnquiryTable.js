@@ -1,60 +1,59 @@
-import React, { useState } from "react";
+import React from "react";
+import { FileText } from "lucide-react";
 
-const EnquiryTable = ({ enquiries }) => {
-  const [showFiles, setShowFiles] = useState(null);
-
+const EnquiryTable = ({ enquiries, onActionClick }) => {
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h2 className="text-2xl font-bold text-gray-900 mb-4 border-b pb-2"> Enquiry List</h2>
-
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-500 text-white text-sm uppercase sticky top-0">
+    <div className="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-hidden">
+        <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-200 text-gray-500 text-sm  sticky top-0">
             <tr>
-              {["Sr. No.", "Customer Name", "Project/Vehicle", "Part Code", "Part Name", "Raw Material", "SOP",
-                "Annual Volume", "Enquiry Date", "Part Colour", "Date Quoted", "Status","Customer P.O Date", "Part Cost",
-                "Tool Cost", "Annual Potential", "P.O no.", "Design Files", "Actions"].map((header, index) => (
-                  <th key={index} className="px-6 py-3 text-left text-sm font-semibold border-b border-gray-200">
-                    {header}
-                  </th>
-                ))}
+              <th className="px-4 py-3 text-left font-semibold">Enquiry ID</th>
+              <th className="px-4 py-3 text-left font-semibold">Customer</th>
+              <th className="px-4 py-3 text-left font-semibold">Project</th>
+              <th className="px-4 py-3 text-left font-semibold">Part Code</th>
+              <th className="px-4 py-3 text-left font-semibold">Part Name</th>
+              <th className="px-4 py-3 text-left font-semibold">Raw Material</th>
+              <th className="px-4 py-3 text-left font-semibold">Status</th>
+              <th className="px-4 py-3 text-left font-semibold">Action</th>
             </tr>
           </thead>
 
           <tbody>
             {enquiries.length > 0 ? (
               enquiries.map((enquiry, index) => (
-                <tr key={index} className="border-b transition duration-200 hover:bg-gray-100">
-                  <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4">{enquiry.customerName}</td>
-                  <td className="px-6 py-4">{enquiry.projectVehicleProgram}</td>
-                  <td className="px-6 py-4">{enquiry.partCode}</td>
-                  <td className="px-6 py-4">{enquiry.partName}</td>
-                  <td className="px-6 py-4">{enquiry.rawMaterial}</td>
-                  <td className="px-6 py-4">{new Date(enquiry.sop).toLocaleDateString()}</td> 
-                  <td className="px-6 py-4">
-                    {enquiry.designFiles && enquiry.designFiles.length > 0 ? (
-                      <div className="flex items-center space-x-3">
-                        <span>{enquiry.designFiles.length} file(s) uploaded</span>
-                        <button
-                          onClick={() => setShowFiles(enquiry.designFiles)}
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
-                        >
-                          View Files
-                        </button>
-                      </div>
-                    ) : (
-                      "No files uploaded"
-                    )}
+                <tr key={index} className="border-b transition duration-200 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-gray-800">{enquiry.id}</td>
+                  <td className="px-4 py-3 text-gray-800">{enquiry.customerName}</td>
+                  <td className="px-4 py-3 text-gray-800">{enquiry.projectVehicleProgram}</td>
+                  <td className="px-4 py-3 text-gray-800">{enquiry.partCode}</td>
+                  <td className="px-4 py-3 text-gray-800">{enquiry.partName}</td>
+                  <td className="px-4 py-3 text-gray-800">{enquiry.rawMaterial}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      enquiry.status === 'Under Review' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : enquiry.status === 'PO Received' 
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-blue-100 text-blue-800'
+                    }`}>
+                      {enquiry.status}
+                    </span>
                   </td>
-                  <td className="px-6 py-4">
-                    {/* You can add any action buttons here if needed */}
+                  <td className="px-4 py-3">
+                    <button
+                      onClick={() => onActionClick(enquiry)}
+                      className="flex items-center text-blue-600 hover:text-blue-800 transition"
+                    >
+                      <FileText size={16} className="mr-1" />
+                      <span>View</span>
+                    </button>
                   </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="16" className="text-center py-8 text-gray-500">
+                <td colSpan="8" className="text-center py-8 text-gray-500">
                   <p className="text-lg font-medium">No enquiries found</p>
                 </td>
               </tr>
@@ -62,24 +61,6 @@ const EnquiryTable = ({ enquiries }) => {
           </tbody>
         </table>
       </div>
-
-      {/* File Modal */}
-      {showFiles && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-1/2">
-            <h3 className="text-xl font-semibold mb-4">Uploaded Files</h3>
-            <ul className="space-y-2">
-              {showFiles.map((fileObj, index) => (
-                <li key={index} className="flex justify-between items-center p-2 bg-gray-100 rounded-md">
-                  <span>{fileObj.file.name}</span>
-                  <a href={fileObj.url} download className="text-blue-500">Download</a>
-                </li>
-              ))}
-            </ul>
-            <button onClick={() => setShowFiles(null)} className="mt-4 bg-red-500 text-white px-3 py-1 rounded">Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

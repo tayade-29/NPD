@@ -66,7 +66,7 @@ const Sidebar = () => {
               </Link>
             </li>
             <li title="Enquiry Status Update" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
-              <Link to="/enquirydetails" className="flex items-center">
+              <Link to="/enquirymgt" className="flex items-center">
                 <CheckCircle className="text-xl" />
                 <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Enquiry Status Update</span>
               </Link>
