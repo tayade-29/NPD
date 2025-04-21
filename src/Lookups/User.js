@@ -10,7 +10,7 @@ function EmployeePage() {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [photoPreview, setPhotoPreview] = useState(null);
-  const [documentName, setDocumentName] = useState('');
+                                                     
 
   const [newEmployee, setNewEmployee] = useState({
     pEmployeeCode: 0,

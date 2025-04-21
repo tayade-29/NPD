@@ -87,6 +87,15 @@ const Sidebar = () => {
               <FaClipboardList className="text-xl" />
               <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Forms</span>
               {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isFormsOpen ? 'rotate-180' : ''}`} />}
+              {isSidebarOpen && isFormsOpen && (
+                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                  <h3 className="text-white font-semibold mb-2"> Forms</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link to="/apqptimeplan" className="hover:text-blue-300">APQP Time Plan Chart</Link></li>
+                    <li><Link to="/feasibilityChart" className="hover:text-blue-300">Feasibility Review Form</Link></li>
+                  </ul>
+                </div>
+              )}
               {!isSidebarOpen && isFormsOpen && (
                 <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
                   <h3 className="text-white font-semibold mb-2"> Forms</h3>
