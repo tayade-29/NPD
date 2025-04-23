@@ -6,7 +6,8 @@ import {
   FaSignOutAlt,
   FaClipboardList,
   FaPlusCircle,
-  FaChevronDown
+  FaChevronDown,
+  FaCalendar
 } from 'react-icons/fa';
 import {
   ChartColumnDecreasing,
@@ -68,6 +69,12 @@ const Sidebar = () => {
             <li title="Enquiry Status Update" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/enquirymgt" className="flex items-center">
                 <CheckCircle className="text-xl" />
+                <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Enquiry Status Update</span>
+              </Link>
+            </li>
+            <li title="Enquiry Status Update" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
+              <Link to="/cft" className="flex items-center">
+                <FaCalendar className="text-xl" />
                 <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Enquiry Status Update</span>
               </Link>
             </li>

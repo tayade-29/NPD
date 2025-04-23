@@ -17,6 +17,7 @@ import Feasibility from "./Forms/FeasibiltyReviewChart";
 import CustomerTable from "./Lookups/Customer";
 import UserPage from "./Lookups/User";
 import SupplierPage from "./Lookups/Supplier";
+import Cft from "./CFT/Cft"
 
 
 const PrivateRoute = ({ children }) => {
@@ -71,6 +72,7 @@ const AppContent = () => {
               <Route path="/customer" element={<PrivateRoute><CustomerTable /></PrivateRoute>} />
               <Route path="/supplier" element={<PrivateRoute><SupplierPage /></PrivateRoute>} />
               <Route path="/user" element={<PrivateRoute><UserPage /></PrivateRoute>} />
+              <Route path="/cft" element={<PrivateRoute><Cft /></PrivateRoute>} />
 
 
               {/* Root and catch-all routes */}

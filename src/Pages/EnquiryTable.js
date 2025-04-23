@@ -6,7 +6,7 @@ const EnquiryTable = ({ enquiries, onActionClick }) => {
     <div className="bg-white rounded-xl shadow-lg p-6 mb-6 overflow-hidden">
         <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-200 text-gray-500 text-sm  sticky top-0">
+          <thead className="bg-gray-50 text-gray-500 text-sm  sticky top-0">
             <tr>
               <th className="px-4 py-3 text-left font-semibold">Enquiry ID</th>
               <th className="px-4 py-3 text-left font-semibold">Customer</th>

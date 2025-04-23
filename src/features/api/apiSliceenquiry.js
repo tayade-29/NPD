@@ -97,8 +97,24 @@ export const apiEnquiry = createApi({
           pIsStatus: data.isStatus === 1 ? 1 : 0, 
         })
       }),
-      
-    })
+    }),
+    changePassword: builder.mutation({
+      query: ({ pFkEmpId, pPassword }) => ({
+        url: 'prc_change_password_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pFkEmpId, pPassword })
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d || '{}');
+        } catch (error) {
+          console.error('Password change transform error:', error);
+          return {};
+        }
+      }
+    }),
+    
     
   })
 });
@@ -107,5 +123,6 @@ export const {
   useGetEnquiriesQuery,
   useGetCustomersQuery,
   useCheckDuplicateEnquiryMutation,
-  useAddEnquiryMutation
+  useAddEnquiryMutation,
+  useChangePasswordMutation,
 } = apiEnquiry;
