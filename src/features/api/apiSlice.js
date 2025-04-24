@@ -239,6 +239,27 @@ export const api = createApi({
       },
       invalidatesTags: ['Employee']
     }),
+
+
+    changePassword: builder.mutation({
+      query: (data) => ({
+        url: 'prc_change_password_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pFkEmpId: data.pFkEmpId,
+          pPassword: data.pPassword,
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d);
+        } catch {
+          throw new Error("Invalid response format");
+        }
+      },
+    }),
+    
   }),
 });
 
@@ -251,4 +272,6 @@ export const {
   useCheckDuplicateEmployeeMutation,
   useAddEmployeeMutation,
   useGetRolesQuery,
+  useChangePasswordMutation,
+
 } = api;

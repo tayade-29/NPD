@@ -1,59 +1,64 @@
 import React, { useState } from 'react';
-import { format, parseDate } from '../utils/dateUtils';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { format, parseDate, isSameDay, addDays } from '../utils/dateUtils';
+import { Calendar as CalendarIcon, Pin } from 'lucide-react';
 
 const DateSelector = ({ onDateSelect }) => {
   const [date, setDate] = useState('');
   const [showCalendar, setShowCalendar] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  
+  const [weeklyPins, setWeeklyPins] = useState([]);
+
   const handleInputChange = (e) => {
     setDate(e.target.value);
   };
-  
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const selectedDate = parseDate(date);
     if (selectedDate) {
       onDateSelect(selectedDate);
+      const newPins = Array.from({ length: 10 }, (_, i) => addDays(selectedDate, i * 7));
+      setWeeklyPins(newPins);
     }
   };
-  
+
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
   };
-  
+
   const handleDateClick = (day) => {
-    setDate(format(day, 'yyyy-MM-dd'));
+    const newDate = format(day, 'yyyy-MM-dd');
+    setDate(newDate);
     setShowCalendar(false);
+    const selectedDate = parseDate(newDate);
+    const newPins = Array.from({ length: 10 }, (_, i) => addDays(selectedDate, i * 7));
+    setWeeklyPins(newPins);
+    onDateSelect(selectedDate);
   };
-  
+
   const changeMonth = (offset) => {
     const newMonth = new Date(currentMonth);
     newMonth.setMonth(newMonth.getMonth() + offset);
     setCurrentMonth(newMonth);
   };
-  
+
   const renderCalendarDays = () => {
     const days = [];
     const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
     const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
-    
-    // Add days from previous month to fill the first week
+
     const startDay = monthStart.getDay();
     for (let i = 0; i < startDay; i++) {
       const prevMonthDay = new Date(monthStart);
       prevMonthDay.setDate(prevMonthDay.getDate() - (startDay - i));
       days.push({ date: prevMonthDay, currentMonth: false });
     }
-    
-    // Add days of current month
+
     for (let day = 1; day <= monthEnd.getDate(); day++) {
       const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
       days.push({ date, currentMonth: true });
     }
-    
-    // Add days from next month to complete the last week
+
     const lastWeekDay = monthEnd.getDay();
     if (lastWeekDay < 6) {
       for (let i = 1; i <= 6 - lastWeekDay; i++) {
@@ -62,10 +67,10 @@ const DateSelector = ({ onDateSelect }) => {
         days.push({ date: nextMonthDay, currentMonth: false });
       }
     }
-    
+
     return days;
   };
-  
+
   return (
     <div className="relative w-full max-w-md">
       <form onSubmit={handleSubmit} className="flex items-center">
@@ -92,45 +97,44 @@ const DateSelector = ({ onDateSelect }) => {
           Select
         </button>
       </form>
-      
+
       {showCalendar && (
         <div className="absolute z-10 mt-1 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-full">
           <div className="flex justify-between items-center mb-4">
             <button
               onClick={() => changeMonth(-1)}
               className="p-1 hover:bg-gray-100 rounded-full"
-            >
-              &lt;
-            </button>
+            >&lt;</button>
             <h3 className="font-medium">
               {format(currentMonth, 'MMMM yyyy')}
             </h3>
             <button
               onClick={() => changeMonth(1)}
               className="p-1 hover:bg-gray-100 rounded-full"
-            >
-              &gt;
-            </button>
+            >&gt;</button>
           </div>
-          
+
           <div className="grid grid-cols-7 gap-1">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div key={day} className="text-center font-medium text-gray-500 text-xs py-1">
                 {day}
               </div>
             ))}
-            
+
             {renderCalendarDays().map((day, index) => (
               <div
                 key={index}
                 onClick={() => handleDateClick(day.date)}
                 className={`
-                  text-center p-2 cursor-pointer text-sm rounded-full hover:bg-blue-50
+                  text-center p-2 cursor-pointer text-sm rounded-full relative hover:bg-blue-50
                   ${day.currentMonth ? 'text-gray-800' : 'text-gray-400'}
                   ${date === format(day.date, 'yyyy-MM-dd') ? 'bg-blue-500 text-black hover:bg-blue-600' : ''}
                 `}
               >
                 {day.date.getDate()}
+                {weeklyPins.some(pinDate => isSameDay(pinDate, day.date)) && (
+                  <Pin size={10} className="absolute top-0 right-0 text-blue-400" />
+                )}
               </div>
             ))}
           </div>

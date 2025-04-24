@@ -23,6 +23,8 @@ const Sidebar = () => {
   const [isFormsOpen, setFormsOpen] = useState(false);
   const [isLookupOpen, setLookupOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+ 
+
   const navigate = useNavigate();
   const { logout } = useAuth();
 
@@ -44,7 +46,7 @@ const Sidebar = () => {
   return (
     <div className="flex relative">
       {/* Sidebar */}
-      <div className={`bg-[#1D3461] text-white font-sans ${isSidebarOpen ? 'w-64' : 'w-16'} min-h-screen p-4 transition-all duration-300`}>        
+      <div className={`bg-gray-700 text-white font-sans ${isSidebarOpen ? 'w-64' : 'w-16'} min-h-screen p-4 transition-all duration-300`}>        
         <div className="flex justify-between items-center mb-8">
           <div className="text-xl font-bold">{isSidebarOpen && 'Dashboard'}</div>
           <button className="text-white" onClick={toggleSidebar}>
@@ -95,7 +97,7 @@ const Sidebar = () => {
               <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Forms</span>
               {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isFormsOpen ? 'rotate-180' : ''}`} />}
               {isSidebarOpen && isFormsOpen && (
-                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                <div className="absolute left-full top-0 ml-2 w-64 bg-gray-700  text-white rounded-lg shadow-lg p-4 z-50">
                   <h3 className="text-white font-semibold mb-2"> Forms</h3>
                   <ul className="space-y-2 text-sm">
                     <li><Link to="/apqptimeplan" className="hover:text-blue-300">APQP Time Plan Chart</Link></li>
@@ -104,7 +106,7 @@ const Sidebar = () => {
                 </div>
               )}
               {!isSidebarOpen && isFormsOpen && (
-                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                <div className="absolute left-full top-0 ml-2 w-64 bg-gray-700  text-white rounded-lg shadow-lg p-4 z-50">
                   <h3 className="text-white font-semibold mb-2"> Forms</h3>
                   <ul className="space-y-2 text-sm">
                     <li><Link to="/apqptimeplan" className="hover:text-blue-300">APQP Time Plan Chart</Link></li>
@@ -117,8 +119,20 @@ const Sidebar = () => {
               <FaUser className="text-xl" />
               <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Lookups</span>
               {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isLookupOpen ? 'rotate-180' : ''}`} />}
+              {isSidebarOpen && isLookupOpen && (
+                <div className="absolute left-full top-0 ml-2 w-64 bg-gray-700  text-white rounded-lg shadow-lg p-4 z-50">
+                  <h3 className="text-white font-semibold mb-2"> Lookups</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li><Link to="/customer" className="hover:text-blue-300">Customer</Link></li>
+                    <li><Link to="/supplier" className="hover:text-blue-300">Toolmaker/Supplier</Link></li>
+                    <li><Link to="/user" className="hover:text-blue-300">User</Link></li>
+                  </ul>
+                </div>
+              )}
+
+
               {!isSidebarOpen && isLookupOpen && (
-                <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
+                <div className="absolute left-full top-0 ml-2 w-64 bg-gray-700  text-white rounded-lg shadow-lg p-4 z-50">
                   <h3 className="text-white font-semibold mb-2"> Lookups</h3>
                   <ul className="space-y-2 text-sm">
                     <li><Link to="/customer" className="hover:text-blue-300">Customer</Link></li>

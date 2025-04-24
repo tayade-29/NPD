@@ -1,8 +1,10 @@
-import React from 'react';
-import { format, isSameDay, isWithinInterval, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from '../utils/dateUtils';
+import React, { useState } from 'react';
+import { format, isSameDay, addDays, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from '../utils/dateUtils';
 import { Calendar as CalendarIcon, Pin } from 'lucide-react';
 
 const Calendar = ({ dates, onDateClick, selectedDate, meetings, compact }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
   const hasMeeting = (date) => {
     const dateKey = format(date, 'yyyy-MM-dd');
     return meetings && meetings[dateKey];
@@ -13,9 +15,8 @@ const Calendar = ({ dates, onDateClick, selectedDate, meetings, compact }) => {
   };
 
   const generateMonthDays = () => {
-    const today = new Date();
-    const monthStart = startOfMonth(today);
-    const monthEnd = endOfMonth(today);
+    const monthStart = startOfMonth(currentMonth);
+    const monthEnd = endOfMonth(currentMonth);
     const calendarStart = startOfWeek(monthStart);
     const calendarEnd = endOfWeek(monthEnd);
 
@@ -30,11 +31,29 @@ const Calendar = ({ dates, onDateClick, selectedDate, meetings, compact }) => {
     return days;
   };
 
+  const goToPreviousMonth = () => {
+    const prevMonth = new Date(currentMonth);
+    prevMonth.setMonth(prevMonth.getMonth() - 1);
+    setCurrentMonth(prevMonth);
+  };
+
+  const goToNextMonth = () => {
+    const nextMonth = new Date(currentMonth);
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    setCurrentMonth(nextMonth);
+  };
+
   return (
     <div className={`bg-gray-50 rounded-xl shadow-md p-4 ${compact ? 'max-w-2xl mx-[20px]' : 'w-full max-w-2xl mx-auto'}`}>
-      <div className="flex items-center justify-center mb-4">
-        <CalendarIcon className="mr-2 text-blue-400" size={20} />
-        <h2 className="text-sm font-semibold text-gray-500">CFT Meeting Calendar</h2>
+      <div className="flex items-center justify-between mb-4">
+        <button onClick={goToPreviousMonth} className="text-xs text-blue-500 hover:underline">&lt; Prev</button>
+        <div className="flex items-center justify-center">
+          <CalendarIcon className="mr-2 text-blue-400" size={20} />
+          <h2 className="text-sm font-semibold text-gray-500">
+            {format(currentMonth, 'MM-MM-yyyy')}
+          </h2>
+        </div>
+        <button onClick={goToNextMonth} className="text-xs text-blue-500 hover:underline">Next &gt;</button>
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-2">
@@ -50,7 +69,7 @@ const Calendar = ({ dates, onDateClick, selectedDate, meetings, compact }) => {
           const isSelected = selectedDate && isSameDay(selectedDate, date);
           const isWeekly = isWeeklyDate(date);
           const hasScheduledMeeting = hasMeeting(date);
-          const isCurrentMonth = date.getMonth() === new Date().getMonth();
+          const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
 
           return (
             <div

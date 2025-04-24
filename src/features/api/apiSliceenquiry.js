@@ -5,7 +5,7 @@ export const apiEnquiry = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: 'http://192.168.0.172:83/Service.asmx/',
   }),
-  tagTypes: ['Enquiry', 'Customer'],
+  tagTypes: ['Enquiry', 'Customer','Password'],
   endpoints: (builder) => ({
     getEnquiries: builder.query({
       query: () => ({
@@ -98,22 +98,29 @@ export const apiEnquiry = createApi({
         })
       }),
     }),
+    
+
     changePassword: builder.mutation({
-      query: ({ pFkEmpId, pPassword }) => ({
+      query: (data) => ({
         url: 'prc_change_password_set',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pFkEmpId, pPassword })
+        body: JSON.stringify({
+          pFkEmpId: data.pFkEmpId,
+          pPassword: data.pPassword
+        })
       }),
       transformResponse: (response) => {
         try {
           return JSON.parse(response.d || '{}');
         } catch (error) {
-          console.error('Password change transform error:', error);
-          return {};
+          console.error('Transform error:', error);
+          return { error: 'Failed to process response' };
         }
       }
     }),
+  
+    
     
     
   })
@@ -124,5 +131,5 @@ export const {
   useGetCustomersQuery,
   useCheckDuplicateEnquiryMutation,
   useAddEnquiryMutation,
-  useChangePasswordMutation,
+  useChangePasswordMutation
 } = apiEnquiry;

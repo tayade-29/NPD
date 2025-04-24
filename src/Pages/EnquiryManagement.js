@@ -1,53 +1,33 @@
-import React, { useState } from 'react';
-import EnquiryTable from './EnquiryTable';
-import EnquiryDetails from './EnquiryDetails';
+import React, { useState } from "react";
+import { useAuth } from '../context/AuthContext';
+import {
+  useGetEnquiriesQuery,
+  useGetCustomersQuery
+} from '../features/api/apiSliceenquiry';
+import EnquiryTable from "./EnquiryTable";
+import EnquiryDetails from "./EnquiryDetails";
+import { FileText, RefreshCw } from "lucide-react";
 
-// Mock data for demonstration
-const mockEnquiries = [
-  {
-    id: 1,
-    customerName: "ABC Motors",
-    projectVehicleProgram: "EV Platform 2024",
-    partCode: "EV-2024-001",
-    partName: "Battery Housing",
-    rawMaterial: "High-grade aluminum",
-    sop: "2024-12-31",
-    estimatedAnnualVolume: "10000",
-    enquiryReceivedDate: "2024-03-01",
-    partColour: "Black",
-    dateQuoted: "2024-03-15",
-    status: "Under Review",
-    customerPODate: "2024-04-01",
-    partCostEstimate: "25000",
-    toolCostEstimate: "500000",
-    annualBusinessPotential: "250",
-    poNo: "PO-2024-001",
-    designFiles: []
-  },
-  {
-    id: 2,
-    customerName: "XYZ Electric",
-    projectVehicleProgram: "SUV Series X",
-    partCode: "SUV-X-1200",
-    partName: "Door Panel",
-    rawMaterial: "ABS Plastic",
-    sop: "2024-10-15",
-    estimatedAnnualVolume: "25000",
-    enquiryReceivedDate: "2024-02-10",
-    partColour: "Grey",
-    dateQuoted: "2024-02-25",
-    status: "PO Received",
-    customerPODate: "2024-03-20",
-    partCostEstimate: "8500",
-    toolCostEstimate: "320000",
-    annualBusinessPotential: "212",
-    poNo: "PO-XYZ-420",
-    designFiles: []
-  }
-];
-
-function App() {
+const EnquiriesPage = () => {
+  const { userData } = useAuth();
   const [selectedEnquiry, setSelectedEnquiry] = useState(null);
+  const { data: enquiries = [], isLoading, isError, error, refetch } = useGetEnquiriesQuery();
+  const { data: customers = [], isLoading: isLoadingCustomers, error: customerError } = useGetCustomersQuery(userData);
+  let parsedCustomers = [];
+  if (Array.isArray(customers)) {
+    parsedCustomers = customers;
+  } else if (typeof customers?.d === 'string') {
+    try {
+      parsedCustomers = JSON.parse(customers.d);
+    } catch (e) {
+      console.error("Failed to parse customer list", e);
+    }
+  }
+  // Create customer map
+  const customerMap = {};
+  parsedCustomers.forEach(cust => {
+    customerMap[cust.DataValueField] = cust.DataTextField;
+  });
 
   const handleActionClick = (enquiry) => {
     setSelectedEnquiry(enquiry);
@@ -58,24 +38,33 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="max-w-[1600px] mx-auto">
-        <h1 className="text-3xl font-bold text-gray-800 mb-8">Enquiry Management System</h1>
-
-        <EnquiryTable 
-          enquiries={mockEnquiries} 
-          onActionClick={handleActionClick} 
-        />
-
-        {selectedEnquiry && (
-          <EnquiryDetails 
-            enquiry={selectedEnquiry} 
-            onClose={handleCloseDetails} 
-          />
-        )}
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Enquiry Management</h1>
+          
+        </div>
+        
       </div>
+
+
+      <EnquiryTable 
+        enquiries={enquiries}
+        isLoading={isLoading}
+        isError={isError}
+        error={error}
+        customerMap={customerMap}
+        onActionClick={handleActionClick}
+      />
+
+      {selectedEnquiry && (
+        <EnquiryDetails 
+          enquiry={selectedEnquiry} 
+          onClose={handleCloseDetails} 
+        />
+      )}
     </div>
   );
-}
+};
 
-export default App;
+export default EnquiriesPage;
