@@ -16,44 +16,48 @@ export const phaseSubactivities = {
       "Preparation of fixture & other necessary resource planning (micro plan)",
       "Preparation of gauges & other necessary resource planning (micro plan)"
     ],
-    "Product Design & Development": [
-      "Design of Product",
-      "Design Verification",
-      "Drawing Release"
-    ],
-    "Process Design & Development": [
-      "Manufacturing feasibility",
-      "Process flow chart preparation",
-      "PFMEA preparation",
-      "Control plan preparation",
-      "Layout preparation",
-      "Cycle time study",
-      "Tooling & Gauging plan"
-    ],
+   "Product Design & Development": [
+  "Design review & resolving gap points if any",
+  "Procurement of new jig / fixture, gauges and other resources as applicable",
+  "Review of special product & process characteristics"
+],
+
+  "Process Design & Development": [
+  "Finalization of process flow diagram",
+  "Preparation of process FMEA",
+  "Preparation of process control plan (proto / prelaunch)",
+  "Preparation of MSA and process capability study plan",
+  "Preparation of packaging standard & packing specifications",
+  "Preparation of process instruction (work instruction)",
+  "Provide training to concern person (if required)"
+],
+
     "Product & Process Validation": [
-      "Tooling Development",
-      "Gauge Development",
-      "Trial Parts Production",
-      "Inspection Report",
-      "Process Trial",
-      "Layout Inspection",
-      "Capability Study",
-      "Initial Sample Submission",
-      "Customer Approval",
-      "Packing Standards",
-      "Logistics Finalization",
-      "Work Instruction",
-      "SOP Preparation",
-      "Training of Employees",
-      "Pre Launch Audit",
-      "Final PPAP Submission",
-      "Final PPAP Approval",
-      "Production Readiness",
-      "Safe Launch Plan",
-      "Handover to Production"
-    ],
+  "Verification & validation of tool, fixture, gauges & other equipment as applicable",
+  "Sample production (trial T0 to Tfinal)",
+  "Preparation of process characteristics matrix (SPPS)",
+  "Submission of samples with sample inspection report & get approval from customer",
+  "Implement corrective action (if required)",
+  "Tool rectifications / ECN (if applicable)",
+  "Sample production (trial T0 to Tfinal) & submission to customer (as applicable)",
+  "Prepare pilot lots & submit to customer",
+  "Feedback from customer for pilot lot",
+  "Implement corrective action (if required)",
+  "Conduct preliminary process capability study (SPC & MSA evaluation)",
+  "Evaluation of packaging standard",
+  "Review of productivity, high RPN & other target",
+  "PPAP lot & document submission",
+  "Prepare & finalise process documents (PFD, PFMEA, CP, SPPS, WI etc)",
+  "Feedback from customer for PPAP lot",
+  "Implement corrective action (if required)",
+  "PSW – get signed from customer",
+  "Introduce the initial production control up to quantity 5000 nos. or production for next 3 months, whichever is later (as per SOP – STPPL/MKD/SOP/16)",
+  "During IPC, all activities are under control of new product development function (feedback from customer, resolving gaps if any, tracking of dispatch qty/lot, corrective actions as appropriate)",
+  "Handover the project to serial production along with all documents / records."
+],
+
     "Feedback, Assessment & Corrective Action": [
-      "Customer Feedback Review"
+      "Customer & in-house feedback analysis & corrective actions (summarize in lesson learn / PDCA sheet)"
     ]
   };
   

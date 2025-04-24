@@ -2,6 +2,7 @@ import React from "react";
 import ActivityTable from "../Components/ActivityTable";
 
 const APQPPage = () => {
+    
     const ACTIVITY_PHASES_APQP = [
         "Plan & define phase",
         "Product design & development",

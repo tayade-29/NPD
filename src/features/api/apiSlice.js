@@ -111,6 +111,7 @@ export const api = createApi({
       },
       invalidatesTags: ['Customer']
     }),
+
     getEmployees: builder.query({
       query: (params) => ({
         url: 'prc_employee_master_get',
@@ -153,7 +154,7 @@ export const api = createApi({
         url: 'prc_employee_master_set',
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ // Add this for updates
+        body: JSON.stringify({
           pEmployeeCode: data.pEmployeeCode,
           pFkClientId: data.pFkClientId,
           pFkPlantId: data.pFkPlantId,
@@ -180,6 +181,28 @@ export const api = createApi({
       },
       invalidatesTags: ['Employee']
     }),
+
+    // ✅ New Endpoint: getNpdEnquiryRegister
+    getNpdEnquiryRegister: builder.query({
+      query: () => ({
+        url: 'prc_npd_enquiry_register_get',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 2,
+          pLookUpId: 0
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          const data = JSON.parse(response.d);
+          return Array.isArray(data) ? data : [];
+        } catch (error) {
+          console.error("Error parsing NPD enquiry data:", error);
+          return [];
+        }
+      },
+    }),
   }),
 });
 
@@ -191,4 +214,5 @@ export const {
   useAddCustomerMutation,
   useLoginUserMutation,
   useCheckDuplicateCustomerMutation,
+  useGetNpdEnquiryRegisterQuery, // ✅ Export the new hook
 } = api;
