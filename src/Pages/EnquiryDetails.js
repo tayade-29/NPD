@@ -27,54 +27,6 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
   const [rows, setRows] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
 
-  const { 
-    data: checkpointsData,
-    isLoading: checkpointsLoading,
-    error: checkpointsError
-  } = useGetCheckpointsQuery(selectedEnquiry?.EnquiryRegisterNo);
-
-  // Initialize rows with proper mutable objects
-  useEffect(() => {
-    if (checkpointsData && activeTab === 1) {
-      const initializedRows = checkpointsData.map(row => {
-        const parsedRow = typeof row === 'string' ? JSON.parse(row) : {...row};
-        return {
-          ...parsedRow,
-          details: parsedRow.details || '',
-          comment: parsedRow.comment || '',
-          responsible: parsedRow.responsible || '',
-          targetDate: parsedRow.targetDate || ''
-        };
-      });
-      setRows(initializedRows);
-    }
-  }, [checkpointsData, activeTab]);
-
-  // Proper immutable update for row changes
-  const handleRowChange = (index, field, value) => {
-    setRows(prevRows => {
-      const newRows = prevRows.map((row, i) => {
-        if (i === index) {
-          return { ...row, [field]: value };
-        }
-        return row;
-      });
-      return newRows;
-    });
-  };
-
-  const handleReset = () => {
-    if (checkpointsData) {
-      const resetRows = checkpointsData.map(row => ({
-        ...(typeof row === 'string' ? JSON.parse(row) : row),
-        details: '',
-        comment: '',
-        responsible: '',
-        targetDate: ''
-      }));
-      setRows(resetRows);
-    }
-  };
 
   const handleInputChange = (e, field) => {
     setSelectedEnquiry(prev => ({ ...prev, [field]: e.target.value }));
@@ -90,82 +42,103 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
   };
  
 
-  const handleSave = async () => {
-    if (isSaving) return;
-    setIsSaving(true);
+  const handleSave = () => {
+    // Your logic for handling the save action goes here
+    console.log("Save button clicked");
+    // You could also call your API or handle other actions here
+  };
   
+  
+
+  const [isFeasible, setIsFeasible] = useState(false);
+  const [checkpoints, setCheckpoints] = useState([]);
+  const [responsiblePersons, setResponsiblePersons] = useState([]);
+  const [feasibilityRows, setFeasibilityRows] = useState([]);
+
+
+  // Fetch checkpoints when the tab is active
+  const { data: checkpointData } = useGetCheckpointsQuery();
+  const { data: responsibleData } = useGetResponsiblePersonQuery({
+    clientId: userData?.clientId,
+    plantId: userData?.plantId,
+    locationId: userData?.locationId
+  });
+
+  useEffect(() => {
+    if (checkpoints.length > 0) {
+      setFeasibilityRows(checkpoints.map((checkpoint, index) => ({
+        serialNo: index + 1,
+        checkpointText: checkpoint.DataTextField,
+        checkpointId: checkpoint.DataValueField,
+        details: '',
+        comments: '',
+        responsiblePersonId: '',
+        responsiblePersonName: '',
+        targetDate: '',
+      })));
+    }
+  }, [checkpoints]);
+  
+  useEffect(() => {
+    if (checkpointData?.length) {
+      setCheckpoints(checkpointData); // ✅ it's already parsed
+    }
+  }, [checkpointData]);
+  
+  
+
+  useEffect(() => {
+    if (responsibleData?.length) {
+      setResponsiblePersons(responsibleData); // ✅ already parsed
+    }
+  }, [responsibleData]);
+  
+
+  // Handle checkbox change
+  const handleFeasibilityChange = () => {
+    setIsFeasible(!isFeasible);
+  };
+
+  const handleSaveFeasibility = async () => {
+    const userId = userData?.userId; // or use CreatedBy if named differently
     const enquiryId = selectedEnquiry?.PkEnquiryMasterId;
-    const createdBy = userData?.userId;
-  
-    if (!createdBy || !enquiryId) {
-      alert("Missing user or enquiry info.");
-      setIsSaving(false);
-      return;
-    }
-  
-    const validRows = rows.filter((row) => {
-      const data = typeof row === "string" ? JSON.parse(row) : row;
-      return (
-        data.DataTextField &&
-        data.responsible &&
-        data.targetDate &&
-        !isNaN(new Date(data.targetDate).getTime())
-      );
-    });
-  
-    if (validRows.length === 0) {
-      alert("No valid rows to save.");
-      setIsSaving(false);
-      return;
-    }
-  
-    const payloads = validRows.map((checkpointData) => {
-      // 🔄 Map from checkpoint text to master list value
-      const matchedMaster = checkpointsData?.find(
-        item => item.DataTextField.trim() === checkpointData.DataTextField.trim()
-      );
-  
-      const preliminaryId = matchedMaster?.DataValueField || 0;
-  
-      return {
-        pPkNPDEnquiryInitialFeasibilityStudyId: 0,
-        pFkEnquiryMasterId: selectedEnquiry?.PkEnquiryMasterId,
-        pFkNPDPreliminaryInitialStudyId: preliminaryId,
-        pFkResponsiblePersonId: Number(checkpointData.responsible),
-        pCommentActionRequired: checkpointData.comment || "",
-        pTargetDate:'',
-        pCreatedBy: userData?.roleId
-      };
-    });
-  
-    // ❌ Filter out any payloads without a valid master ID
-    const filteredPayloads = payloads.filter(p => p.pFkNPDPreliminaryInitialStudyId > 0);
-    if (filteredPayloads.length === 0) {
-      alert("Mapping failed: No valid preliminary study IDs found.");
-      setIsSaving(false);
-      return;
-    }
   
     try {
-      const results = await Promise.allSettled(
-        filteredPayloads.map(payload => saveFeasibilityCheck(payload).unwrap())
-      );
+      const savePromises = feasibilityRows.map(row => {
+        return saveFeasibilityCheck({
+          pPkNPDEnquiryInitialFeasibilityStudyId: 0,
+          pFkEnquiryMasterId: enquiryId,
+          pFkNPDPreliminaryInitialStudyId: row.checkpointId,           // ✅ checkpoint ID
+          pFkResponsiblePersonId: row.responsiblePersonId,  
+          pCommentActionRequired: row.comments || '',
+          pTargetDate: row.targetDate || '',
+          pCreatedBy: userData?.roleId,
+        }).unwrap(); // unwrap to get promise
+      });
   
-      const failed = results.filter(r => r.status === "rejected");
-  
-      if (failed.length > 0) {
-        throw new Error(`${failed.length}/${results.length} saves failed`);
-      }
-  
-      alert("Feasibility data saved successfully.");
-    } catch (err) {
-      console.error("Feasibility Save Error:", err);
-      alert(`Save failed: ${err.message}`);
-    } finally {
-      setIsSaving(false);
+      const responses = await Promise.all(savePromises);
+      console.log("Feasibility saved successfully", responses);
+      alert("Feasibility saved successfully");
+    } catch (error) {
+      console.error("Error saving feasibility:", error);
+      alert("Something went wrong while saving feasibility");
     }
   };
   
+
+  const handleRowChange = (index, field, value) => {
+    const updatedRows = [...feasibilityRows];
+    if (field === "responsiblePersonId") {
+      const selected = responsiblePersons.find(p => p.DataValueField === parseInt(value));
+      updatedRows[index]["responsiblePersonName"] = selected?.DataTextField || '';
+    }
+    updatedRows[index][field] = value;
+    setFeasibilityRows(updatedRows);
+  };
+  
+
+
+  // Don't go here
   
   
   const [saveQuotationDetails, { isLoading, isSuccess, error }] = useSaveQuotationDetailsMutation();
@@ -208,11 +181,7 @@ const handleSubmitPO = async () => {
   }
 };
 
-const { data: responsiblePersons = [], isLoading: responsibleLoading } = useGetResponsiblePersonQuery({
-  clientId: userData?.clientId, // you can make these dynamic if needed
-  plantId: userData?.plantId,
-  locationId: userData?.locationId
-});
+
 
   const tabs = [
     "View Details", "Initial Feasibility Check", "Quotation", "P.O.", "Status"
@@ -312,196 +281,101 @@ const { data: responsiblePersons = [], isLoading: responsibleLoading } = useGetR
 )}
 
                  {/* Feasibility */}
-                 {activeTab === 1 && (
-  <div className="flex flex-col h-full bg-white rounded-lg shadow-sm border border-gray-200">
-    {/* Loading & Error States */}
-    {checkpointsLoading ? (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="animate-spin h-8 w-8 border-4 border-blue-500 rounded-full border-t-transparent" />
-      </div>
-    ) : checkpointsError ? (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Loading Error</h3>
-          <p className="text-sm text-gray-500">{checkpointsError.message}</p>
-        </div>
-      </div>
-    ) : (
-      <div className="flex flex-col h-full divide-y divide-gray-200">
-        {/* Header */}
-        <div className="p-6 bg-gray-50">
-          <h3 className="text-lg font-semibold text-gray-900">Initial Feasibility Check</h3>
-        </div>
-
-        {/* Scrollable Table Area */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full overflow-y-auto">
-            <table className="min-w-full divide-y divide-gray-300">
-              <thead className="bg-gray-50 sticky top-0">
+                 {activeTab === 1 && ( // Assuming 1 is the index for Initial Feasibility
+        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Initial Feasibility</h3>
+          
+          {/* Table for Checkpoints */}
+          <div className="overflow-y-auto max-h-60">
+            <table className="min-w-full">
+              <thead>
                 <tr>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 w-12">Sr. No.</th>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900 min-w-[300px]">
-                    Check Points
-                  </th>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Details</th>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Comments</th>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Responsible</th>
-                  <th className="px-4 py-3.5 text-left text-sm font-semibold text-gray-900">Target Date</th>
+                  <th>Serial No.</th>
+                  <th>Checkpoint</th>
+                  <th>Checkpoint ID</th>
+                  <th>Details</th>
+                  <th>Comments</th>
+                  <th>Responsible Person</th>
+                  <th>Responsible Person ID</th>
+                  <th>Target Date</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-              {rows.map((checkpointData, index) => (
-    <tr key={index} className="hover:bg-gray-50 transition-colors">
-      <td className="px-4 py-3 text-sm font-medium text-gray-500 align-top">{index + 1}</td>
-      <td className="px-4 py-3 text-sm font-semibold text-gray-900 align-top">
-        {checkpointData.DataTextField}
-      </td>
-      <td className="px-4 py-3 align-top">
+              <tbody>
+  {feasibilityRows.map((row, index) => (
+    <tr key={row.checkpointId}>
+      <td>{row.serialNo}</td>
+      <td>{row.checkpointText}</td>
+      <td>{row.checkpointId}</td>
+      <td>
         <input
-          className="w-full px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-md 
-            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-          placeholder="Enter details"
-          value={checkpointData.details}
+          type="text"
+          value={row.details}
           onChange={(e) => handleRowChange(index, "details", e.target.value)}
+          className="border p-1 rounded w-full"
         />
       </td>
-      <td className="px-4 py-3 align-top">
-        <textarea
-          rows={1}
-          className="w-full px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-md 
-            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-400"
-          placeholder="Add comments"
-          value={checkpointData.comment}
-          onChange={(e) => handleRowChange(index, "comment", e.target.value)}
+      <td>
+        <input
+          type="text"
+          value={row.comments}
+          onChange={(e) => handleRowChange(index, "comments", e.target.value)}
+          className="border p-1 rounded w-full"
         />
       </td>
-      <td className="px-4 py-3 align-top">
-      <select
-  className="w-full px-3 py-1.5 text-sm text-gray-700 bg-white border border-gray-300 rounded-md 
-    focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-  value={checkpointData.responsible}
-  onChange={(e) => handleRowChange(index, "responsible", e.target.value)}
->
-  <option value="">Select Responsible</option>
-
-  {responsibleLoading ? (
-    <option disabled>Loading...</option>
-  ) : (
-    responsiblePersons.map((person) => (
-      <option key={person.DataValueField} value={person.DataValueField}>
-        {person.DataTextField}
-      </option>
-    ))
-  )}
-</select>
-
+      <td>
+        <select
+          value={row.responsiblePersonId}
+          onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
+          className="border p-1 rounded w-full"
+        >
+          <option value="">Select</option>
+          {responsiblePersons.map(person => (
+            <option key={person.DataValueField} value={person.DataValueField}>
+              {person.DataTextField}
+            </option>
+          ))}
+        </select>
       </td>
-      <td className="px-4 py-3 align-top">
-        <div className="relative">
-          <input
-            type="date"
-            className="w-full px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-md 
-              focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
-            value={checkpointData.targetDate}
-            onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
-          />
-          <CalendarDays className="h-4 w-4 text-gray-400 absolute right-3 top-2.5 pointer-events-none" />
-        </div>
+      <td>{row.responsiblePersonId}</td>
+      <td>
+        <input
+          type="date"
+          value={row.targetDate}
+          onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
+          className="border p-1 rounded w-full"
+        />
       </td>
     </tr>
   ))}
-              </tbody>
+</tbody>
+
             </table>
           </div>
-        </div>
 
-        {/* Action Section */}
-        <div className="p-6 bg-white border-t border-gray-200">
-          <div className="flex flex-col space-y-6">
-            {/* File Upload Section */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700">Supporting Documents</h4>
-                  <p className="text-sm text-gray-500 mt-1">Upload relevant feasibility documents</p>
-                </div>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "feasibilityFile")}
-                    className="hidden"
-                    accept=".pdf,.doc,.docx,.xls,.xlsx"
-                  />
-                  <div className="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm 
-                    text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 
-                    focus:ring-offset-2 focus:ring-blue-500">
-                    <Upload className="h-5 w-5 mr-2 text-gray-500" />
-                    Upload File
-                  </div>
-                </label>
-              </div>
-              {selectedEnquiry.feasibilityFile && (
-                <div className="flex items-center space-x-2 text-sm text-green-600 bg-green-50 px-4 py-2 rounded-md">
-                  <FileText className="h-5 w-5 flex-shrink-0" />
-                  <span className="truncate">{selectedEnquiry.feasibilityFile.name}</span>
-                  <button className="text-blue-600 hover:text-blue-800 ml-2 flex items-center">
-                    <Eye className="h-4 w-4 mr-1" />
-                    Preview
-                  </button>
-                </div>
-              )}
-            </div>
+          {/* Feasibility Checkbox */}
+          <div className="flex items-center mt-4">
+            <input
+              type="checkbox"
+              checked={isFeasible}
+              onChange={handleFeasibilityChange}
+              className="mr-2"
+            />
+            <label>Is Feasible</label>
+          </div>
 
-            {/* Status & Actions */}
-            <div className="flex items-center justify-between pt-4">
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={selectedEnquiry.isFeasible || false}
-                      onChange={(e) => handleCheckboxChange(e, "isFeasible")}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full 
-                      peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] 
-                      after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 
-                      after:transition-all peer-checked:bg-blue-600">
-                    </div>
-                    <span className="ml-3 text-sm font-medium text-gray-700">
-                      Mark as Feasible
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 
-                    rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 
-                    focus:ring-blue-500"
-                >
-                  Reset Changes
-                </button>
-                <button
-  onClick={handleSave}
-  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent 
-    rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 
-    focus:ring-blue-500"
->
-  Save All Changes
-</button>
-
-              </div>
-            </div>
+          {/* Save Button */}
+          <div className="mt-4">
+            <button
+              onClick={handleSaveFeasibility}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md"
+            >
+              Save
+            </button>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-)}
+      )}
+
+ 
  {/* Quoatation */}
  {activeTab === 2 && (
   <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 w-full max-w-2xl mx-auto">
