@@ -27,6 +27,23 @@ export const apiEnquiry = createApi({
       },
       providesTags: ['Enquiry']
     }),
+    getEnquiriesById: builder.query({
+      query: ({ pAction = 0, pLookUpId = 0 }) => ({
+        url: 'prc_npd_enquiry_register_get',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pAction, pLookUpId })
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d || '[]');
+        } catch (error) {
+          console.error('Transform error:', error);
+          return [];
+        }
+      },
+      providesTags: ['Enquiry']
+    }),
 
     getCustomers: builder.query({
       query: (userData) => ({
@@ -55,6 +72,8 @@ export const apiEnquiry = createApi({
       },
       providesTags: ['Customer']
     }),
+
+    
 
     checkDuplicateEnquiry: builder.mutation({
       query: (data) => ({
@@ -120,16 +139,150 @@ export const apiEnquiry = createApi({
       }
     }),
   
+    getCheckpoints: builder.query({
+      query: (userData) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 10,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 1,
+          pClientId: userData?.clientId || 1,
+          pPlantId: userData?.plantId || 1,
+          pLocationId: userData?.locationId || 1
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          if (!response.d) return [];
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : JSON.parse(parsed);
+        } catch (error) {
+          console.error('Transform error for customers:', error);
+          return [];
+        }
+      },
+      providesTags: ['Customer']
+    }), 
     
     
+    saveFeasibilityCheck: builder.mutation({
+      query: (data) => ({
+        url: 'prc_npd_enquiry_initial_feasibility_study_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pPkNPDEnquiryInitialFeasibilityStudyId: 0, // or use existing if editing
+          pFkEnquiryMasterId: data.pFkEnquiryMasterId,
+          pFkNPDPreliminaryInitialStudyId: data.pFkNPDPreliminaryInitialStudyId, // DataValueField
+          pFkResponsiblePersonId: data.pFkResponsiblePersonId,
+          pCommentActionRequired: data.pCommentActionRequired,
+          pTargetDate: data.pTargetDate,
+          pCreatedBy: data.pCreatedBy,
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d || '{}');
+        } catch (error) {
+          console.error('Transform error:', error);
+          return { error: 'Failed to process response' };
+        }
+      }
+    }),
     
+    saveQuotationDetails: builder.mutation({
+      query: (data) => ({
+        url: 'prc_npd_enquiry_quotation_detail_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pPkEnquiryMasterId: data.pPkEnquiryMasterId,
+          pQuotationNo: data.pQuotationNo,
+          pQuotationDate: data.pQuotationDate,
+          pPartCost: data.pPartCost,
+          pToolCost: data.pToolCost
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d || '{}');
+        } catch (error) {
+          console.error('Transform error:', error);
+          return { error: 'Failed to process response' };
+        }
+      }
+    }),
+    
+    saveCustomerPODetails: builder.mutation({
+      query: (data) => ({
+        url: 'prc_npd_enquiry_customer_po_detail_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pPkEnquiryMasterId: data.pPkEnquiryMasterId,
+          pCustomerPODate: data.pCustomerPODate,
+          pCustomerPONo: data.pCustomerPONo
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d || '{}');
+        } catch (error) {
+          console.error('Transform error:', error);
+          return { error: 'Failed to process response' };
+        }
+      }
+    }),
+    
+    getResponsiblePerson: builder.query({
+      query: (userData) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 7,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 0,
+          pClientId: userData?.clientId || 1,
+          pPlantId: userData?.plantId || 1,
+          pLocationId: userData?.locationId || 1
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          if (!response.d) return [];
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : JSON.parse(parsed);
+        } catch (error) {
+          console.error('Transform error:', error);
+          return [];
+        }
+      },
+      providesTags: ['Customer']
+    }),
+    
+
+
   })
 });
 
 export const {
   useGetEnquiriesQuery,
+  useGetEnquiriesByIdQuery,
   useGetCustomersQuery,
   useCheckDuplicateEnquiryMutation,
   useAddEnquiryMutation,
-  useChangePasswordMutation
+  useChangePasswordMutation,
+  useGetCheckpointsQuery,
+  useSaveFeasibilityCheckMutation,
+  useSaveQuotationDetailsMutation,
+  useSaveCustomerPODetailsMutation,
+  useGetResponsiblePersonQuery,
+
+
+
 } = apiEnquiry;
