@@ -12,19 +12,19 @@ const EnquiryTable = ({
   // No need to re-declare customerMap inside the component
 
   const [searchTerm, setSearchTerm] = useState('');
- 
+
 
 
   // Filter enquiries based on search term
   const filteredEnquiries = Array.isArray(enquiries)
     ? enquiries.filter(enquiry =>
-        (enquiry.EnquiryRegisterNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        enquiry.ProjectName?.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+    (enquiry.EnquiryRegisterNo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      enquiry.ProjectName?.toLowerCase().includes(searchTerm.toLowerCase()))
+    )
     : [];
 
 
-    
+
 
   if (isLoading) {
     return (
@@ -40,20 +40,18 @@ const EnquiryTable = ({
   return (
     <div className=" max-w-7xl bg-white p-2 rounded-lg shadow-sm ml-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
-        <h2 className="text-2xl font-semibold text-gray-800"></h2>
+        <h2 className="text-2xl font-bold text-gray-800">Enquiry List</h2>
         <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
+          <div className="relative w-full sm:w-80">
             <input
               type="text"
-              placeholder="Search enquiries..."
+              placeholder="Search enquiries by project name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-0 pr-4 py-2 border border-gray-300 rounded-lg "
             />
-            <Search className="absolute right-3 top-2.5 h-5 w-10 text-blue-600" />
+            <Search className="absolute right-3 top-2.5 h-5 w-10 text-blue-600 font-bold" />
           </div>
-         
-
         </div>
       </div>
 
@@ -94,8 +92,8 @@ const EnquiryTable = ({
 
                 <td className="px-4 py-4 whitespace-nowrap text-sm">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${enquiry.IsStatus === 1
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
                     }`}>
                     {enquiry.IsStatus === 1 ? 'Active' : 'Inactive'}
                   </span>

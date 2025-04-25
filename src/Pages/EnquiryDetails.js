@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  X, 
-  Save, 
-  Edit2, 
-  Upload, 
-  FileText, 
-  CalendarDays, 
-  Eye, 
+import {
+  X,
+  Save,
+  Edit2,
+  Upload,
+  FileText,
+  CalendarDays,
+  Eye,
   CheckCircle,
   AlertTriangle
 } from "lucide-react";
 import ProcessTracker from "../Components/ProcessTracker";
-import { useGetCheckpointsQuery, useSaveFeasibilityCheckMutation,useSaveQuotationDetailsMutation,useSaveCustomerPODetailsMutation,
+import {
+  useGetCheckpointsQuery, useSaveFeasibilityCheckMutation, useSaveQuotationDetailsMutation, useSaveCustomerPODetailsMutation,
   useGetResponsiblePersonQuery
 } from '../features/api/apiSliceenquiry';
 import { useAuth } from '../context/AuthContext';
@@ -24,8 +25,7 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [currentStatus, setCurrentStatus] = useState(enquiry.status);
   const [isProcessTrackerOpen, setIsProcessTrackerOpen] = useState(false);
-  const [rows, setRows] = useState([]);
-  const [isSaving, setIsSaving] = useState(false);
+
 
 
   const handleInputChange = (e, field) => {
@@ -40,30 +40,25 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
     const file = e.target.files[0];
     if (file) setSelectedEnquiry(prev => ({ ...prev, [field]: file }));
   };
- 
 
+  // For view details tab
   const handleSave = () => {
-    // Your logic for handling the save action goes here
     console.log("Save button clicked");
-    // You could also call your API or handle other actions here
   };
-  
-  
 
+
+
+  // {for initial feasibilty check tab}
   const [isFeasible, setIsFeasible] = useState(false);
   const [checkpoints, setCheckpoints] = useState([]);
   const [responsiblePersons, setResponsiblePersons] = useState([]);
   const [feasibilityRows, setFeasibilityRows] = useState([]);
-
-
-  // Fetch checkpoints when the tab is active
   const { data: checkpointData } = useGetCheckpointsQuery();
   const { data: responsibleData } = useGetResponsiblePersonQuery({
     clientId: userData?.clientId,
     plantId: userData?.plantId,
     locationId: userData?.locationId
   });
-
   useEffect(() => {
     if (checkpoints.length > 0) {
       setFeasibilityRows(checkpoints.map((checkpoint, index) => ({
@@ -78,44 +73,36 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
       })));
     }
   }, [checkpoints]);
-  
   useEffect(() => {
     if (checkpointData?.length) {
-      setCheckpoints(checkpointData); // ✅ it's already parsed
+      setCheckpoints(checkpointData);
     }
   }, [checkpointData]);
-  
-  
-
   useEffect(() => {
     if (responsibleData?.length) {
-      setResponsiblePersons(responsibleData); // ✅ already parsed
+      setResponsiblePersons(responsibleData);
     }
   }, [responsibleData]);
-  
-
-  // Handle checkbox change
   const handleFeasibilityChange = () => {
     setIsFeasible(!isFeasible);
   };
-
   const handleSaveFeasibility = async () => {
-    const userId = userData?.userId; // or use CreatedBy if named differently
+    const userId = userData?.userId; //
     const enquiryId = selectedEnquiry?.PkEnquiryMasterId;
-  
+
     try {
       const savePromises = feasibilityRows.map(row => {
         return saveFeasibilityCheck({
           pPkNPDEnquiryInitialFeasibilityStudyId: 0,
           pFkEnquiryMasterId: enquiryId,
           pFkNPDPreliminaryInitialStudyId: Number(row.checkpointId),           // ✅ checkpoint ID
-          pFkResponsiblePersonId: Number(row.responsiblePersonId),  
+          pFkResponsiblePersonId: Number(row.responsiblePersonId),
           pCommentActionRequired: row.comments || '',
           pTargetDate: row.targetDate || '',
           pCreatedBy: userData?.roleId,
         }).unwrap(); // unwrap to get promise
       });
-  
+
       const responses = await Promise.all(savePromises);
       console.log("Feasibility saved successfully", responses);
       alert("Feasibility saved successfully");
@@ -124,7 +111,7 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
       alert("Something went wrong while saving feasibility");
     }
   };
-  
+
 
   const handleRowChange = (index, field, value) => {
     const updatedRows = [...feasibilityRows];
@@ -135,12 +122,10 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
     updatedRows[index][field] = value;
     setFeasibilityRows(updatedRows);
   };
-  
 
 
-  // Don't go here
-  
-  
+
+  //  for quotation upload tab
   const [saveQuotationDetails, { isLoading, isSuccess, error }] = useSaveQuotationDetailsMutation();
   const handleSubmitQuotation = async () => {
     try {
@@ -148,48 +133,39 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
         pPkEnquiryMasterId: selectedEnquiry?.PkEnquiryMasterId,
         pQuotationNo: selectedEnquiry.quotationNumber,
         pQuotationDate: selectedEnquiry.quotationDate,
-        pPartCost: selectedEnquiry.partCost || 0, // Default to 0 if not provided
+        pPartCost: selectedEnquiry.partCost || 0,
         pToolCost: selectedEnquiry.toolCost || 0,
       };
-  
+
       const response = await saveQuotationDetails(payload).unwrap();
       console.log("Quotation saved:", response);
-      // Optionally show success message here
     } catch (err) {
       console.error("Failed to save quotation:", err);
-      // Show error message here
     }
   };
-  
 
+
+  //  for PO tab
   const [saveCustomerPODetails] = useSaveCustomerPODetailsMutation();
+  const handleSubmitPO = async () => {
+    try {
+      const payload = {
+        pPkEnquiryMasterId: selectedEnquiry?.PkEnquiryMasterId,
+        pCustomerPODate: selectedEnquiry?.customerPODate,
+        pCustomerPONo: selectedEnquiry?.customerPONo,
+      };
 
-const handleSubmitPO = async () => {
-  try {
-    const payload = {
-      pPkEnquiryMasterId: selectedEnquiry?.PkEnquiryMasterId,
-      pCustomerPODate: selectedEnquiry?.customerPODate,
-      pCustomerPONo: selectedEnquiry?.customerPONo,
-    };
-
-    const response = await saveCustomerPODetails(payload).unwrap();
-    console.log("P.O. saved successfully", response);
-    // Add toast or UI feedback here
-  } catch (err) {
-    console.error("Error saving P.O.:", err);
-    // Add error feedback here
-  }
-};
-
-
+      const response = await saveCustomerPODetails(payload).unwrap();
+      console.log("P.O. saved successfully", response);
+    } catch (err) {
+      console.error("Error saving P.O.:", err);
+    }
+  };
 
   const tabs = [
     "View Details", "Initial Feasibility Check", "Quotation", "P.O.", "Status"
   ];
 
-  // Rest of the component remains the same...
-
-  // Fields to display based on the response
   const fieldsToDisplay = [
     { key: "EnquiryRegisterNo", label: "Enquiry Register No" },
     { key: "ProjectName", label: "Project Name" },
@@ -205,379 +181,377 @@ const handleSubmitPO = async () => {
   if (!selectedEnquiry) return null;
 
   return (
-    <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
-      <div className="w-[1100px] h-[700px] bg-white rounded-xl flex flex-col">
-        <div className="p-6 pb-0 border-b bg-white">
+    <div className="fixed inset-0 bg-gray-50 flex items-center mt-0 z-50">
+      <div className="w-full h-[600px] bg-white rounded-xl flex flex-col">
+        <div className="px-10 py-5 pb-0 border-b bg-white">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-500">
+            <h2 className="text-2xl font-bold text-gray-800">
               Enquiry Details <span className="text-sm font-normal text-gray-500 ml-2">{selectedEnquiry.EnquiryRegisterNo}</span>
             </h2>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+            <button onClick={onClose} className="text-gray-800 hover:text-gray-600 transition-colors">
               <X size={24} />
             </button>
           </div>
 
-          <div className="flex space-x-1">
-            {tabs.map((tab, i) => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(i)}
-                className={`px-6 py-3 text-sm font-medium transition-colors rounded-t-lg ${
-                  activeTab === i
-                    ? "bg-white border-t border-r border-l border-gray-200 text-blue-600"
-                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+          <div className="flex justify-center">
+            <div className="flex space-x-1">
+              {tabs.map((tab, i) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(i)}
+                  className={`px-6 py-3 text-sm font-medium transition-colors justify-center rounded-t-lg ${activeTab === i
+                      ? "bg-white border-t border-r border-l border-gray-200 text-blue-600"
+                      : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                    }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto p-6">
           {/* View Details Tab */}
           {activeTab === 0 && (
-  <div className="space-y-8 bg-gray-50">
-    {/* Form Grid with Spacing and Styling */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {fieldsToDisplay.map(({ key, label, type }) => (
-        <div key={key} className="flex items-center space-x-4">
-          <label className="text-sm font-semibold text-gray-700 w-1/3">{label}:</label>
-          {isEditing ? (
-            <input
-              type={type || "text"}
-              value={selectedEnquiry[key] || ""}
-              onChange={(e) => handleInputChange(e, key)}
-              className="w-2/3 p-2 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-300"
-            />
-          ) : (
-            <p className="w-2/3 text-gray-800">{selectedEnquiry[key] || "N/A"}</p>
+            <div className="flex justify-center">
+              <div className="bg-gray-50 px-10 py-6 rounded-lg shadow-sm space-y-6 w-full max-w-5xl">
+                {/* Form Title */}
+                <h3 className="text-xl font-semibold text-gray-700">Enquiry Details</h3>
+
+                {/* Form Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {fieldsToDisplay.map(({ key, label, type }) => (
+                    <div key={key} className="flex flex-col">
+                      <label className="text-sm font-medium text-gray-600 mb-1">{label}</label>
+                      {isEditing ? (
+                        <input
+                          type={type || "text"}
+                          value={selectedEnquiry[key] || ""}
+                          onChange={(e) => handleInputChange(e, key)}
+                          className="w-full px-3 py-2 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : (
+                        <p className="text-gray-800 text-sm">{selectedEnquiry[key] || "N/A"}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Action Button Bottom-Right */}
+                <div className="flex justify-end pt-2">
+                  {isEditing ? (
+                    <button
+                      onClick={handleSave}
+                      className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 text-sm"
+                    >
+                      <Save size={16} className="mr-1" />
+                      Save
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditing(true)}
+                      className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm"
+                    >
+                      <Edit2 size={16} className="mr-1" />
+                      Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
           )}
-        </div>
-      ))}
-    </div>
 
-    {/* Action Buttons */}
-    <div className="flex justify-center pt-6 space-x-4">
-      {isEditing ? (
-        <button
-          onClick={handleSave}
-          className="flex items-center bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-all duration-300"
-        >
-          <Save size={18} className="mr-2" />
-          Save Changes
-        </button>
-      ) : (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="flex items-center bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-all duration-300"
-        >
-          <Edit2 size={18} className="mr-2" />
-          Edit Details
-        </button>
-      )}
-    </div>
-  </div>
-)}
 
-                 {/* Feasibility */}
-                 {activeTab === 1 && ( // Assuming 1 is the index for Initial Feasibility
-        <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Initial Feasibility</h3>
-          
-          {/* Table for Checkpoints */}
-          <div className="overflow-y-auto max-h-60">
-            <table className="min-w-full">
-              <thead>
-                <tr>
-                  <th>Serial No.</th>
-                  <th>Checkpoint</th>
-                  <th>Checkpoint ID</th>
-                  <th>Details</th>
-                  <th>Comments</th>
-                  <th>Responsible Person</th>
-                  <th>Responsible Person ID</th>
-                  <th>Target Date</th>
-                </tr>
-              </thead>
-              <tbody>
-  {feasibilityRows.map((row, index) => (
-    <tr key={row.checkpointId}>
-      <td>{row.serialNo}</td>
-      <td>{row.checkpointText}</td>
-      <td>{row.checkpointId}</td>
-      <td>
-        <input
-          type="text"
-          value={row.details}
-          onChange={(e) => handleRowChange(index, "details", e.target.value)}
-          className="border p-1 rounded w-full"
-        />
-      </td>
-      <td>
-        <input
-          type="text"
-          value={row.comments}
-          onChange={(e) => handleRowChange(index, "comments", e.target.value)}
-          className="border p-1 rounded w-full"
-        />
-      </td>
-      <td>
-        <select
-          value={row.responsiblePersonId}
-          onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
-          className="border p-1 rounded w-full"
-        >
-          <option value="">Select</option>
-          {responsiblePersons.map(person => (
-            <option key={person.DataValueField} value={person.DataValueField}>
-              {person.DataTextField}
-            </option>
-          ))}
-        </select>
-      </td>
-      <td>{row.responsiblePersonId}</td>
-      <td>
-        <input
-          type="date"
-          value={row.targetDate}
-          onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
-          className="border p-1 rounded w-full"
-        />
-      </td>
-    </tr>
-  ))}
-</tbody>
 
-            </table>
-          </div>
 
-          {/* Feasibility Checkbox */}
-          <div className="flex items-center mt-4">
-            <input
-              type="checkbox"
-              checked={isFeasible}
-              onChange={handleFeasibilityChange}
-              className="mr-2"
-            />
-            <label>Is Feasible</label>
-          </div>
+          {/* Feasibility */}
+          {activeTab === 1 && (
+            <div >
 
-          {/* Save Button */}
-          <div className="mt-4">
-            <button
-              onClick={handleSaveFeasibility}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md"
-            >
-              Save
-            </button>
-          </div>
-        </div>
-      )}
 
- 
- {/* Quoatation */}
- {activeTab === 2 && (
-  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 w-full max-w-2xl mx-auto">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-      <FileText size={20} className="mr-2 text-blue-600" />
-      Quotation Document Upload
-    </h3>
+              {/* Table Container */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
+                  <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <tr>
+                      <th className="px-4 py-3">Serial No.</th>
+                      <th className="px-4 py-3">Checkpoint</th>
+                      {/* Hidden visually, kept in DOM */}
+                      <th className="hidden">Checkpoint ID</th>
+                      <th className="px-4 py-3 w-60">Details</th>
+                      <th className="px-4 py-3 w-60">Comments</th>
+                      <th className="px-4 py-3 w-56">Responsible Person</th>
+                      {/* Hidden visually, kept in DOM */}
+                      <th className="hidden">Responsible Person ID</th>
+                      <th className="px-4 py-3">Target Date</th>
+                    </tr>
+                  </thead>
 
-    <div className="space-y-6">
-      {/* Quotation Number */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Quotation Number <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={selectedEnquiry.quotationNumber || ""}
-          onChange={(e) => handleInputChange(e, "quotationNumber")}
-          placeholder="Enter quotation number"
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+                  <tbody className="divide-y divide-gray-200">
+                    {feasibilityRows.map((row, index) => (
+                      <tr key={row.checkpointId} className="hover:bg-gray-50 transition">
+                        <td className="px-4 py-2">{row.serialNo}</td>
+                        <td className="px-4 py-2">{row.checkpointText}</td>
+                        <td className="hidden">{row.checkpointId}</td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={row.details}
+                            onChange={(e) => handleRowChange(index, "details", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={row.comments}
+                            onChange={(e) => handleRowChange(index, "comments", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={row.responsiblePersonId}
+                            onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="">Select</option>
+                            {responsiblePersons.map(person => (
+                              <option key={person.DataValueField} value={person.DataValueField}>
+                                {person.DataTextField}
+                              </option>
+                            ))}
+                          </select>
+                        </td>
+                        <td className="hidden">{row.responsiblePersonId}</td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="date"
+                            value={row.targetDate}
+                            onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
 
-      {/* Quotation Date */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Quotation Date <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="date"
-            value={selectedEnquiry.quotationDate || ""}
-            onChange={(e) => handleInputChange(e, "quotationDate")}
-            className="block w-full rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-            <CalendarDays size={18} />
-          </div>
-        </div>
-      </div>
+              {/* Feasibility Checkbox */}
+              <div className="flex items-center mt-6">
+                <input
+                  type="checkbox"
+                  checked={isFeasible}
+                  onChange={handleFeasibilityChange}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                />
+                <label className="ml-2 text-sm text-gray-700">Is Feasible</label>
+              </div>
 
-      {/* Part Cost */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Part Cost (₹)
-        </label>
-        <input
-          type="number"
-          value={selectedEnquiry.partCost || ""}
-          onChange={(e) => handleInputChange(e, "partCost")}
-          placeholder="Enter part cost"
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* Tool Cost */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Tool Cost (₹)
-        </label>
-        <input
-          type="number"
-          value={selectedEnquiry.toolCost || ""}
-          onChange={(e) => handleInputChange(e, "toolCost")}
-          placeholder="Enter tool cost"
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
-
-      {/* File Upload */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Upload Quotation File
-        </label>
-        <div className="flex items-center space-x-4">
-          <input
-            type="file"
-            onChange={(e) => handleFileChange(e, "quotationFile")}
-            className="hidden"
-            id="quotation-upload"
-          />
-          <label
-            htmlFor="quotation-upload"
-            className="bg-blue-50 text-blue-600 px-4 py-2 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium"
-          >
-            <Upload size={16} className="inline-block mr-2" /> Upload File
-          </label>
-          {selectedEnquiry.quotationFile && (
-            <button
-              type="button"
-              className="flex items-center text-green-600 hover:underline"
-            >
-              <Eye size={16} className="mr-1" /> View
-            </button>
+              {/* Save Button */}
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={handleSaveFeasibility}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
           )}
-        </div>
-      </div>
-
-      {/* Status Toggle / Button */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Quotation Status
-        </label>
-        <button
-          type="button"
-          className="inline-flex items-center bg-green-100 text-green-800 px-4 py-2 rounded-md text-sm font-medium hover:bg-green-200"
-        >
-          <CheckCircle size={16} className="mr-2" /> Mark as Complete
-        </button>
-      </div>
-
-      {/* Submit Button */}
-      <div className="pt-4 text-right">
-        <button
-          onClick={handleSubmitQuotation}
-          className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition duration-200"
-        >
-          <Upload size={16} className="mr-2" /> Submit Quotation
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
 
-{/* PO */}
-{activeTab === 3 && (
-  <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 w-full max-w-2xl mx-auto">
-    <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-      <FileText size={20} className="mr-2 text-blue-600" />
-      P.O. Document Upload
-    </h3>
 
-    <div className="space-y-6">
-      {/* Purchase Order Number */}
-      <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">
-          Purchase Order Number <span className="text-red-500">*</span>
-        </label>
-        <input
-          type="text"
-          value={selectedEnquiry.customerPONo || ""}
-          onChange={(e) => handleInputChange(e, "customerPONo")}
-          placeholder="Enter P.O. number"
-          className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
-      </div>
+          {/* Quoatation */}
+          {activeTab === 2 && (
+            <div className="bg-white p-8  border  w-full max-w-5xl mx-auto h-full">
 
-      {/* P.O. Date */}
-      <div className="w-full">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          P.O. Date <span className="text-red-500">*</span>
-        </label>
-        <div className="relative">
-          <input
-            type="date"
-            value={selectedEnquiry.customerPODate || ""}
-            onChange={(e) => handleInputChange(e, "customerPODate")}
-            className="block w-full appearance-none rounded-md border border-gray-300 bg-white px-4 py-2 pr-10 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500"
-          />
-          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-400">
-            <CalendarDays size={18} />
-          </div>
-        </div>
-      </div>
 
-      {/* Upload File (Optional) */}
-      <div>
-        <label className="block text-sm font-medium text-gray-600 mb-1">Upload P.O. File</label>
-        <div className="flex items-center space-x-4">
-          <input
-            type="file"
-            onChange={(e) => handleFileChange(e, "poFile")}
-            className="hidden"
-            id="po-upload"
-          />
-          <label
-            htmlFor="po-upload"
-            className="bg-blue-50 text-blue-600 px-4 py-2 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium"
-          >
-            <Upload size={16} className="inline-block mr-2" /> Upload File
-          </label>
-          {selectedEnquiry.poFile && (
-            <button className="flex items-center text-green-600 hover:underline">
-              <Eye size={16} className="mr-1" /> View
-            </button>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                {/* Quotation Number */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Quotation Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedEnquiry.quotationNumber || ""}
+                    onChange={(e) => handleInputChange(e, "quotationNumber")}
+                    placeholder="Enter quotation number"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Quotation Date */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Quotation Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={selectedEnquiry.quotationDate || ""}
+                      onChange={(e) => handleInputChange(e, "quotationDate")}
+                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      <CalendarDays size={18} />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Part Cost */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Part Cost (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={selectedEnquiry.partCost || ""}
+                    onChange={(e) => handleInputChange(e, "partCost")}
+                    placeholder="Enter part cost"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Tool Cost */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Tool Cost (₹)
+                  </label>
+                  <input
+                    type="number"
+                    value={selectedEnquiry.toolCost || ""}
+                    onChange={(e) => handleInputChange(e, "toolCost")}
+                    placeholder="Enter tool cost"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="mb-10">
+                <label className="block text-base font-medium text-gray-700 mb-2">
+                  Upload Quotation File
+                </label>
+                <div className="flex flex-wrap items-center gap-4">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileChange(e, "quotationFile")}
+                    className="hidden"
+                    id="quotation-upload"
+                  />
+                  <label
+                    htmlFor="quotation-upload"
+                    className="bg-blue-50 text-blue-600 px-5 py-2.5 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium flex items-center"
+                  >
+                    <Upload size={16} className="mr-2" /> Upload File
+                  </label>
+                  {selectedEnquiry.quotationFile && (
+                    <button
+                      type="button"
+                      className="flex items-center text-green-600 text-sm hover:underline"
+                    >
+                      <Eye size={16} className="mr-1" /> View File
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSubmitQuotation}
+                  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200"
+                >
+                  <Upload size={16} className="mr-2" /> Submit Quotation
+                </button>
+              </div>
+            </div>
           )}
-        </div>
-      </div>
 
-      {/* Submit Button */}
-      <div className="pt-4">
-        <button
-          onClick={handleSubmitPO}
-          className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700"
-        >
-          <Upload size={16} className="mr-2" /> Submit P.O.
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+
+
+          {/* PO */}
+          {activeTab === 3 && (
+            <div className="bg-white p-8 w-full border max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+                {/* Purchase Order Number */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    Purchase Order Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={selectedEnquiry.customerPONo || ""}
+                    onChange={(e) => handleInputChange(e, "customerPONo")}
+                    placeholder="Enter P.O. number"
+                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* P.O. Date */}
+                <div>
+                  <label className="block text-base font-medium text-gray-700 mb-2">
+                    P.O. Date <span className="text-red-500">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      value={selectedEnquiry.customerPODate || ""}
+                      onChange={(e) => handleInputChange(e, "customerPODate")}
+                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
+                      <CalendarDays size={18} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* File Upload */}
+              <div className="mb-10">
+                <label className="block text-base font-medium text-gray-700 mb-2">
+                  Upload P.O. File
+                </label>
+                <div className="flex flex-wrap items-center gap-4">
+                  <input
+                    type="file"
+                    onChange={(e) => handleFileChange(e, "poFile")}
+                    className="hidden"
+                    id="po-upload"
+                  />
+                  <label
+                    htmlFor="po-upload"
+                    className="bg-blue-50 text-blue-600 px-5 py-2.5 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium flex items-center"
+                  >
+                    <Upload size={16} className="mr-2" /> Upload File
+                  </label>
+                  {selectedEnquiry.poFile && (
+                    <button
+                      type="button"
+                      className="flex items-center text-green-600 text-sm hover:underline"
+                    >
+                      <Eye size={16} className="mr-1" /> View File
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSubmitPO}
+                  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200"
+                >
+                  <Upload size={16} className="mr-2" /> Submit P.O.
+                </button>
+              </div>
+            </div>
+          )}
+
 
 
           {/* Status Tab */}
@@ -587,13 +561,12 @@ const handleSubmitPO = async () => {
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Current Status</h3>
                 <div className="flex items-center justify-between">
                   <div>
-                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${
-                      currentStatus === 'Under Review' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : currentStatus === 'PO Received' 
+                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${currentStatus === 'Under Review'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : currentStatus === 'PO Received'
                           ? 'bg-green-100 text-green-800'
                           : 'bg-blue-100 text-blue-800'
-                    }`}>
+                      }`}>
                       {currentStatus}
                     </span>
                     <p className="mt-2 text-sm text-gray-600">
@@ -609,7 +582,7 @@ const handleSubmitPO = async () => {
                   </button>
                 </div>
               </div>
-              
+
               {isProcessTrackerOpen && (
                 <ProcessTracker
                   isOpen={true}
@@ -619,7 +592,7 @@ const handleSubmitPO = async () => {
                   selectedEnquiry={selectedEnquiry}
                 />
               )}
-              
+
               <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Status History</h3>
                 <div className="space-y-4">
@@ -633,7 +606,7 @@ const handleSubmitPO = async () => {
                       <p className="text-xs text-gray-500">{selectedEnquiry.enquiryReceivedDate}</p>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-start">
                     <div className="h-full">
                       <div className="h-4 w-4 rounded-full bg-blue-500 mt-1"></div>
@@ -644,7 +617,7 @@ const handleSubmitPO = async () => {
                       <p className="text-xs text-gray-500">{selectedEnquiry.dateQuoted}</p>
                     </div>
                   </div>
-                  
+
                   {selectedEnquiry.customerPODate && (
                     <div className="flex items-start">
                       <div className="h-full">
@@ -668,7 +641,7 @@ const handleSubmitPO = async () => {
 
 export default EnquiryDetails;
 
-       
+
 
 
 
