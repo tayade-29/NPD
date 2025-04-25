@@ -108,8 +108,8 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
         return saveFeasibilityCheck({
           pPkNPDEnquiryInitialFeasibilityStudyId: 0,
           pFkEnquiryMasterId: enquiryId,
-          pFkNPDPreliminaryInitialStudyId: row.checkpointId,           // ✅ checkpoint ID
-          pFkResponsiblePersonId: row.responsiblePersonId,  
+          pFkNPDPreliminaryInitialStudyId: Number(row.checkpointId),           // ✅ checkpoint ID
+          pFkResponsiblePersonId: Number(row.responsiblePersonId),  
           pCommentActionRequired: row.comments || '',
           pTargetDate: row.targetDate || '',
           pCreatedBy: userData?.roleId,
