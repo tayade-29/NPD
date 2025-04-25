@@ -39,7 +39,6 @@ const EnquiryForm = () => {
   const [checkDuplicate, { isLoading: isCheckingDuplicate }] = useCheckDuplicateEnquiryMutation();
   const [addEnquiry, { isLoading: isSubmitting }] = useAddEnquiryMutation();
 
-  // Parse customers data
   let parsedCustomers = [];
   if (Array.isArray(customers)) {
     parsedCustomers = customers;
@@ -50,7 +49,7 @@ const EnquiryForm = () => {
       console.error("Failed to parse customer list", e);
     }
   }
-  // Create customer map
+
   const customerMap = {};
   parsedCustomers.forEach(cust => {
     customerMap[cust.DataValueField] = cust.DataTextField;
@@ -112,7 +111,6 @@ const EnquiryForm = () => {
         return;
       }
 
-      // Check for duplicate entries only in create mode
       if (!editMode) {
         const duplicateResult = await checkDuplicate({
           pFkCustomerId: formData.pFkCustomerId,
@@ -128,7 +126,6 @@ const EnquiryForm = () => {
         }
       }
 
-      // Add/Update enquiry
       await addEnquiry({
         pPkEnquiryMasterId: editMode ? formData.pPkEnquiryMasterId : 0,
         pFkCustomerId: formData.pFkCustomerId,
@@ -151,14 +148,14 @@ const EnquiryForm = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Navigation Tabs */}
-        <div className="mb-8 border-b border-gray-200">
-          <nav className="flex space-x-8">
+        <div className="mb-6 border-b border-gray-200">
+          <nav className="flex justify-start space-x-8">
             <button
               onClick={() => { setPage('form'); setEditMode(false); }}
-              className={`pb-4 px-1 text-sm font-medium ${page === 'form'
+              className={`pb-3 px-1 text-sm font-medium ${page === 'form'
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
@@ -167,7 +164,7 @@ const EnquiryForm = () => {
             </button>
             <button
               onClick={() => { setPage('table'); refetch(); }}
-              className={`pb-4 px-1 text-sm font-medium ${page === 'table'
+              className={`pb-3 px-1 text-sm font-medium ${page === 'table'
                 ? 'border-b-2 border-blue-500 text-blue-600'
                 : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
                 }`}
@@ -179,7 +176,7 @@ const EnquiryForm = () => {
 
         {/* Form Page */}
         {page === 'form' && (
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-8 rounded-lg shadow-sm space-y-8">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center">
                 {editMode && (
@@ -206,7 +203,7 @@ const EnquiryForm = () => {
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-700">Basic Information</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Customer Name <span className="text-red-500">*</span>
@@ -228,7 +225,7 @@ const EnquiryForm = () => {
                       name="projectVehicleProgram"
                       value={formData.projectVehicleProgram}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
@@ -238,7 +235,7 @@ const EnquiryForm = () => {
               {/* Part Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-700">Part Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Part Code <span className="text-red-500">*</span>
@@ -248,7 +245,7 @@ const EnquiryForm = () => {
                       name="partCode"
                       value={formData.partCode}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
@@ -261,7 +258,7 @@ const EnquiryForm = () => {
                       name="partName"
                       value={formData.partName}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
@@ -274,7 +271,7 @@ const EnquiryForm = () => {
                       name="rawMaterial"
                       value={formData.rawMaterial}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       required
                     />
                   </div>
@@ -292,7 +289,7 @@ const EnquiryForm = () => {
               {/* Additional Details */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-700">Additional Details</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       SOP Date
@@ -302,7 +299,7 @@ const EnquiryForm = () => {
                       name="sop"
                       value={formData.sop}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
                   <div>
@@ -313,7 +310,7 @@ const EnquiryForm = () => {
                       name="remark"
                       value={formData.remark}
                       onChange={handleChange}
-                      className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full p-3 border rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       rows="3"
                     />
                   </div>
@@ -321,33 +318,26 @@ const EnquiryForm = () => {
                     <label className="flex items-center">
                       <input
                         type="checkbox"
+                        name="isStatus"
                         checked={formData.isStatus === 1}
                         onChange={handleStatusChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="mr-2"
                       />
-                      <span className="ml-2 text-sm text-gray-600">Active</span>
+                      Mark as Active
                     </label>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-3">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors duration-150 flex items-center"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Reset
-                </button>
+              {/* Submit Button */}
+              <div className="pr-4">
+               
                 <button
                   type="submit"
                   disabled={isSubmitting || isCheckingDuplicate}
-                  className={`px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-150 flex items-center ${(isSubmitting || isCheckingDuplicate) ? 'opacity-75 cursor-not-allowed' : ''
-                    }`}
+                  className={`flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-md ${isSubmitting || isCheckingDuplicate ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
                 >
-                  <Save className="w-4 h-4 mr-2" />
-                  {isSubmitting ? 'Saving...' : isCheckingDuplicate ? 'Checking...' : (editMode ? 'Update Enquiry' : 'Save Enquiry')}
+                  {isSubmitting || isCheckingDuplicate ? 'Submitting...' : <><Save className="w-5 h-5 mr-2" />Save</>}
                 </button>
               </div>
             </form>
@@ -359,10 +349,7 @@ const EnquiryForm = () => {
           <EnquiryTable
             enquiries={enquiries}
             isLoading={isLoadingEnquiries}
-            refetch={refetch}
-            onNewEnquiryClick={() => { setPage('form'); resetForm(); }}
-            customerMap={customerMap}
-            onEditClick={handleEditClick}
+            handleEditClick={handleEditClick}
           />
         )}
       </div>
@@ -371,4 +358,3 @@ const EnquiryForm = () => {
 };
 
 export default EnquiryForm;
-
