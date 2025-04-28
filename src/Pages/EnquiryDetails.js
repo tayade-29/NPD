@@ -113,8 +113,9 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
     if (feasibilityRows.some(row => !row.details || !row.targetDate)) {
       // Alert message when required fields are not filled
       alert("Please fill in all the fields (Details and Target Date) before saving.");
-  }}
- 
+    }
+  }
+
   const isSaveDisabled = () => {
     return feasibilityRows.some(row => !row.details || !row.targetDate);
   }
@@ -191,9 +192,16 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
       <div className="w-full h-[600px] bg-white rounded-xl flex flex-col">
         <div className="px-10 py-5 pb-0 border-b bg-white">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-gray-800">
-              Enquiry Details <span className="text-sm font-normal text-gray-500 ml-2">{selectedEnquiry.EnquiryRegisterNo}</span>
-            </h2>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">
+                Enquiry Details
+              </h2>
+              <p className="text-sm font-normal text-gray-800 ml-2 mt-1">
+                {selectedEnquiry.EnquiryRegisterNo}
+              </p>
+            </div>
+
+
             <button onClick={onClose} className="text-gray-800 hover:text-gray-600 transition-colors">
               <X size={24} />
             </button>
@@ -206,8 +214,8 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
                   key={tab}
                   onClick={() => setActiveTab(i)}
                   className={`px-6 py-3 text-sm font-medium transition-colors justify-center rounded-t-lg ${activeTab === i
-                      ? "bg-white border-t border-r border-l border-gray-200 text-blue-600"
-                      : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                    ? "bg-white border-t border-r border-l border-gray-200 text-blue-600"
+                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
                     }`}
                 >
                   {tab}
@@ -273,103 +281,103 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
 
           {/* Feasibility */}
           {activeTab === 1 && (
-  <div>
-    {/* Table Container */}
-    <div className="overflow-x-auto">
-      <table className="min-w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
-        <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-          <tr>
-            <th className="px-4 py-3">Serial No.</th>
-            <th className="px-4 py-3">Checkpoint</th>
-            {/* Hidden visually, kept in DOM */}
-            <th className="hidden">Checkpoint ID</th>
-            <th className="px-4 py-3 w-60">Details</th>
-            <th className="px-4 py-3 w-60">Comments</th>
-            <th className="px-4 py-3 w-56">Responsible Person</th>
-            {/* Hidden visually, kept in DOM */}
-            <th className="hidden">Responsible Person ID</th>
-            <th className="px-4 py-3">Target Date</th>
-          </tr>
-        </thead>
+            <div>
+              {/* Table Container */}
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
+                  <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <tr>
+                      <th className="px-4 py-3">Serial No.</th>
+                      <th className="px-4 py-3">Checkpoint</th>
+                      {/* Hidden visually, kept in DOM */}
+                      <th className="hidden">Checkpoint ID</th>
+                      <th className="px-4 py-3 w-60">Details</th>
+                      <th className="px-4 py-3 w-60">Comments</th>
+                      <th className="px-4 py-3 w-56">Responsible Person</th>
+                      {/* Hidden visually, kept in DOM */}
+                      <th className="hidden">Responsible Person ID</th>
+                      <th className="px-4 py-3">Target Date</th>
+                    </tr>
+                  </thead>
 
-        <tbody className="divide-y divide-gray-200">
-          {feasibilityRows.map((row, index) => (
-            <tr key={row.checkpointId} className="hover:bg-gray-50 transition">
-              <td className="px-4 py-2">{row.serialNo}</td>
-              <td className="px-4 py-2">{row.checkpointText}</td>
-              <td className="hidden">{row.checkpointId}</td>
-              <td className="px-4 py-2">
-                <input
-                  type="text"
-                  value={row.details}
-                  onChange={(e) => handleRowChange(index, "details", e.target.value)}
-                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-              </td>
-              <td className="px-4 py-2">
-                <input
-                  type="text"
-                  value={row.comments}
-                  onChange={(e) => handleRowChange(index, "comments", e.target.value)}
-                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </td>
-              <td className="px-4 py-2">
-                <select
-                  value={row.responsiblePersonId}
-                  onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
-                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="">Select</option>
-                  {responsiblePersons
-                    .filter(person => person.DataValueField >= 1) // Apply filter here
-                    .map(person => (
-                      <option key={person.DataValueField} value={person.DataValueField}>
-                        {person.DataTextField}
-                      </option>
+                  <tbody className="divide-y divide-gray-200">
+                    {feasibilityRows.map((row, index) => (
+                      <tr key={row.checkpointId} className="hover:bg-gray-50 transition">
+                        <td className="px-4 py-2">{row.serialNo}</td>
+                        <td className="px-4 py-2">{row.checkpointText}</td>
+                        <td className="hidden">{row.checkpointId}</td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={row.details}
+                            onChange={(e) => handleRowChange(index, "details", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="text"
+                            value={row.comments}
+                            onChange={(e) => handleRowChange(index, "comments", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          />
+                        </td>
+                        <td className="px-4 py-2">
+                          <select
+                            value={row.responsiblePersonId}
+                            onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            <option value="">Select</option>
+                            {responsiblePersons
+                              .filter(person => person.DataValueField >= 1) // Apply filter here
+                              .map(person => (
+                                <option key={person.DataValueField} value={person.DataValueField}>
+                                  {person.DataTextField}
+                                </option>
+                              ))}
+                          </select>
+                        </td>
+                        <td className="hidden">{row.responsiblePersonId}</td>
+                        <td className="px-4 py-2">
+                          <input
+                            type="date"
+                            value={row.targetDate}
+                            onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
+                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </td>
+                      </tr>
                     ))}
-                </select>
-              </td>
-              <td className="hidden">{row.responsiblePersonId}</td>
-              <td className="px-4 py-2">
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Feasibility Checkbox */}
+              <div className="flex items-center mt-6">
                 <input
-                  type="date"
-                  value={row.targetDate}
-                  onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
-                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                  required
+                  type="checkbox"
+                  checked={isFeasible}
+                  onChange={handleFeasibilityChange}
+                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                 />
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                <label className="ml-2 text-sm text-gray-700">Is Feasible</label>
+              </div>
 
-    {/* Feasibility Checkbox */}
-    <div className="flex items-center mt-6">
-      <input
-        type="checkbox"
-        checked={isFeasible}
-        onChange={handleFeasibilityChange}
-        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-      />
-      <label className="ml-2 text-sm text-gray-700">Is Feasible</label>
-    </div>
-
-    {/* Save Button */}
-    <div className="flex justify-end mt-6">
-      <button
-        onClick={handleSaveFeasibility}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
-        disabled={isSaveDisabled()}
-      >
-        Save
-      </button>
-    </div>
-  </div>
-)}
+              {/* Save Button */}
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={handleSaveFeasibility}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
+                  disabled={isSaveDisabled()}
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          )}
 
 
           {/* Quoatation */}
@@ -564,12 +572,14 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
 
           {/* Status Tab */}
           {activeTab === 4 && (
-            <div className="space-y-6">
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Current Status</h3>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <span className={`inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium ${currentStatus === 'Under Review'
+            <div className="space-y-8 p-4 md:p-6">
+
+              {/* Current Status Section */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-800">Current Status</h3>
+                  <div className="mt-2 flex items-center space-x-3">
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${currentStatus === 'Under Review'
                         ? 'bg-yellow-100 text-yellow-800'
                         : currentStatus === 'PO Received'
                           ? 'bg-green-100 text-green-800'
@@ -577,70 +587,75 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
                       }`}>
                       {currentStatus}
                     </span>
-                    <p className="mt-2 text-sm text-gray-600">
-                      Last updated: {new Date().toLocaleDateString()}
-                    </p>
+                    <span className="text-xs text-gray-500">Last updated: {new Date().toLocaleDateString()}</span>
                   </div>
-                  <button
-                    onClick={() => setIsProcessTrackerOpen(true)}
-                    className="text-blue-600 hover:text-blue-800 font-medium px-4 py-2 border border-blue-300 rounded-md hover:bg-blue-50 transition-colors flex items-center"
-                  >
-                    <Edit2 size={16} className="mr-2" />
-                    Update Status
-                  </button>
                 </div>
+
+                <button
+                  onClick={() => setIsProcessTrackerOpen(true)}
+                  className="mt-4 md:mt-0 flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition"
+                >
+                  <Edit2 size={16} className="mr-2" />
+                  Update Status
+                </button>
               </div>
 
-              {isProcessTrackerOpen && (
-                <ProcessTracker
-                  isOpen={true}
-                  onClose={() => setIsProcessTrackerOpen(false)}
-                  currentStatus={currentStatus}
-                  onStatusUpdate={setCurrentStatus}
-                  selectedEnquiry={selectedEnquiry}
-                />
-              )}
+              {/* Status History Section */}
+              <div className="bg-white p-6 rounded-xl shadow-sm border">
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">Status History</h3>
 
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Status History</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="h-full">
-                      <div className="h-4 w-4 rounded-full bg-green-500 mt-1"></div>
-                      <div className="h-full w-0.5 bg-gray-300 ml-[7px] mt-1"></div>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-800">Enquiry Received</p>
+                <div className="relative pl-6 space-y-8">
+                  <div className="absolute left-2 top-0 bottom-0 w-0.5 bg-gray-200" />
+
+                  {/* Timeline Items */}
+                  <div className="relative">
+                    <div className="absolute -left-1 top-1 bg-green-500 h-3 w-3 rounded-full"></div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Enquiry Received</p>
                       <p className="text-xs text-gray-500">{selectedEnquiry.enquiryReceivedDate}</p>
                     </div>
                   </div>
 
-                  <div className="flex items-start">
-                    <div className="h-full">
-                      <div className="h-4 w-4 rounded-full bg-blue-500 mt-1"></div>
-                      <div className="h-full w-0.5 bg-gray-300 ml-[7px] mt-1"></div>
-                    </div>
-                    <div className="ml-4">
-                      <p className="text-sm font-medium text-gray-800">Quotation Sent</p>
+                  <div className="relative">
+                    <div className="absolute -left-1 top-1 bg-blue-500 h-3 w-3 rounded-full"></div>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Quotation Sent</p>
                       <p className="text-xs text-gray-500">{selectedEnquiry.dateQuoted}</p>
                     </div>
                   </div>
 
                   {selectedEnquiry.customerPODate && (
-                    <div className="flex items-start">
-                      <div className="h-full">
-                        <div className="h-4 w-4 rounded-full bg-yellow-500 mt-1"></div>
-                      </div>
-                      <div className="ml-4">
-                        <p className="text-sm font-medium text-gray-800">PO Received</p>
+                    <div className="relative">
+                      <div className="absolute -left-1 top-1 bg-yellow-500 h-3 w-3 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-800">PO Received</p>
                         <p className="text-xs text-gray-500">{selectedEnquiry.customerPODate}</p>
                       </div>
                     </div>
                   )}
                 </div>
               </div>
+
+              {/* Center Modal for Process Tracker */}
+              {isProcessTrackerOpen && (
+                <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                  <div className="bg-white w-full max-w-[1200px] mx-4 elative">
+                    <ProcessTracker
+                      isOpen={true}
+                      onClose={() => setIsProcessTrackerOpen(false)}
+                      currentStatus={currentStatus}
+                      onStatusUpdate={setCurrentStatus}
+                      selectedEnquiry={selectedEnquiry}
+                    />
+
+                  </div>
+                </div>
+              )}
             </div>
           )}
+
+
+
         </div>
       </div>
     </div>

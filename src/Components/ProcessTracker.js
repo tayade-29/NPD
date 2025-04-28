@@ -90,7 +90,7 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
   if (!isOpen) return null;
 
   return (
-    <div className="w-[800px] h-[600px] bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
+    <div className="w-full h-[600px] bg-white rounded-xl shadow-lg border border-gray-200 flex flex-col">
       <div className="p-5 border-b border-gray-200 bg-gray-50">
         <div className="flex justify-between items-center">
           <h3 className="text-xl font-bold text-gray-800">Process Tracker</h3>
@@ -101,9 +101,7 @@ const ProcessTracker = ({ isOpen, onClose, currentStatus, onStatusUpdate, select
             <X size={20} />
           </button>
         </div>
-        <p className="text-sm text-gray-600 mt-1">
-          Track and update the process status for this enquiry
-        </p>
+       
       </div>
 
       <div className="border-b border-gray-200 bg-white overflow-x-auto">
