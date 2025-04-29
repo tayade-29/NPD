@@ -219,7 +219,7 @@ function EmployeePage() {
         {/* Header section */}
         <div className="flex items-center justify-between px-6 py-4">
           {/* Heading */}
-          <h2 className="text-2xl font-semibold text-gray-800">Employee Management</h2>
+          <h2 className="text-2xl font-semibold text-gray-800">Users</h2>
 
           {/* Search Bar - centered and wider */}
           <div className="flex-1 mx-40">
@@ -259,7 +259,7 @@ function EmployeePage() {
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <PlusCircle className="w-5 h-5 mr-2" />
-            Add New Employee
+            Add New user
           </button>
         </div>
         {/* </div>
@@ -335,7 +335,7 @@ function EmployeePage() {
               <div className="p-6 border-b border-gray-200">
                 <div className="flex justify-between items-center">
                   <h3 className="text-xl font-semibold">
-                    {editId ? 'Edit Employee' : 'New Employee'}
+                    {editId ? 'Edit User' : 'New User'}
                   </h3>
                   <button
                     onClick={() => setShowForm(false)}

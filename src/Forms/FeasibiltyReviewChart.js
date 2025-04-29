@@ -1,209 +1,266 @@
-import React, { useState } from "react";
-import { Plus, Trash2, FileSpreadsheet, Download, Upload } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  useGetEnquiriesByIdQuery,
+  useGetCheckpointsForFeasibilityQuery,
+  useGetSubCheckpointForFeasibilityQuery,
+  useGetResponsiblePersonQuery
+} from "../features/api/apiSliceenquiry";
+import { useLocation } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
-export default function FeasibilityReview() {
-    const [formData, setFormData] = useState({
-        customer: "",
-        partNo: "",
-        date: "",
-    });
 
-    const columns = [
-        "Check Points",
-        "Details",
-        "Comment / Action Required",
-        "Person Responsible",
-        "Target Date",
-    ];
+const FeasibilityReview = () => {
+  const { userData } = useAuth();
+  const [formData, setFormData] = useState({ customer: "", partNo: "", date: "" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const [rows, setRows] = useState([]);
+  const [checkpointOptions, setCheckpointOptions] = useState([]);
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState("");
+  const location = useLocation();
+  const enquiryId = location.state?.enquiryId || 0;
+  console.log("Enquiry ID:", enquiryId);
 
-    const [rows, setRows] = useState([{
-        id: "1",
-        "Check Points": "",
-        "Details": "",
-        "Comment / Action Required": "",
-        "Person Responsible": "",
-        "Target Date": "",
-    }]);
 
-    const [searchTerm, setSearchTerm] = useState("");
 
-    const addRow = () => {
-        const newRow = {
-            id: (rows.length + 1).toString(),
-            ...Object.fromEntries(columns.map(col => [col, ""]))
-        };
-        setRows([...rows, newRow]);
-    };
+  // const { data: enquiryData } = useGetEnquiriesByIdQuery({ pAction: 0, pLookUpId:enquiryId });
+  const { data: checkpointData } = useGetCheckpointsForFeasibilityQuery();
+  const { data: fetchedSubCheckpoints } = useGetSubCheckpointForFeasibilityQuery(
+    { checkpointId: selectedCheckpoint },
+    { skip: !selectedCheckpoint }
+  );
 
-    const removeRow = (id) => {
-        setRows(rows.filter(row => row.id !== id));
-    };
+  useEffect(() => {
+    if (checkpointData) {
+      setCheckpointOptions(checkpointData);
+    }
+  }, [checkpointData]);
 
-    const updateRow = (id, column, value) => {
-        setRows(rows.map(row => (row.id === id ? { ...row, [column]: value } : row)));
-    };
+  const { data: enquiryData } = useGetEnquiriesByIdQuery({ pAction: 0, pLookUpId: enquiryId });
 
-    const filteredRows = rows.filter(row =>
-        Object.values(row).some(value =>
-            value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
+  useEffect(() => {
+    console.log('Enquiry Data Response:', enquiryData);
+    if (enquiryData && enquiryData.length > 0) {
+      const matchedEnquiry = enquiryData.find(item => item.PkEnquiryMasterId === enquiryId);
+      if (matchedEnquiry) {
+        setFormData({
+          customer: matchedEnquiry.CustomerName || "",
+          partNo: matchedEnquiry.PartCode || "",
+          date: matchedEnquiry.EnquiryDate?.slice(0, 10) || "",
+        });
+      }
+    }
+  }, [enquiryData, enquiryId]);
+
+
+  useEffect(() => {
+    if (fetchedSubCheckpoints && fetchedSubCheckpoints.length > 0) {
+      const newRows = fetchedSubCheckpoints.map((subCheckpoint, index) => ({
+        id: (index + 1).toString(),
+        checkpoint: subCheckpoint.DataTextField || "",
+        comment: "",
+        person: "",
+        targetDate: "",
+      }));
+      setRows(newRows);
+    } else {
+      setRows([]); // Clear rows if no sub-checkpoints
+    }
+  }, [fetchedSubCheckpoints, selectedCheckpoint]);
+
+  const handleCheckpointChange = (e) => {
+    const checkpointId = e.target.value;
+    setSelectedCheckpoint(checkpointId);
+  };
+
+  const updateRow = (id, field, value) => {
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === id ? { ...row, [field]: value } : row))
     );
+  };
 
-    const exportToCSV = () => {
-        const headers = ["Sr No", ...columns];
-        const csvContent = [
-            headers.join(","),
-            ...filteredRows.map((row, index) => [
-                index + 1,
-                ...columns.map(col => row[col])
-            ].join(","))
-        ].join("\n");
 
-        const blob = new Blob([csvContent], { type: "text/csv" });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "feasibility-review.csv";
-        a.click();
-        window.URL.revokeObjectURL(url);
+  const [responsiblePersons, setResponsiblePersons] = useState([]);
+  const [feasibilityRows, setFeasibilityRows] = useState([]);
+
+
+  const { data: responsibleData } = useGetResponsiblePersonQuery({
+    clientId: userData?.clientId,
+    plantId: userData?.plantId,
+    locationId: userData?.locationId
+  });
+  useEffect(() => {
+    if (responsibleData) {
+      setResponsiblePersons(responsibleData);
+    }
+  }, [responsibleData]);
+  const handleRowChange = (index, field, value) => {
+    const updatedRows = [...feasibilityRows];
+    const updateRow = (id, field, value) => {
+      setRows(prevRows =>
+        prevRows.map(row => {
+          if (row.id !== id) return row;
+
+          // If changing the responsible person, also set name
+          if (field === "responsiblePersonId") {
+            const selected = responsiblePersons.find(p => p.DataValueField === parseInt(value));
+            return {
+              ...row,
+              responsiblePersonId: value,
+              responsiblePersonName: selected?.DataTextField || ""
+            };
+          }
+
+          return { ...row, [field]: value };
+        })
+      );
     };
 
-    const getColumnWidth = (column) => {
-        return "min-w-[200px]";  // Adjust as necessary
-    };
+    if (field === "responsiblePersonId") {
+      const selected = responsiblePersons.find(p => p.DataValueField === parseInt(value));
+      updatedRows[index]["responsiblePersonName"] = selected?.DataTextField || '';
+    }
+    updatedRows[index][field] = value;
+    setFeasibilityRows(updatedRows);
+  };
 
-    return (
-        <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-[1200px]">
-            <div className="mb-6">
-                <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-3">
-                        <FileSpreadsheet className="w-8 h-8 text-blue-600" />
-                        <h1 className="text-2xl font-bold text-gray-800">Feasibility Review</h1>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                        <div>STPPL / MKD / FM / 02</div>
-                        <div>Rev. No.: 06</div>
-                        <div>Rev. Date: 20.11.2021</div>
-                    </div>
-                </div>
+  const filteredRows = rows.filter((row) =>
+    Object.values(row).some((value) =>
+      value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
 
-                {/* Form Header */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div className="space-y-6">
-                        <div>
-                            <label className="block text-base font-medium text-gray-700 mb-2">Customer</label>
-                            <input
-                                type="text"
-                                value={formData.customer}
-                                onChange={(e) => setFormData({ ...formData, customer: e.target.value })}
-                                className="block w-full px-4 py-3 text-base border rounded-md shadow-sm" />
-                        </div>
-                        <div>
-                            <label className="block text-base font-medium text-gray-700 mb-2">Part No</label>
-                            <input
-                                type="text"
-                                value={formData.partNo}
-                                onChange={(e) => setFormData({ ...formData, partNo: e.target.value })}
-                                className="block w-full px-4 py-3 text-base border rounded-md shadow-sm" />
-                        </div>
-                        <div>
-                            <label className="block text-base font-medium text-gray-700 mb-2">Date</label>
-                            <input
-                                type="date"
-                                value={formData.date}
-                                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                className="block w-full px-4 py-3 text-base border rounded-md shadow-sm" />
-                        </div>
-                    </div>
-                </div>
+  return (
+    <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-[1300px]">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800 mb-4">Feasibility Review</h1>
 
-                <div className="flex justify-between items-center mb-6">
-                    <div className="flex gap-2">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search table..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="pl-12 pr-4 py-3 w-80 text-base border rounded-l-lg" />
-                        </div>
-                        <button
-                            className="px-6 py-3 bg-blue-500 text-white rounded-r-lg hover:bg-blue-400 text-base">
-                            Search
-                        </button>
-                    </div>
-                    <div className="flex gap-3">
-                        <button
-                            onClick={exportToCSV}
-                            className="flex items-center gap-2 px-6 py-3 bg-green-400 text-white rounded-lg hover:bg-green-700 text-base">
-                            <Upload className="w-5 h-5" /> Export
-                        </button>
-                        <label className="flex items-center gap-2 px-6 py-3 bg-gray-400 text-white rounded-lg hover:bg-gray-700 cursor-pointer text-base">
-                            <Download className="w-5 h-5" /> Import
-                            <input type="file" className="hidden" accept=".csv" />
-                        </label>
-                        <button
-                            onClick={addRow}
-                            className="flex items-center gap-2 px-6 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-700 text-base">
-                            <Plus className="w-5 h-5" /> Add Row
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full border-collapse bg-white">
-                    <thead>
-                        <tr className="bg-gray-50">
-                            <th className="px-6 py-4 text-left text-base font-semibold text-gray-600 border-b min-w-[80px]">Sr No</th>
-                            {columns.map((column, index) => (
-                                <th key={index} className={`px-6 py-4 text-left text-base font-semibold text-gray-600 border-b ${getColumnWidth(column)}`}>
-                                    {column}
-                                </th>
-                            ))}
-                            <th className="px-6 py-4 text-left text-base font-semibold text-gray-600 border-b min-w-[80px]">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                        {filteredRows.map((row, rowIndex) => (
-                            <tr key={row.id} className="hover:bg-gray-50">
-                                <td className="px-6 py-4 text-base text-gray-600">{rowIndex + 1}</td>
-                                {columns.map((column, colIndex) => (
-                                    <td key={colIndex} className={`px-6 py-4 ${getColumnWidth(column)}`}>
-                                        {column === "Target Date" ? (
-                                            <input
-                                                type="date"
-                                                className="w-full px-4 py-2 text-base border rounded focus:ring-2 focus:ring-blue-500"
-                                                value={row[column]}
-                                                onChange={(e) => updateRow(row.id, column, e.target.value)}
-                                            />
-                                        ) : (
-                                            <input
-                                                type="text"
-                                                className="w-full px-4 py-2 text-base border rounded focus:ring-2 focus:ring-blue-500"
-                                                value={row[column]}
-                                                onChange={(e) => updateRow(row.id, column, e.target.value)}
-                                            />
-                                        )}
-                                    </td>
-                                ))}
-                                <td className="px-6 py-4">
-                                    <button
-                                        onClick={() => removeRow(row.id)}
-                                        className="text-red-500 hover:text-red-700"
-                                        title="Delete Row">
-                                        <Trash2 className="w-5 h-5" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-
-            <div className="mt-4 text-base text-gray-500">
-                Showing {filteredRows.length} of {rows.length} entries
-            </div>
+        {/* Customer Details */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-gray-50 p-4 rounded shadow">
+            <p className="text-sm text-gray-500">Customer</p>
+            <p className="font-semibold">{formData.customer || "Not specified"}</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded shadow">
+            <p className="text-sm text-gray-500">Part Number</p>
+            <p className="font-semibold">{formData.partNo || "Not specified"}</p>
+          </div>
+          <div className="bg-gray-50 p-4 rounded shadow">
+            <p className="text-sm text-gray-500">Date</p>
+            <p className="font-semibold">
+              {formData.date
+                ? new Date(formData.date).toLocaleDateString("en-US", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })
+                : "Not specified"}
+            </p>
+          </div>
         </div>
-    );
-}
+
+        {/* Centered Search
+        <div className="flex justify-center mb-6">
+          <input
+            type="text"
+            placeholder="Search..."
+            className="w-10 px-10 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div> */}
+      </div>
+
+      {/* Table */}
+      <div className="relative">
+        <div className="overflow-y-auto max-h-[400px] border rounded-lg">
+          <table className="w-full border-collapse">
+            <thead className="sticky top-0 bg-gray-100 shadow text-gray-700">
+              <tr>
+                <th className="px-4 py-3 border">Sr No</th>
+
+                {/* Checkpoints Header with Dropdown */}
+                <th className="px-4 py-3 border">
+                  <div className="flex flex-col items-center">
+
+                    <select
+                      value={selectedCheckpoint}
+                      onChange={handleCheckpointChange}
+                      className="mt-2 w-48 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select Check Point</option>
+                      {checkpointOptions.map((option) => (
+                        <option key={option.DataValueField} value={option.DataValueField}>
+                          {option.DataTextField}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </th>
+
+                <th className="px-4 py-3 border">Comment / Action Required</th>
+                <th className="px-4 py-3 border">Person Responsible</th>
+                <th className="px-4 py-3 border">Target Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRows.length > 0 ? (
+                filteredRows.map((row, index) => (
+                  <tr key={row.id} className="hover:bg-gray-50">
+                    <td className="px-4 py-2 border text-center">{index + 1}</td>
+                    <td className="px-4 py-2 border">{row.checkpoint}</td>
+                    <td className="px-4 py-2 border">
+                      <input
+                        type="text"
+                        className="w-full px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500"
+                        value={row.comment}
+                        onChange={(e) => updateRow(row.id, "comment", e.target.value)}
+                      />
+                    </td>
+                    <select
+                      value={row.responsiblePersonId || ""}
+                      onChange={(e) => updateRow(row.id, "responsiblePersonId", e.target.value)}
+                      className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="">Select</option>
+                      {responsiblePersons.map(person => (
+                        <option key={person.DataValueField} value={person.DataValueField}>
+                          {person.DataTextField}
+                        </option>
+                      ))}
+                    </select>
+
+
+                    <td className="px-4 py-2 border">
+                      <input
+                        type="date"
+                        className="w-full px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500"
+                        value={row.targetDate}
+                        onChange={(e) => updateRow(row.id, "targetDate", e.target.value)}
+                      />
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-6 text-gray-400">
+                    No records found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Fixed Save Button */}
+        <div className="sticky bottom-0 bg-white p-4 border-t flex justify-end">
+          <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FeasibilityReview;

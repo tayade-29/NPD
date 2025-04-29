@@ -218,6 +218,18 @@ const EnquiryForm = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Customer Contact Person Name <span className="text-red-500">*</span>
+                    </label>
+                    <CustomerDropdown
+                      selectedCustomer={formData.customerName}
+                      onCustomerSelect={handleCustomerSelect}
+                      customers={customers}
+                      isLoading={isLoadingCustomers}
+                      error={customerError}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
                       Project/Vehicle Program <span className="text-red-500">*</span>
                     </label>
                     <input

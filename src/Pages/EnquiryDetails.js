@@ -53,6 +53,7 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
   const [checkpoints, setCheckpoints] = useState([]);
   const [responsiblePersons, setResponsiblePersons] = useState([]);
   const [feasibilityRows, setFeasibilityRows] = useState([]);
+  const [feasibilityReason, setFeasibilityReason] = useState('');
   const { data: checkpointData } = useGetCheckpointsQuery();
   const { data: responsibleData } = useGetResponsiblePersonQuery({
     clientId: userData?.clientId,
@@ -281,103 +282,141 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
 
           {/* Feasibility */}
           {activeTab === 1 && (
-            <div>
-              {/* Table Container */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm text-left text-gray-700 border border-gray-200 rounded-lg">
-                  <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <tr>
-                      <th className="px-4 py-3">Serial No.</th>
-                      <th className="px-4 py-3">Checkpoint</th>
-                      {/* Hidden visually, kept in DOM */}
-                      <th className="hidden">Checkpoint ID</th>
-                      <th className="px-4 py-3 w-60">Details</th>
-                      <th className="px-4 py-3 w-60">Comments</th>
-                      <th className="px-4 py-3 w-56">Responsible Person</th>
-                      {/* Hidden visually, kept in DOM */}
-                      <th className="hidden">Responsible Person ID</th>
-                      <th className="px-4 py-3">Target Date</th>
-                    </tr>
-                  </thead>
+  <div className="relative">
+    {/* Scrollable Table Section */}
+    <div className="overflow-x-auto max-h-[400px] overflow-y-auto border border-gray-300 rounded-md">
+      <table className="min-w-full text-sm text-left text-gray-700">
+        <thead className="sticky top-0 z-10 bg-gray-100 text-gray-600 uppercase text-xs shadow-sm">
+          <tr>
+            <th className="px-4 py-3">Serial No.</th>
+            <th className="px-4 py-3">Checkpoint</th>
+            <th className="hidden">Checkpoint ID</th>
+            <th className="px-4 py-3 w-60">Details</th>
+            <th className="px-4 py-3 w-60">Comments</th>
+            <th className="px-4 py-3 w-56">Responsible Person</th>
+            <th className="hidden">Responsible Person ID</th>
+            <th className="px-4 py-3">Target Date</th>
+          </tr>
+        </thead>
 
-                  <tbody className="divide-y divide-gray-200">
-                    {feasibilityRows.map((row, index) => (
-                      <tr key={row.checkpointId} className="hover:bg-gray-50 transition">
-                        <td className="px-4 py-2">{row.serialNo}</td>
-                        <td className="px-4 py-2">{row.checkpointText}</td>
-                        <td className="hidden">{row.checkpointId}</td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={row.details}
-                            onChange={(e) => handleRowChange(index, "details", e.target.value)}
-                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="text"
-                            value={row.comments}
-                            onChange={(e) => handleRowChange(index, "comments", e.target.value)}
-                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                          />
-                        </td>
-                        <td className="px-4 py-2">
-                          <select
-                            value={row.responsiblePersonId}
-                            onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
-                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="">Select</option>
-                            {responsiblePersons
-                              .filter(person => person.DataValueField >= 1) // Apply filter here
-                              .map(person => (
-                                <option key={person.DataValueField} value={person.DataValueField}>
-                                  {person.DataTextField}
-                                </option>
-                              ))}
-                          </select>
-                        </td>
-                        <td className="hidden">{row.responsiblePersonId}</td>
-                        <td className="px-4 py-2">
-                          <input
-                            type="date"
-                            value={row.targetDate}
-                            onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
-                            className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Feasibility Checkbox */}
-              <div className="flex items-center mt-6">
+        <tbody className="divide-y divide-gray-200">
+          {feasibilityRows.map((row, index) => (
+            <tr key={row.checkpointId} className="hover:bg-gray-50 transition">
+              <td className="px-4 py-2">{row.serialNo}</td>
+              <td className="px-4 py-2">{row.checkpointText}</td>
+              <td className="hidden">{row.checkpointId}</td>
+              <td className="px-4 py-2">
                 <input
-                  type="checkbox"
-                  checked={isFeasible}
-                  onChange={handleFeasibilityChange}
-                  className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                  type="text"
+                  value={row.details}
+                  onChange={(e) => handleRowChange(index, "details", e.target.value)}
+                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                  required
                 />
-                <label className="ml-2 text-sm text-gray-700">Is Feasible</label>
-              </div>
-
-              {/* Save Button */}
-              <div className="flex justify-end mt-6">
-                <button
-                  onClick={handleSaveFeasibility}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
-                  disabled={isSaveDisabled()}
+              </td>
+              <td className="px-4 py-2">
+                <input
+                  type="text"
+                  value={row.comments}
+                  onChange={(e) => handleRowChange(index, "comments", e.target.value)}
+                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                />
+              </td>
+              <td className="px-4 py-2">
+                <select
+                  value={row.responsiblePersonId}
+                  onChange={(e) => handleRowChange(index, "responsiblePersonId", e.target.value)}
+                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
                 >
-                  Save
-                </button>
-              </div>
-            </div>
-          )}
+                  <option value="">Select</option>
+                  {responsiblePersons
+                    .filter(person => person.DataValueField >= 1)
+                    .map(person => (
+                      <option key={person.DataValueField} value={person.DataValueField}>
+                        {person.DataTextField}
+                      </option>
+                    ))}
+                </select>
+              </td>
+              <td className="hidden">{row.responsiblePersonId}</td>
+              <td className="px-4 py-2">
+                <input
+                  type="date"
+                  value={row.targetDate}
+                  onChange={(e) => handleRowChange(index, "targetDate", e.target.value)}
+                  className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                  required
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+    {/* Sticky Footer Section */}
+    <div className="sticky bottom-0 bg-white py-2 border-t mt-0 z-20">
+      {/* Feasibility Radio Buttons */}
+      <div className="flex items-center gap-6 px-2 mb-4">
+        <span className="text-sm text-gray-700">Feasibility:</span>
+
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="radio"
+            name="feasibility"
+            value="yes"
+            checked={isFeasible === true}
+            onChange={() => {
+              setIsFeasible(true);
+              setFeasibilityReason('');
+            }}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+          />
+          Feasible
+        </label>
+
+        <label className="flex items-center gap-2 text-sm text-gray-700">
+          <input
+            type="radio"
+            name="feasibility"
+            value="no"
+            checked={isFeasible === false}
+            onChange={() => setIsFeasible(false)}
+            className="h-4 w-4 text-red-600 focus:ring-red-500"
+          />
+          Not Feasible
+        </label>
+      </div>
+
+      {/* Conditional Textarea for Reason */}
+      {!isFeasible && (
+        <div className="px-2 mb-4">
+          <label className="block text-sm text-gray-700 mb-1">Reason for Non-Feasibility:</label>
+          <textarea
+            value={feasibilityReason}
+            onChange={(e) => setFeasibilityReason(e.target.value)}
+            className="w-full border rounded-md px-3 py-2 resize-none focus:ring-red-500 focus:border-red-500"
+            rows={3}
+            placeholder="Please explain why this is not feasible"
+            required
+          ></textarea>
+        </div>
+      )}
+
+      {/* Save Button */}
+      <div className="flex justify-end px-2">
+        <button
+          onClick={handleSaveFeasibility}
+          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-2 rounded-md transition duration-200"
+          disabled={isSaveDisabled()}
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
 
 
           {/* Quoatation */}

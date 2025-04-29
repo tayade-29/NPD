@@ -8,12 +8,10 @@ import {
   FaChartLine,
   FaSearch,
   FaRegCalendarCheck,
-  FaCheckCircle,
-  FaTachometerAlt,
   FaTasks,
-  FaUserTie	
+  FaFileAlt
 } from 'react-icons/fa';
-import { LayoutDashboard, FileBarChart, ClipboardCheck } from 'lucide-react';
+import { ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
@@ -30,9 +28,17 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => setShowLogoutConfirm(true);
+
   const confirmLogout = () => {
     logout();
     navigate('/login');
+  };
+
+  // New function: When clicked on normal Link -> close sidebar
+  const handleLinkClick = () => {
+    if (isSidebarOpen) {
+      setSidebarOpen(false);
+    }
   };
 
   return (
@@ -51,7 +57,7 @@ const Sidebar = () => {
             className="text-white hover:text-gray-300 transition-colors"
             onClick={toggleSidebar}
           >
-            <FaBars size={24} /> {/* made bigger */}
+            <FaBars size={24} />
           </button>
         </div>
 
@@ -61,16 +67,15 @@ const Sidebar = () => {
             <li className="relative">
               <Link
                 to="/"
+                onClick={handleLinkClick}
                 className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
               >
-                <FaChartLine className="w-6 h-6" /> {/* bigger */}
+                <FaChartLine className="w-6 h-6" />
                 <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
                   Dashboard
                 </span>
                 {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Dashboard
-                  </span>
+                  <span className="tooltip">Dashboard</span>
                 )}
               </Link>
             </li>
@@ -79,16 +84,15 @@ const Sidebar = () => {
             <li className="relative">
               <Link
                 to="/enquiryform"
+                onClick={handleLinkClick}
                 className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
               >
-                <FaClipboardList className="w-4 h-4" />
+                <FaClipboardList className="w-6 h-6" />
                 <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
                   Enquiry Registration
                 </span>
                 {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Enquiry Registration
-                  </span>
+                  <span className="tooltip">Enquiry Registration</span>
                 )}
               </Link>
             </li>
@@ -103,11 +107,6 @@ const Sidebar = () => {
                 <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
                   Templates
                 </span>
-                {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Templates
-                  </span>
-                )}
                 {isSidebarOpen && (
                   <FaChevronDown
                     className={`w-4 h-4 transform transition-transform ${
@@ -117,22 +116,14 @@ const Sidebar = () => {
                 )}
               </button>
               {openDropdown === 'templates' && (
-                <ul className={`${
-                  isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'
-                } space-y-2`}>
+                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
                   <li>
-                    <Link
-                      to="/apqpform"
-                      className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg"
-                    >
+                    <Link to="/apqpform" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
                       Add APQP Activity
                     </Link>
                   </li>
                   <li>
-                    <Link
-                      to="/reviewform"
-                      className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg"
-                    >
+                    <Link to="/reviewform" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
                       Add CheckPoints
                     </Link>
                   </li>
@@ -150,11 +141,6 @@ const Sidebar = () => {
                 <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
                   Status
                 </span>
-                {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Status
-                  </span>
-                )}
                 {isSidebarOpen && (
                   <FaChevronDown
                     className={`w-4 h-4 transform transition-transform ${
@@ -164,27 +150,25 @@ const Sidebar = () => {
                 )}
               </button>
               {openDropdown === 'status' && (
-                <ul className={`${
-                  isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'
-                } space-y-2`}>
+                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
                   <li>
-                    <Link to="/enquirymgt" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Enquiry Status
+                    <Link to="/enquirymgt" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                      Update Enquiry Status
                     </Link>
                   </li>
                   <li>
-                    <Link to="/apqptimeplan" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      APQP Timeline
+                    <Link to="/pendingapqp" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                      Pending APQP Time Plan
                     </Link>
                   </li>
                   <li>
-                    <Link to="/feasibilityChart" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Feasibility Review
+                    <Link to="/apqptimeplan" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                      Update APQP Time Plan
                     </Link>
                   </li>
                   <li>
-                    <Link to="/pendingapqp" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Pending APQP
+                    <Link to="/frt" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                      Technical Feasibility Review
                     </Link>
                   </li>
                 </ul>
@@ -195,6 +179,7 @@ const Sidebar = () => {
             <li className="relative">
               <Link
                 to="/cft"
+                onClick={handleLinkClick}
                 className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
               >
                 <FaRegCalendarCheck className="w-6 h-6" />
@@ -202,9 +187,7 @@ const Sidebar = () => {
                   CFT Meeting
                 </span>
                 {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    CFT Meeting
-                  </span>
+                  <span className="tooltip">CFT Meeting</span>
                 )}
               </Link>
             </li>
@@ -215,15 +198,10 @@ const Sidebar = () => {
                 onClick={() => handleDropdown('lookups')}
                 className="w-full flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
               >
-                <FaUserTie	 className="w-6 h-6" />
+                <FaSearch className="w-6 h-6" />
                 <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
                   Lookups
                 </span>
-                {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Lookups
-                  </span>
-                )}
                 {isSidebarOpen && (
                   <FaChevronDown
                     className={`w-4 h-4 transform transition-transform ${
@@ -233,21 +211,19 @@ const Sidebar = () => {
                 )}
               </button>
               {openDropdown === 'lookups' && (
-                <ul className={`${
-                  isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'
-                } space-y-2`}>
+                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
                   <li>
-                    <Link to="/customer" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                    <Link to="/customer" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
                       Customers
                     </Link>
                   </li>
                   <li>
-                    <Link to="/supplier" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                    <Link to="/supplier" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
                       Suppliers
                     </Link>
                   </li>
                   <li>
-                    <Link to="/user" className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
+                    <Link to="/user" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
                       Users
                     </Link>
                   </li>
@@ -259,16 +235,15 @@ const Sidebar = () => {
             <li className="relative">
               <Link
                 to="/account"
+                onClick={handleLinkClick}
                 className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
               >
-                <FaSearch className="w-6 h-6" />
+                <FaFileAlt className="w-6 h-6" />
                 <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
                   Reports
                 </span>
                 {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Reports
-                  </span>
+                  <span className="tooltip">Reports</span>
                 )}
               </Link>
             </li>
@@ -283,11 +258,6 @@ const Sidebar = () => {
                 <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
                   Logout
                 </span>
-                {!isSidebarOpen && (
-                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-gray-900 text-white px-2 py-1 rounded-md text-sm opacity-0 group-hover:opacity-100 transition-opacity shadow-md whitespace-nowrap">
-                    Logout
-                  </span>
-                )}
               </button>
             </li>
           </ul>
