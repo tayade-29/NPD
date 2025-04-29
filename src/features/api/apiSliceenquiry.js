@@ -342,7 +342,16 @@ export const apiEnquiry = createApi({
       providesTags: ['Customer']
     }),
 
-
+    setFeasibilityReview: builder.mutation({
+      query: (body) => ({
+        url: 'prc_npd_enquiry_feasibility_review_set',
+        method: 'POST',
+        body,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }),
+    }),
 
   })
 });
@@ -362,7 +371,7 @@ export const {
   useGetResponsiblePersonQuery,
   useGetCheckpointsForFeasibilityQuery,
   useGetSubCheckpointForFeasibilityQuery,
-
+  useSetFeasibilityReviewMutation
 
 
 } = apiEnquiry;

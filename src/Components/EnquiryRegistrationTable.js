@@ -8,7 +8,7 @@ const EnquiryTable = ({
   onNewEnquiryClick,
   selectedCustomerName,
   customerMap = {},
-  onEditClick
+  handleEditClick
 }) => {
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -86,7 +86,8 @@ const EnquiryTable = ({
 </td>
 
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {customerMap[enquiry.FkCustomerId] || '-'}
+                {enquiry.CustomerName || customerMap[enquiry.FkCustomerId] || '-'}
+
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                   {enquiry.ProjectName || enquiry.projectVehicleProgram || '-'}
@@ -111,7 +112,7 @@ const EnquiryTable = ({
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                   <button
-                    onClick={() => onEditClick(enquiry)}
+                    onClick={() => handleEditClick(enquiry)}
                     className="bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors duration-150 rounded-lg px-3 py-1.5 inline-flex items-center"
                   >
                     <Edit className="w-4 h-4 mr-1" />

@@ -3,7 +3,8 @@ import {
   useGetEnquiriesByIdQuery,
   useGetCheckpointsForFeasibilityQuery,
   useGetSubCheckpointForFeasibilityQuery,
-  useGetResponsiblePersonQuery
+  useGetResponsiblePersonQuery,
+  useSetFeasibilityReviewMutation
 } from "../features/api/apiSliceenquiry";
 import { useLocation } from "react-router-dom";
 import { useAuth } from '../context/AuthContext';
@@ -56,11 +57,14 @@ const FeasibilityReview = () => {
     if (fetchedSubCheckpoints && fetchedSubCheckpoints.length > 0) {
       const newRows = fetchedSubCheckpoints.map((subCheckpoint, index) => ({
         id: (index + 1).toString(),
+        subCheckpointId: subCheckpoint.DataValueField || 0, // store ID here
         checkpoint: subCheckpoint.DataTextField || "",
         comment: "",
         person: "",
         targetDate: "",
+        responsiblePersonId: "", // you missed this also
       }));
+      
       setRows(newRows);
     } else {
       setRows([]); // Clear rows if no sub-checkpoints
@@ -128,6 +132,33 @@ const FeasibilityReview = () => {
       value.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+  const [setFeasibilityReview] = useSetFeasibilityReviewMutation();
+  const handleSave = async () => {
+    try {
+      const payload = rows.map(row => ({
+        pPkNPDEnquiryFeasibilityReviewId: 0,
+        pFkEnquiryMasterId: enquiryId,
+        pFkNPDCheckPointTypeId: selectedCheckpoint, // This is DataValueField of selected checkpoint
+        pFkNPDCheckPointTypeDetailId: row.subCheckpointId || 0, // We'll fix this below
+        pFkResponsiblePersonId: row.responsiblePersonId || 0,
+        pReviewDescription: row.checkpoint || "", // Checkpoint Name
+        pCommentActionRequired: row.comment || "",
+        pTargetDate: row.targetDate || "",
+        pCreatedBy: userData?.roleId || 0
+      }));
+  
+      for (const review of payload) {
+        await setFeasibilityReview(review);
+      }
+  
+      alert('Feasibility Reviews saved successfully!');
+    } catch (error) {
+      console.error('Error saving feasibility review:', error);
+      alert('Failed to save feasibility reviews.');
+    }
+  };
+  
 
   return (
     <div className="container mx-auto p-6 bg-white shadow-xl rounded-xl max-w-[1300px]">
@@ -254,9 +285,13 @@ const FeasibilityReview = () => {
 
         {/* Fixed Save Button */}
         <div className="sticky bottom-0 bg-white p-4 border-t flex justify-end">
-          <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-            Save
-          </button>
+        <button
+  onClick={handleSave}
+  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+>
+  Save
+</button>
+
         </div>
       </div>
     </div>
