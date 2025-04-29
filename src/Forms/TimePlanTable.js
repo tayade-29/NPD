@@ -10,7 +10,7 @@ const TimePlanTable = () => {
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-800">APQP Time Plan Table</h2>
+        <h2 className="text-2xl font-bold text-gray-800">Pending APQP Time Plan </h2>
       </div>
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <table className="min-w-full table-auto">

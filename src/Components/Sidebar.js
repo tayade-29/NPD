@@ -24,6 +24,8 @@ const Sidebar = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const [isDocsOpen, setDocsOpen] = useState(false);
+
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
   const toggleForms = () => {
@@ -91,7 +93,8 @@ const Sidebar = () => {
                 <div className="absolute left-full top-0 ml-2 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-4 z-50">
                   <h3 className="text-white font-semibold mb-2"> Forms</h3>
                   <ul className="space-y-2 text-sm">
-                    <li><Link to="/timeplan" className="hover:text-blue-300">APQP Time Plan Chart</Link></li>
+                    <li><Link to="/timeplan" className="hover:text-blue-300">Pending APQP Time Plan </Link></li>
+                    <li><Link to="/apqptable" className="hover:text-blue-300"> APQP Time Plan </Link></li>
                     <li><Link to="/feasibilityChart" className="hover:text-blue-300">Feasibility Review Form</Link></li>
                   </ul>
                 </div>
@@ -112,6 +115,31 @@ const Sidebar = () => {
                 </div>
               )}
             </li>
+
+                        {/* Docs Section */}
+                        <li title="Docs" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative cursor-pointer" onClick={() => {
+              setFormsOpen(false);
+              setLookupOpen(false);
+              setDocsOpen(!isDocsOpen);
+            }}>
+              <FileText className="text-xl" />
+              <span className={`${isSidebarOpen ? 'block ml-2' : 'sr-only'}`}>Docs</span>
+              {isSidebarOpen && <FaChevronDown className={`ml-auto transition-transform ${isDocsOpen ? 'rotate-180' : ''}`} />}
+              {!isSidebarOpen && isDocsOpen && (
+                <div className="absolute left-full top-0 ml-4 w-64 bg-[#1D3461] text-white rounded-lg shadow-lg p-8 z-50">
+                  <h3 className="text-white font-semibold mb-2">Docs</h3>
+                  <ul className="space-y-2 text-sm">
+                  <Link to="/mouldinspection" className="hover:text-blue-300">Mould Inspection Checksheet</Link>
+                    <li><Link to="/tooldesignreview" className="hover:text-blue-300">Tool Design Review</Link></li>
+                    <li><Link to="/trialrequisitionnote" className="hover:text-blue-300">Trial Requisition Note</Link></li>
+                    <li><Link to="/trialreportform" className="hover:text-blue-300">Trial Report</Link></li>
+                    <li><Link to="/sampleinspectionreportform" className="hover:text-blue-300">Summary Sheet Sample Inspection Report</Link></li>
+                    <li><Link to="/predispatchinspection" className="hover:text-blue-300">Pre Dispatch Inspection report Report</Link></li>
+                  </ul>
+                </div>
+              )}
+            </li>
+
             <li title="Report" className="group flex items-center gap-x-4 hover:bg-gray-700 rounded p-2 relative">
               <Link to="/account" className="flex items-center">
                 <FileBarChart className="text-xl" />

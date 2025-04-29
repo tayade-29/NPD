@@ -1,13 +1,13 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from './context/AuthContext';
-import APQPTable from './Forms/ApqpActivityTable';
+import APQPTable from './Forms/APQPTable';
 import FeasibilityReviewPage from './Forms/FeasibilityReviewCheckpoints';
 import EnquiryRegisterForm from './Forms/EnquiryRegisterForm';
 import EnquiryManagement from './Pages/EnquiryDetails';
 // import APQPTimePlan from './Forms/APQPTimePlanChart';
 import TimePlanTable from './Forms/TimePlanTable';
-import APQPTimePlanChart from './Forms/APQPTimePlanChart'; // adjust path if needed
+import APQPTimePlanChart from './Forms/APQPTimePlanChart'; 
 import ActivityTable from './Components/ActivityTable';
 import Sidebar from "./Components/Sidebar";
 import Navbar from "./Components/Navbar";
@@ -20,6 +20,18 @@ import Feasibility from "./Forms/FeasibiltyReviewChart";
 import CustomerTable from "./Lookups/Customer";
 import UserPage from "./Lookups/User";
 import SupplierPage from "./Lookups/Supplier";
+import MouldInspectionChecksheet from './Pages/MouldInspectionChecksheet';
+import CoreCavityTable from './Tables/CoreCavityTable';
+import FeedingSystemTable from './Tables/FeedingSystemTable';
+import GeneralTable from './Tables/GeneralTable';
+import MouldMaterialRelated from './Tables/MouldMaterialRelated';
+import ToolDesignReview from './Pages/ToolDesignReview';
+import TrialReportForm from './Pages/TrialReportForm';
+import SampleInspectionReportForm from './Pages/SampleInspectionReportForm';
+import TrialRequisitionNote from './Pages/TrialRequisitionNote';
+import PreDispatchInspection from './Pages/PreDispatchInspection';
+
+
 
 
 
@@ -79,6 +91,18 @@ const AppContent = () => {
               <Route path="/supplier" element={<PrivateRoute><SupplierPage /></PrivateRoute>} />
               <Route path="/user" element={<PrivateRoute><UserPage /></PrivateRoute>} />
               <Route path="/activity-table" element={<PrivateRoute><ActivityTable /></PrivateRoute>} />
+              <Route path="/mouldinspection" element={<MouldInspectionChecksheet />} />
+              <Route path="/core-cavity" element={<CoreCavityTable />} />
+              <Route path="/feeding-system" element={<FeedingSystemTable />} />
+              <Route path="/general" element={<GeneralTable />} />
+              <Route path="/mouldmaterialrelated" element={<MouldMaterialRelated />} />
+              <Route path="/tooldesignreview" element={<ToolDesignReview />} />
+              <Route path="/trialreportform" element={<TrialReportForm />} />
+              <Route path="/sampleinspectionreportform" element={<SampleInspectionReportForm />} />
+              <Route path="/trialrequisitionnote" element={<TrialRequisitionNote />} />
+              <Route path="/predispatchinspection" element={<PreDispatchInspection />} />
+              <Route path='/apqptable' element={<APQPTable />} />
+
 
 
 

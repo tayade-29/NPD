@@ -23,6 +23,59 @@ export const api = createApi({
       },
     }),
 
+    getActivityPhases: builder.query({
+      query: ({ clientId, plantId, locationId }) => ({
+        url: "/prc_master_fill",
+        method: "POST",
+        body: {
+          pAction: 5,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 1,
+          pClientId: clientId,
+          pPlantId: plantId,
+          pLocationId: locationId
+        }
+      }),
+      transformResponse: (response) => {
+        try {
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          console.error("ActivityPhase Transform Error:", err);
+          return [];
+        }
+      }
+    }),
+
+    getSubactivities: builder.query({
+      query: ({ lookUpId, clientId, plantId, locationId }) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 6,
+          pLookUpId: lookUpId,
+          pLookUpType: 0,
+          pSelectionType: 0,
+          pClientId: clientId,
+          pPlantId: plantId,
+          pLocationId: locationId
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (error) {
+          console.error("Error parsing subactivities:", error);
+          return [];
+        }
+      },
+    }),
+    
+    
+
     getCustomer: builder.query({
       query: (params) => ({
         url: 'prc_customer_master_get',
@@ -182,6 +235,51 @@ export const api = createApi({
       invalidatesTags: ['Employee']
     }),
 
+    getResponsibilities: builder.query({
+      query: ({ clientId, plantId, locationId }) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 7,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 0,
+          pClientId: clientId || 1,
+          pPlantId: plantId || 1,
+          pLocationId: locationId || 1
+        }),
+      }),
+      transformResponse: (response) => {
+        try {
+          const data = JSON.parse(response.d);
+          return Array.isArray(data) ? data : [];
+        } catch (error) {
+          console.error("Error parsing Responsibility list:", error);
+          return [];
+        }
+      },
+    }),
+    
+    saveApqpTimePlan: builder.mutation({
+      query: (data) => ({
+        url: 'prc_npd_apqp_time_plan_set',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      }),
+      transformResponse: (response) => {
+        try {
+          return JSON.parse(response.d);
+        } catch (error) {
+          throw new Error('Invalid response format');
+        }
+      }
+    }),
+    
+
+
+
     // ✅ New Endpoint: getNpdEnquiryRegister
     getNpdEnquiryRegister: builder.query({
       query: () => ({
@@ -215,4 +313,11 @@ export const {
   useLoginUserMutation,
   useCheckDuplicateCustomerMutation,
   useGetNpdEnquiryRegisterQuery, // ✅ Export the new hook
+  useGetResponsibilitiesQuery,
+  useSaveApqpTimePlanMutation,
+  useGetActivityPhasesQuery, // 👉 Add this line
+  useGetSubactivitiesQuery,
+
+
+  
 } = api;
