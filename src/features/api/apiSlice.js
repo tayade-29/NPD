@@ -276,6 +276,25 @@ export const api = createApi({
         }
       }
     }),
+
+    getPendingApqpTimePlan: builder.query({
+      query: ({ pAction, pLookUpId, pEnquiryMasterId }) => ({
+        url: 'prc_npd_apqp_time_plan_pending_get',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pAction, pLookUpId, pEnquiryMasterId })
+      }),
+      transformResponse: (response) => {
+        try {
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+          console.error("Error parsing pending APQP time plan:", err);
+          return [];
+        }
+      }
+    }),
+    
     
 
 
@@ -317,6 +336,8 @@ export const {
   useSaveApqpTimePlanMutation,
   useGetActivityPhasesQuery, // 👉 Add this line
   useGetSubactivitiesQuery,
+  useGetPendingApqpTimePlanQuery,
+
 
 
   

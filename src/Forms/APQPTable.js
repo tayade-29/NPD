@@ -1,14 +1,17 @@
+// Full working code for APQPTable.js with all logic and rendering intact
+
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import {
   Trash2, FileSpreadsheet, Download, Upload, ChevronDown, Calendar
 } from "lucide-react";
-// import { phaseSubactivities } from "./subactivities";
-import { useGetNpdEnquiryRegisterQuery, useGetResponsibilitiesQuery } from "../features/api/apiSlice";
+import {
+  useGetNpdEnquiryRegisterQuery,
+  useGetResponsibilitiesQuery,
+  useSaveApqpTimePlanMutation,
+  useGetActivityPhasesQuery
+} from "../features/api/apiSlice";
 import { useGetEnquiriesByIdQuery } from "../features/api/apiSliceenquiry";
-import { useSaveApqpTimePlanMutation } from "../features/api/apiSlice"; // import the mutation
-import { useGetActivityPhasesQuery } from "../features/api/apiSlice";
-import { useGetSubactivitiesQuery } from "../features/api/apiSlice";
 import { useAuth } from '../context/AuthContext';
 
 export default function APQPTable() {
@@ -16,12 +19,7 @@ export default function APQPTable() {
   const enquiryId = location.state?.enquiryId || null;
   const shouldFetch = !!enquiryId;
   const { userData } = useAuth();
-  
-  // const userData = JSON.parse(localStorage.getItem("userData"));
-  const [saveApqpTimePlan] = useSaveApqpTimePlanMutation(); // initializes the mutation
-  // const [subactivitiesMap, setSubactivitiesMap] = useState({});
-  // const mainActivityPhases = Array.isArray(activityPhaseData?.Data)
-  
+  const [saveApqpTimePlan] = useSaveApqpTimePlanMutation();
   const [formData, setFormData] = useState({
     partName: "",
     partNo: "",
@@ -31,77 +29,50 @@ export default function APQPTable() {
     handoverDate: ""
   });
 
-  const {
-    data: masterDetails = [],
-    isLoading: isMasterLoading,
-  } = useGetEnquiriesByIdQuery(
+  const { data: masterDetails = [], isLoading: isMasterLoading } = useGetEnquiriesByIdQuery(
     { pAction: 1, pLookUpId: enquiryId },
     { skip: !shouldFetch }
   );
-
-  const {
-    data: activityPhaseData = [],
-    isLoading: isActivityPhaseLoading
-  } = useGetActivityPhasesQuery({
+  const { data: activityPhaseData = [] } = useGetActivityPhasesQuery({
     clientId: userData?.clientId || 1,
     plantId: userData?.plantId || 1,
     locationId: userData?.locationId || 1
   });
-  
-  const {
-    data: allEnquiries = [],
-    isLoading: isEnquiriesLoading,
-  } = useGetNpdEnquiryRegisterQuery();
-
-  const {
-    data: responsibilityList = [],
-    isLoading: isResponsibilitiesLoading,
-  } = useGetResponsibilitiesQuery({
+  const { data: allEnquiries = [], isLoading: isEnquiriesLoading } = useGetNpdEnquiryRegisterQuery();
+  const { data: responsibilityList = [] } = useGetResponsibilitiesQuery({
     clientId: userData?.clientId || 1,
     plantId: userData?.plantId || 1,
-    locationId: userData?.locationId || 1,
+    locationId: userData?.locationId || 1
   });
 
   const responsibilityOptions = responsibilityList
-  .filter(item => parseInt(item.DataValueField) >= 1)
-  .map(item => ({
-    label: item.DataTextField,
-    value: item.DataValueField
-  }));
+    .filter(item => parseInt(item.DataValueField) >= 1)
+    .map(item => ({ label: item.DataTextField, value: item.DataValueField }));
 
-  const displayEnquiryRegisterId = allEnquiries.find(
-    (e) => e.PkEnquiryMasterId === enquiryId
-  )?.EnquiryRegisterNo || "";
+  const displayEnquiryRegisterId = allEnquiries.find(e => e.PkEnquiryMasterId === enquiryId)?.EnquiryRegisterNo || "";
 
   useEffect(() => {
-    if (!isMasterLoading && Array.isArray(masterDetails) && masterDetails.length > 0) {
+    if (!isMasterLoading && masterDetails.length > 0) {
       const data = masterDetails[0];
-      setFormData((prev) => ({
-        ...prev,
+      setFormData({
         partNo: data.PartCode || "",
         partName: data.PartName,
         customer: data.CustomerName || "",
         customerPODate: data.CustomerPODate || "",
         pswApprovalDate: data.PSWApprovalDate || "",
         handoverDate: data.HandoverDate || ""
-      }));
+      });
     }
   }, [isMasterLoading, masterDetails]);
 
   const columns = [
-    "Activity",               // Activity Phase
-    "Responsibility",
-    "Planned Start",
-    "Actual Start",
-    "Planned Finish",
-    "Actual Finish",
-    "Status",
-    "Target Dates",
-    "Action Required",
-    "Status with Remarks"
+    "Activity", "Responsibility", "Planned Start", "Actual Start",
+    "Planned Finish", "Actual Finish", "Status", "Target Dates",
+    "Action Required", "Status with Remarks", "Upload"
   ];
   
-    const [rows, setRows] = useState([]);
+
+  const [rows, setRows] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(null);
 
@@ -116,32 +87,14 @@ export default function APQPTable() {
   }, [dropdownOpen]);
 
   const mainActivityPhases = Array.isArray(activityPhaseData)
-  ? activityPhaseData
-      .filter(item => parseInt(item?.DataValueField) >= 1) // 👈 only include value >= 1
-      .map(item => ({
-        id: item.DataValueField,
-        name: item.DataTextField
-      }))
-  : [];
+    ? activityPhaseData
+        .filter(item => parseInt(item?.DataValueField) >= 1)
+        .map(item => ({ id: item.DataValueField, name: item.DataTextField }))
+    : [];
 
-  const addSubactivityRows = (phaseLabel, subacts, selectedId) => {
-    const newRows = subacts.map((label) => ({
-      id: crypto.randomUUID(),
-      Phase: phaseLabel,
-      PhaseId: selectedId,
-      Activity: label,
-      Responsibility: [],
-      "Planned Start": "",
-      "Planned Finish": ""
-    }));
-  
-    setRows(newRows);
-  };
-  
   const handlePhaseSelect = async (e) => {
     const selectedId = e.target.value;
     if (!selectedId) return;
-  
     try {
       const response = await fetch("http://192.168.0.172:83/Service.asmx/prc_master_fill", {
         method: "POST",
@@ -156,45 +109,37 @@ export default function APQPTable() {
           pLocationId: userData?.locationId || 1,
         }),
       });
-  
+
       const result = await response.json();
       const subactivityData = JSON.parse(result.d);
-  
-      // ✅ Filter subactivities with DataValueField >= 1
       const filteredSubactivities = subactivityData
         .filter(item => parseInt(item.DataValueField) >= 1)
-        .map(item => ({
-          label: item.DataTextField,
-          value: item.DataValueField
-        }));
-  
-      // ✅ Get the label (text) of selected phase
+        .map(item => ({ label: item.DataTextField, value: item.DataValueField }));
+
       const phaseLabel = mainActivityPhases.find(p => p.id === selectedId)?.name || "";
-  
-      // ✅ Generate new rows
-      const newRows = filteredSubactivities.map((sub) => ({
+      const newRows = filteredSubactivities.map(sub => ({
         id: crypto.randomUUID(),
-        Phase: phaseLabel,           // 👈 this is for display
-        PhaseId: selectedId,         
+        Phase: phaseLabel,
+        PhaseId: selectedId,
         Activity: sub.label,
         ActivityId: sub.value,
         Responsibility: [],
         "Planned Start": "",
-        "Planned Finish": ""
+        "Planned Finish": "",
+        "Upload":[]
       }));
-  
-      setRows(newRows); // ✅ finally update table rows
+      setRows(newRows);
     } catch (error) {
       console.error("Error fetching subactivities:", error);
     }
   };
-  
+
   const updateRow = (id, column, value) => {
-    setRows(rows.map((row) => (row.id === id ? { ...row, [column]: value } : row)));
+    setRows(rows.map(row => (row.id === id ? { ...row, [column]: value } : row)));
   };
 
-  const filteredRows = rows.filter((row) =>
-    Object.values(row).some((value) =>
+  const filteredRows = rows.filter(row =>
+    Object.values(row).some(value =>
       value?.toString().toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
@@ -212,14 +157,9 @@ export default function APQPTable() {
     ];
     const rowData = filteredRows.map((row, index) => [
       index + 1,
-      ...columns.map((col) => Array.isArray(row[col]) ? row[col].join(" / ") : row[col])
+      ...columns.map(col => Array.isArray(row[col]) ? row[col].join(" / ") : row[col])
     ]);
-
-    const csvContent = [
-      ...metaInfo.map(row => row.join(",")),
-      ...rowData.map(row => row.join(","))
-    ].join("\n");
-
+    const csvContent = [...metaInfo.map(row => row.join(",")), ...rowData.map(row => row.join(","))].join("\n");
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -228,17 +168,16 @@ export default function APQPTable() {
     a.click();
     window.URL.revokeObjectURL(url);
   };
-  
+
   const handleSave = async () => {
     if (rows.length === 0) return alert("No data to save. Please add subactivities.");
-  
     try {
       const results = await Promise.all(
-        rows.map(async (row) => {
+        rows.map(async row => {
           const payload = {
             pPKAPQPTimePlanId: 0,
             pFEnquiryMasterId: enquiryId,
-            pFKAPQPTypeId: Number(row.PhaseId), // ✅ sending correct ID (DataValueField)
+            pFKAPQPTypeId: Number(row.PhaseId),
             pFKAPQPMasterDetailId: Number(row.ActivityId),
             pFKResponsibilityEMPId: row.Responsibility.join(","),
             pStartPlanDate: row["Planned Start"],
@@ -250,52 +189,76 @@ export default function APQPTable() {
             pRemark: '',
             pCreatedBy: userData?.roleId
           };
-  
-          // Await each save mutation result
           const result = await saveApqpTimePlan(payload);
-  
-          // ✅ Check for success — assuming your API returns a status field or success indicator
-          // Adjust this depending on your actual API response format
-          if (!result?.data || result?.error) {
-            throw new Error("Failed to save row");
-          }
-  
+          if (!result?.data || result?.error) throw new Error("Failed to save row");
           return result;
         })
       );
-  
-      // ✅ If all succeeded
       alert("All rows saved successfully!");
-  
     } catch (error) {
       console.error("Save error:", error);
       alert("An error occurred while saving. Please try again.");
     }
   };
-   
+
+  const handleReset = () => {
+    const clearedRows = rows.map(row => ({
+      ...row,
+      Responsibility: [],
+      "Planned Start": "",
+      "Planned Finish": "",
+      "Actual Start": "",
+      "Actual Finish": "",
+      "Status": "",
+      "Status with Remarks": "",
+      "Action Required": "",
+      "Target Dates": ""
+    }));
+    setRows(clearedRows);
+  };
+
   const getColumnWidth = (column) => {
-    if (column === "Activity") return "w-[400px]"; // ⬅️ increase width here
-    return "w-[250px]"; // optional default for others
+    if (column === "Activity") return "w-[400px]";
+    return "w-[250px]"; // default width for other columns
   };
   
-  
+
   
   return (
-    <div className="w-[1500px] mx-auto p-6 bg-white shadow-xl rounded-xl">
+    <div className="w-[1500px] mx-auto mt-1 p-6 bg-white shadow-xl rounded-xl">
       <div className="mb-6">
         <div className="flex justify-between items-center mb-4">
-          <div className="flex items-center gap-3">
-            <FileSpreadsheet className="w-8 h-8 text-blue-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800 mb-1">APQP TIME PLAN </h1>
-              <p className="text-base text-black mt-3">
-                Project Id:{" "}
-                <span className="font-semibold">
-                  {isEnquiriesLoading ? "Loading..." : displayEnquiryRegisterId}
-                </span>
-              </p>
-            </div>
-          </div>
+        <div className="flex items-start gap-3">
+  <div className="pt-1">
+    <FileSpreadsheet className="w-7 h-7 text-blue-600" />
+  </div>
+  <div>
+    <h1 className="text-2xl font-bold text-gray-800 mb-1">APQP TIME PLAN</h1>
+    <div className="flex items-center gap-3">
+      <label className="text-base text-black font-medium whitespace-nowrap">Project Id:</label>
+      {isEnquiriesLoading ? (
+        <span className="font-semibold">Loading...</span>
+      ) : (
+        <select
+          value={enquiryId || ""}
+          onChange={(e) => {
+            const selectedId = e.target.value;
+            window.location.href = `/apqp-time-plan?enquiryId=${selectedId}`;
+          }}
+          className="border px-3 py-1 rounded text-sm"
+        >
+          <option value="">Select Project</option>
+          {allEnquiries.map((enquiry) => (
+            <option key={enquiry.PkEnquiryMasterId} value={enquiry.PkEnquiryMasterId}>
+              {enquiry.EnquiryRegisterNo}
+            </option>
+          ))}
+        </select>
+      )}
+    </div>
+  </div>
+</div>
+
           <div className="text-sm text-gray-600 text-right">
             <div>STPPL / MKD / FM / 03</div>
             <div>Rev. No.: 04</div>
@@ -423,7 +386,7 @@ export default function APQPTable() {
         </div>
       </div>
 
-      {/* Table */}
+    
       {/* Table Section */}
 <div className="overflow-x-auto rounded-lg border max-h-[500px] overflow-y-scroll">
   <table className="w-full table-fixed border-collapse">
@@ -455,115 +418,147 @@ export default function APQPTable() {
         ))}
       </tr>
     </thead>
-
     <tbody className="divide-y divide-gray-200">
-      {filteredRows.map((row, rowIndex) => (
-        <tr key={row.id} className="hover:bg-gray-50">
-          <td className="px-6 py-4 text-center border border-gray-300 font-medium text-gray-700 bg-white w-[100px]">
-            {rowIndex + 1}
-          </td>
-          {columns.map((column, colIndex) => (
-            <td
-              key={colIndex}
-              className={`px-6 py-3 border border-gray-300 bg-white ${getColumnWidth(column)} w-[250px]`}
-            >
-              {column === "Activity" ? (
-                <span className="block px-2 py-1 text-gray-700 bg-gray-100 rounded">
-                  {row[column]}
+  {filteredRows.map((row, rowIndex) => (
+    <tr key={row.id} className="hover:bg-gray-50">
+      <td className="px-6 py-4 text-center border border-gray-300 font-medium text-gray-700 bg-white w-[100px]">
+        {rowIndex + 1}
+      </td>
+      {columns.map((column, colIndex) => (
+        <td
+          key={colIndex}
+          className={`px-6 py-3 border border-gray-300 bg-white ${getColumnWidth(column)} w-[250px]`}
+        >
+          {column === "Activity" ? (
+            <span className="block px-2 py-1 text-gray-700 bg-gray-100 rounded">
+              {row[column]}
+            </span>
+          ) : column === "Responsibility" ? (
+            <div id={`dropdown-${row.id}`} className="relative">
+              <button
+                onClick={() =>
+                  setDropdownOpen(dropdownOpen === row.id ? null : row.id)
+                }
+                className="w-full flex justify-between items-center px-3 py-2 border rounded bg-white"
+              >
+                <span>
+                  {row[column]?.length > 0
+                    ? responsibilityOptions
+                        .filter((opt) => row[column].includes(opt.value))
+                        .map((opt) => opt.label)
+                        .join(" / ")
+                    : "Select Responsibility"}
                 </span>
-              ) : column === "Responsibility" ? (
-                <div id={`dropdown-${row.id}`} className="relative">
-                  <button
-                    onClick={() =>
-                      setDropdownOpen(dropdownOpen === row.id ? null : row.id)
-                    }
-                    className="w-full flex justify-between items-center px-3 py-2 border rounded bg-white"
-                  >
-                    <span>
-                      {row[column]?.length > 0
-                        ? responsibilityOptions
-                            .filter((opt) => row[column].includes(opt.value))
-                            .map((opt) => opt.label)
-                            .join(" / ")
-                        : "Select Responsibility"}
-                    </span>
-                    <ChevronDown className="w-4 h-4 text-gray-500" />
-                  </button>
-                  {dropdownOpen === row.id && (
-                    <div className="absolute mt-2 bg-white border shadow rounded z-10 w-full max-h-[200px] overflow-y-auto">
-                      {responsibilityOptions.map((option) => (
-                        <label
-                          key={option.value}
-                          className="block px-3 py-2 hover:bg-gray-100 text-sm"
-                        >
-                          <input
-                            type="checkbox"
-                            className="mr-2"
-                            checked={row[column].includes(option.value)}
-                            onChange={() => {
-                              const isSelected = row[column].includes(option.value);
-                              const updatedSelection = isSelected
-                                ? row[column].filter((id) => id !== option.value)
-                                : [...row[column], option.value];
-                              updateRow(row.id, column, updatedSelection);
-                            }}
-                          />
-                          {option.label}
-                        </label>
-                      ))}
-                    </div>
-                  )}
+                <ChevronDown className="w-4 h-4 text-gray-500" />
+              </button>
+              {dropdownOpen === row.id && (
+                <div className="absolute mt-2 bg-white border shadow rounded z-10 w-full max-h-[200px] overflow-y-auto">
+                  {responsibilityOptions.map((option) => (
+                    <label
+          
+          
+                    key={option.value}
+                      className="block px-3 py-2 hover:bg-gray-100 text-sm"
+                    >
+                      <input
+                        type="checkbox"
+                        className="mr-2"
+                        checked={row[column].includes(option.value)}
+                        onChange={() => {
+                          const isSelected = row[column].includes(option.value);
+                          const updatedSelection = isSelected
+                            ? row[column].filter((id) => id !== option.value)
+                            : [...row[column], option.value];
+                          updateRow(row.id, column, updatedSelection);
+                        }}
+                      />
+                      {option.label}
+                    </label>
+                  ))}
                 </div>
-              ) : ["Planned Start", "Planned Finish", "Actual Start", "Actual Finish", "Target Dates"].includes(column) ? (
-                <div className="relative flex items-center">
-                  <input
-                    type="date"
-                    value={row[column] || ""}
-                    onChange={(e) => updateRow(row.id, column, e.target.value)}
-                    className="w-full pl-4 pr-12 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-                  />
-                  <div className="absolute right-3 pointer-events-none">
-                    <Calendar className="h-4 w-4 text-gray-500" />
-                  </div>
-                </div>
-              ) : column === "Status" ? (
-                <select
-                  value={row[column] || ""}
-                  onChange={(e) => updateRow(row.id, column, e.target.value)}
-                  className="w-full px-3 py-2 border rounded"
-                >
-                  <option value="">Select</option>
-                  <option value="Green">Green</option>
-                  <option value="Yellow">Yellow</option>
-                  <option value="Red">Red</option>
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  value={row[column] || ""}
-                  onChange={(e) => updateRow(row.id, column, e.target.value)}
-                  className="w-full px-4 py-2 border rounded"
-                />
               )}
-            </td>
-          ))}
-        </tr>
+            </div>
+          ) : ["Planned Start", "Planned Finish", "Actual Start", "Actual Finish", "Target Dates"].includes(column) ? (
+            <div className="relative flex items-center">
+              <input
+                type="date"
+                value={row[column] || ""}
+                onChange={(e) => updateRow(row.id, column, e.target.value)}
+                className="w-full pl-4 pr-12 py-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+              />
+              <div className="absolute right-3 pointer-events-none">
+                <Calendar className="h-4 w-4 text-gray-500" />
+              </div>
+            </div>
+          ) :column === "Status" ? (
+  <div className="text-gray-800 font-medium">
+    {row[column] || ""}
+  </div>
+) :  column === "Upload" ? (
+            <div>
+  <input
+    type="file"
+    multiple
+    onChange={(e) => {
+      const selectedFiles = Array.from(e.target.files);
+      const existingFiles = row[column] || [];
+      const allFiles = [...existingFiles, ...selectedFiles];
+
+      // Remove duplicates by file name
+      const uniqueFiles = allFiles.filter(
+        (file, index, self) =>
+          index === self.findIndex((f) => f.name === file.name)
+      );
+
+      updateRow(row.id, column, uniqueFiles);
+    }}
+    className="w-full mb-1"
+  />
+  <div className="text-sm text-gray-700">
+    {row[column]?.length > 0
+      ? row[column].map((file) => file.name).join(", ")
+      : "No files selected"}
+  </div>
+</div>
+
+
+          )
+           : (
+            <input
+              type="text"
+              value={row[column] || ""}
+              onChange={(e) => updateRow(row.id, column, e.target.value)}
+              className="w-full px-4 py-2 border rounded"
+            />
+          )}
+        </td>
       ))}
-    </tbody>
+    </tr>
+  ))}
+</tbody>
+
   </table>
 </div>
 
 {/* Sticky Save Button Section */}
-<div className="sticky bottom-0 bg-white py-4 mt-4 border-t flex justify-between items-center z-10">
+<div className="mt-4 flex justify-between items-center">
   <div className="text-base text-gray-500">
     Showing {filteredRows.length} of {rows.length} entries
   </div>
-  <button
-    onClick={handleSave}
-    className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-  >
-    Save
-  </button>
+  <div className="flex gap-3">
+    <button
+      onClick={handleReset}
+      className="px-6 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
+    >
+      Reset
+    </button>
+    <button
+      onClick={handleSave}
+      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+    >
+      Save
+    </button>
+  </div>
 </div>
 
     </div>
