@@ -3,7 +3,6 @@ import React from 'react';
 const CoreCavityTable = () => {
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Core & Cavity</h1>
       <div className="bg-white rounded-xl shadow-md overflow-hidden">
         <table className="min-w-full table-auto">
           <thead className="bg-gray-50">
