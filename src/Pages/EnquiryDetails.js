@@ -49,7 +49,7 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
 
 
   // {for initial feasibilty check tab}
-  const [isFeasible, setIsFeasible] = useState(false);
+  const [isFeasible, setIsFeasible] = useState(true);
   const [checkpoints, setCheckpoints] = useState([]);
   const [responsiblePersons, setResponsiblePersons] = useState([]);
   const [feasibilityRows, setFeasibilityRows] = useState([]);
@@ -191,7 +191,7 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
   return (
     <div className="fixed inset-0 bg-gray-50 flex items-center mt-0 z-50">
       <div className="w-full h-[600px] bg-white rounded-xl flex flex-col">
-        <div className="px-10 py-5 pb-0 border-b bg-white">
+        <div className="px-10  pb-0 border-b bg-white">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">

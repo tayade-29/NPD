@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from './context/AuthContext';
 import APQPTable from './Forms/ApqpActivityTable';
@@ -22,6 +22,7 @@ import FRT from "./Forms/FeasibilityReviewTable"
 
 
 const PrivateRoute = ({ children }) => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated } = useAuth();
   const location = useLocation();
 
@@ -36,19 +37,21 @@ const PrivateRoute = ({ children }) => {
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
   const location = useLocation();
+  const [isSidebarOpen, setSidebarOpen] = useState(false); // ✅ Shared sidebar state
 
   if (location.pathname === '/') {
     return <Navigate to="/login" replace />;
   }
 
-
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-1">
-        {isAuthenticated && <Sidebar />}
+        {isAuthenticated && (
+          <Sidebar isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+        )}
         <div className="flex-1 flex flex-col">
-          {isAuthenticated && <Navbar />}
-          <div className="p-6 flex-1">
+          {isAuthenticated && <Navbar isSidebarOpen={isSidebarOpen} />}
+          <div className="px-4 py-2 flex-1" style={{ marginLeft: isSidebarOpen ? '256px' : '64px', transition: 'margin 0.3s ease' }}>
             <Routes>
               <Route
                 path="/login"
@@ -58,7 +61,6 @@ const AppContent = () => {
                     : <Login />
                 }
               />
-
 
               {/* Protected routes */}
               <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
@@ -108,3 +110,9 @@ function App() {
 }
 
 export default App;
+
+
+
+
+
+

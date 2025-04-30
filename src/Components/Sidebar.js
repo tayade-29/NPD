@@ -14,15 +14,13 @@ import {
 import { ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
-const Sidebar = () => {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
   const [openDropdown, setOpenDropdown] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const toggleSidebar = () => setSidebarOpen(!isSidebarOpen);
-
   const handleDropdown = (dropdown) => {
     setOpenDropdown(openDropdown === dropdown ? null : dropdown);
   };
@@ -34,20 +32,20 @@ const Sidebar = () => {
     navigate('/login');
   };
 
-  // New function: When clicked on normal Link -> close sidebar
   const handleLinkClick = () => {
     if (isSidebarOpen) {
       setSidebarOpen(false);
     }
+    setOpenDropdown(null);
   };
 
   return (
-    <div className="flex relative">
+    <div className="flex">
       {/* Sidebar */}
       <div
-        className={`bg-gray-700 text-white font-sans ${
+        className={`fixed top-0 left-0 bg-gray-700 text-white font-sans ${
           isSidebarOpen ? 'w-64' : 'w-16'
-        } min-h-screen p-3 transition-all duration-300 ease-in-out`}
+        } h-screen p-3 transition-all duration-300 ease-in-out z-50`}
       >
         <div className="flex justify-between items-center mb-8">
           <div className="text-xl font-bold truncate">
@@ -63,225 +61,92 @@ const Sidebar = () => {
 
         <nav className="flex-1">
           <ul className="space-y-1">
-            {/* Dashboard */}
-            <li className="relative">
-              <Link
-                to="/"
-                onClick={handleLinkClick}
-                className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
+            <li>
+              <Link to="/" onClick={handleLinkClick} className="flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaChartLine className="w-6 h-6" />
-                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
-                  Dashboard
-                </span>
-                {!isSidebarOpen && (
-                  <span className="tooltip">Dashboard</span>
-                )}
+                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>Dashboard</span>
               </Link>
             </li>
 
-            {/* Enquiry Registration */}
-            <li className="relative">
-              <Link
-                to="/enquiryform"
-                onClick={handleLinkClick}
-                className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
+            <li>
+              <Link to="/enquiryform" onClick={handleLinkClick} className="flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaClipboardList className="w-6 h-6" />
-                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
-                  Enquiry Registration
-                </span>
-                {!isSidebarOpen && (
-                  <span className="tooltip">Enquiry Registration</span>
-                )}
+                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>Enquiry Registration</span>
               </Link>
             </li>
 
-            {/* Templates Dropdown */}
-            <li className="relative">
-              <button
-                onClick={() => handleDropdown('templates')}
-                className="w-full flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
-                <ClipboardCheck className="w-6 h-6" />
-                <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
-                  Templates
-                </span>
-                {isSidebarOpen && (
-                  <FaChevronDown
-                    className={`w-4 h-4 transform transition-transform ${
-                      openDropdown === 'templates' ? 'rotate-180' : ''
-                    }`}
-                  />
-                )}
-              </button>
-              {openDropdown === 'templates' && (
-                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
-                  <li>
-                    <Link to="/apqpform" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Add APQP Activity
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/reviewform" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Add CheckPoints
-                    </Link>
-                  </li>
-                </ul>
-              )}
-            </li>
+            {/* Templates */}
+            <Dropdown
+              label="Templates"
+              icon={<ClipboardCheck className="w-6 h-6" />}
+              isSidebarOpen={isSidebarOpen}
+              isOpen={openDropdown === 'templates'}
+              toggle={() => handleDropdown('templates')}
+            >
+              <DropdownLink to="/apqpform" onClick={handleLinkClick} label="Add APQP Activity" />
+              <DropdownLink to="/reviewform" onClick={handleLinkClick} label="Add CheckPoints" />
+            </Dropdown>
 
-            {/* Status Dropdown */}
-            <li className="relative">
-              <button
-                onClick={() => handleDropdown('status')}
-                className="w-full flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
-                <FaTasks className="w-6 h-6" />
-                <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
-                  Status
-                </span>
-                {isSidebarOpen && (
-                  <FaChevronDown
-                    className={`w-4 h-4 transform transition-transform ${
-                      openDropdown === 'status' ? 'rotate-180' : ''
-                    }`}
-                  />
-                )}
-              </button>
-              {openDropdown === 'status' && (
-                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
-                  <li>
-                    <Link to="/enquirymgt" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Update Enquiry Status
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/pendingapqp" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Pending APQP Time Plan
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/apqptimeplan" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Update APQP Time Plan
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/frt" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Technical Feasibility Review
-                    </Link>
-                  </li>
-                </ul>
-              )}
-            </li>
+            {/* Status */}
+            <Dropdown
+              label="Status"
+              icon={<FaTasks className="w-6 h-6" />}
+              isSidebarOpen={isSidebarOpen}
+              isOpen={openDropdown === 'status'}
+              toggle={() => handleDropdown('status')}
+            >
+              <DropdownLink to="/enquirymgt" onClick={handleLinkClick} label="Update Enquiry Status" />
+              <DropdownLink to="/pendingapqp" onClick={handleLinkClick} label="Pending APQP Time Plan" />
+              <DropdownLink to="/apqptimeplan" onClick={handleLinkClick} label="Update APQP Time Plan" />
+              <DropdownLink to="/frt" onClick={handleLinkClick} label="Technical Feasibility Review" />
+            </Dropdown>
 
-            {/* CFT Meeting */}
-            <li className="relative">
-              <Link
-                to="/cft"
-                onClick={handleLinkClick}
-                className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
+            <li>
+              <Link to="/cft" onClick={handleLinkClick} className="flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaRegCalendarCheck className="w-6 h-6" />
-                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
-                  CFT Meeting
-                </span>
-                {!isSidebarOpen && (
-                  <span className="tooltip">CFT Meeting</span>
-                )}
+                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>CFT Meeting</span>
               </Link>
             </li>
 
-            {/* Lookups Dropdown */}
-            <li className="relative">
-              <button
-                onClick={() => handleDropdown('lookups')}
-                className="w-full flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
-                <FaSearch className="w-6 h-6" />
-                <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>
-                  Lookups
-                </span>
-                {isSidebarOpen && (
-                  <FaChevronDown
-                    className={`w-4 h-4 transform transition-transform ${
-                      openDropdown === 'lookups' ? 'rotate-180' : ''
-                    }`}
-                  />
-                )}
-              </button>
-              {openDropdown === 'lookups' && (
-                <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-xl z-10 min-w-[160px]'} space-y-2`}>
-                  <li>
-                    <Link to="/customer" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Customers
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/supplier" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Suppliers
-                    </Link>
-                  </li>
-                  <li>
-                    <Link to="/user" onClick={handleLinkClick} className="flex items-center p-2 text-sm hover:bg-gray-700 rounded-lg">
-                      Users
-                    </Link>
-                  </li>
-                </ul>
-              )}
-            </li>
+            {/* Lookups */}
+            <Dropdown
+              label="Lookups"
+              icon={<FaSearch className="w-6 h-6" />}
+              isSidebarOpen={isSidebarOpen}
+              isOpen={openDropdown === 'lookups'}
+              toggle={() => handleDropdown('lookups')}
+            >
+              <DropdownLink to="/customer" onClick={handleLinkClick} label="Customers" />
+              <DropdownLink to="/supplier" onClick={handleLinkClick} label="Suppliers" />
+              <DropdownLink to="/user" onClick={handleLinkClick} label="Users" />
+            </Dropdown>
 
-            {/* Reports */}
-            <li className="relative">
-              <Link
-                to="/account"
-                onClick={handleLinkClick}
-                className="flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
+            <li>
+              <Link to="/account" onClick={handleLinkClick} className="flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaFileAlt className="w-6 h-6" />
-                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
-                  Reports
-                </span>
-                {!isSidebarOpen && (
-                  <span className="tooltip">Reports</span>
-                )}
+                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>Reports</span>
               </Link>
             </li>
 
             {/* Logout */}
-            <li className="relative">
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center p-3 hover:bg-gray-700 rounded-lg transition-colors group relative"
-              >
+            <li>
+              <button onClick={handleLogout} className="w-full flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaSignOutAlt className="w-6 h-6" />
-                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>
-                  Logout
-                </span>
+                <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>Logout</span>
               </button>
             </li>
           </ul>
         </nav>
       </div>
 
-      {/* Logout Confirmation Modal */}
+      {/* Logout Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white">
             <p className="mb-4">Are you sure you want to log out?</p>
             <div className="flex justify-end space-x-3">
-              <button
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                onClick={confirmLogout}
-              >
-                Logout
-              </button>
-              <button
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
-                onClick={() => setShowLogoutConfirm(false)}
-              >
-                Cancel
-              </button>
+              <button onClick={confirmLogout} className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg">Logout</button>
+              <button onClick={() => setShowLogoutConfirm(false)} className="px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg">Cancel</button>
             </div>
           </div>
         </div>
@@ -289,5 +154,38 @@ const Sidebar = () => {
     </div>
   );
 };
+
+// Sub Components
+const Dropdown = ({ label, icon, isSidebarOpen, isOpen, toggle, children }) => (
+  <li className="relative">
+    <button
+      onClick={toggle}
+      className="w-full flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors"
+    >
+      {icon}
+      <span className={`ml-3 flex-1 text-left ${!isSidebarOpen && 'sr-only'}`}>{label}</span>
+      {isSidebarOpen && (
+        <FaChevronDown className={`w-4 h-4 transform transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+      )}
+    </button>
+    {isOpen && (
+      <ul className={`${isSidebarOpen ? 'ml-8 mt-1' : 'absolute left-full top-0 ml-2 bg-gray-800 p-2 rounded-lg shadow-lg z-50 min-w-[160px]'} space-y-2`}>
+        {children}
+      </ul>
+    )}
+  </li>
+);
+
+const DropdownLink = ({ to, onClick, label }) => (
+  <li>
+    <Link
+      to={to}
+      onClick={onClick}
+      className="flex items-center p-2 text-sm hover:bg-gray-600 rounded-lg transition-colors"
+    >
+      {label}
+    </Link>
+  </li>
+);
 
 export default Sidebar;

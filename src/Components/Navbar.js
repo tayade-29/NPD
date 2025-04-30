@@ -2,16 +2,16 @@ import { useState, useRef, useEffect } from "react";
 import { FaBell, FaCommentDots, FaUserCircle, FaChevronDown } from "react-icons/fa";
 import PasswordChangeModal from "./ChangePasswordModal";
 import { useAuth } from "../context/AuthContext";
-import { User } from "lucide-react";
 
-const Navbar = () => {
+const SIDEBAR_WIDTH = 256;
+ // Adjust this if your sidebar width is different
+
+const Navbar = ({ isSidebarOpen }) => {
   const { userData, logout } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const dropdownRef = useRef(null);
-  const UserName=userData.UserName;
-  console.log("userData:", userData);
-
+  const UserName = userData.UserName;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -20,16 +20,13 @@ const Navbar = () => {
         setIsDropdownOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const toggleDropdown = () => {
-    setIsDropdownOpen(!isDropdownOpen);
-  };
+  const toggleDropdown = () => setIsDropdownOpen(!isDropdownOpen);
 
   const openPasswordModal = () => {
     setIsPasswordModalOpen(true);
@@ -42,15 +39,23 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="bg-white shadow-md w-full px-4 sm:px-6 py-3 sm:py-4 flex flex-wrap justify-between items-center">
+     <nav
+  className="fixed top-0 z-50 bg-white shadow-md px-4 sm:px-6 flex justify-between items-center transition-all duration-300"
+  style={{
+    left: isSidebarOpen ? '256px' : '64px',
+    width: isSidebarOpen ? 'calc(100% - 256px)' : 'calc(100% - 64px)',
+    
+  }}
+>
+
         {/* Company Logo and Name */}
         <div className="flex items-center space-x-2 sm:space-x-4">
-          <img 
-            src="/src/assets/logo2.jpg" 
-            alt="Company Logo" 
-            className="w-8 h-8 sm:w-12 sm:h-12 rounded-full object-cover" 
+          <img
+            src="/src/assets/logo2.jpg"
+            alt="Company Logo"
+            className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
           />
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-800 truncate">
+          <h1 className="text-lg sm:text-xl font-bold text-gray-800 truncate">
             <span className="hidden sm:inline">New Product Development</span>
             <span className="sm:hidden">NPD</span>
           </h1>
@@ -58,19 +63,14 @@ const Navbar = () => {
 
         {/* Icons and User Info */}
         <div className="flex items-center space-x-3 sm:space-x-6">
-          {/* Chat Icon */}
           <button className="relative p-1 rounded-full hover:bg-gray-100">
             <FaCommentDots className="text-gray-700 w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-
-          {/* Notification Icon */}
           <button className="relative p-1 rounded-full hover:bg-gray-100">
             <FaBell className="text-gray-700 w-5 h-5 sm:w-6 sm:h-6" />
           </button>
-
-          {/* User Account - Click to Toggle Dropdown */}
           <div className="relative" ref={dropdownRef}>
-            <button 
+            <button
               className="flex items-center space-x-1 sm:space-x-2 cursor-pointer p-1 rounded-full hover:bg-gray-100"
               onClick={toggleDropdown}
             >
@@ -78,15 +78,19 @@ const Navbar = () => {
               <span className="text-gray-700 font-medium hidden sm:block">
                 {UserName}
               </span>
-              <FaChevronDown className={`text-gray-500 w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""}`} />
+              <FaChevronDown
+                className={`text-gray-500 w-3 h-3 transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : ""
+                  }`}
+              />
             </button>
 
-            {/* Dropdown Menu */}
             {isDropdownOpen && (
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 animate-fadeIn">
                 <div className="px-4 py-2 text-sm text-gray-700 border-b">
                   <div className="font-medium">{UserName}</div>
-                  <div className="text-gray-500 text-xs truncate">{userData?.email || ""}</div>
+                  <div className="text-gray-500 text-xs truncate">
+                    {userData?.email || ""}
+                  </div>
                 </div>
                 <button
                   onClick={openPasswordModal}
@@ -107,9 +111,10 @@ const Navbar = () => {
       </nav>
 
       {/* Password Change Modal */}
-      {isPasswordModalOpen && (
-        <PasswordChangeModal onClose={closePasswordModal} />
-      )}
+      {isPasswordModalOpen && <PasswordChangeModal onClose={closePasswordModal} />}
+
+      {/* Spacer to push content below fixed navbar */}
+      <div className="h-16 sm:h-20"></div>
     </>
   );
 };

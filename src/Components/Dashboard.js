@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,12 +11,16 @@ import {
   Tooltip,
   ArcElement,
 } from "chart.js";
-import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, Legend } from "recharts";
-import Calendar from 'react-calendar';
-
-import 'react-calendar/dist/Calendar.css';
-import './Dashboard.css';
-
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  Legend,
+} from "recharts";
+import Calendar from "react-calendar";
+import "react-calendar/dist/Calendar.css";
+import "./Dashboard.css";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, ArcElement);
 
@@ -60,21 +66,18 @@ const requestDataMapping = {
     { name: "New Requests", value: 30 },
     { name: "Pending Requests", value: 25 },
   ],
-
 };
 
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28"];
 
-
-
 const Dashboard = () => {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
 
   const [currentMonthIndex, setCurrentMonthIndex] = useState(new Date().getMonth());
   const [selectedMonth, setSelectedMonth] = useState(months[currentMonthIndex]);
   const [selectedTool, setSelectedTool] = useState("Tool A");
   const [requestData, setRequestData] = useState(requestDataMapping[selectedMonth] || []);
   const [date, setDate] = useState(new Date());
-  const [hoveredDate, setHoveredDate] = useState(null);
 
   useEffect(() => {
     setSelectedMonth(months[currentMonthIndex]);
@@ -82,7 +85,6 @@ const Dashboard = () => {
   }, [currentMonthIndex]);
 
   const data = dummyData[selectedMonth];
-
   const totalEnquiryGenerated = data.reduce((sum, value) => sum + value, 0);
   const noOfEnquiries = data[0];
   const completedEnquiries = data[1];
@@ -122,9 +124,7 @@ const Dashboard = () => {
     maintainAspectRatio: false,
     responsive: true,
     plugins: {
-      legend: {
-        display: false,
-      },
+      legend: { display: false },
     },
   };
 
@@ -132,7 +132,6 @@ const Dashboard = () => {
     { name: "Production", value: productionData[selectedTool].production },
     { name: "Rejection", value: productionData[selectedTool].rejection },
   ];
-
 
   const dualAxisData = {
     labels: ["Toolmaker 1", "Toolmaker 2", "Toolmaker 3"],
@@ -161,24 +160,16 @@ const Dashboard = () => {
   const dualAxisOptions = {
     responsive: true,
     scales: {
-      y: {
-        type: 'linear',
-        position: 'left',
-      },
+      y: { type: 'linear', position: 'left' },
       y1: {
         type: 'linear',
         position: 'right',
-        grid: {
-          drawOnChartArea: false,
-        },
+        grid: { drawOnChartArea: false },
       },
     },
-    plugins: {
-      legend: {
-        display: true,
-      },
-    },
+    plugins: { legend: { display: true } },
   };
+
   const meetings = [
     { date: new Date(2025, 2, 3), name: 'Project Kick-off', time: '10:00 AM' },
     { date: new Date(2025, 2, 10), name: 'Budget Review', time: '2:00 PM' },
@@ -186,196 +177,163 @@ const Dashboard = () => {
     { date: new Date(2025, 2, 25), name: 'Sprint Retrospective', time: '4:00 PM' },
   ];
 
-
   const currentYear = new Date().getFullYear();
+  const firstDayOfMonth = new Date(currentYear, currentMonthIndex, 1);
+  const lastDayOfMonth = new Date(currentYear, currentMonthIndex + 1, 0);
 
-
-  const firstDayOfMonth = new Date(currentYear, selectedMonth, 1);
-  const lastDayOfMonth = new Date(currentYear, selectedMonth + 1, 0);
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
-
-      <div style={{ textAlign: "left", marginBottom: "20px" }}>
-        <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
-          {months[selectedMonth]}
-        </h1>
-        <select
-          value={months[selectedMonth]}
-          onChange={handleMonthChange}
-          style={{ padding: "8px", fontSize: "16px", borderRadius: "5px" }}
-        >
-          {months.map((month, index) => (
-            <option key={index} value={month}>
-              {month}
-            </option>
-          ))}
-        </select>
-      </div>
-
-
-      <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px" }}>
-        {[
-          { title: "Total enquiry", value: totalEnquiryGenerated, color: "#3498db" },
-          { title: "Number of enquiries Inprocess", value: noOfEnquiries, color: "#f1c40f" },
-          { title: "Completed Enquiries", value: completedEnquiries, color: "#2ecc71" },
-          { title: "Pending enquiries for feasibility", value: pendingEnquiries, color: "#e74c3c" },
-        ].map((item, index) => (
-          <div
-            key={index}
-            style={{
-              background: item.color,
-              color: "#fff",
-              padding: "15px 20px",
-              borderRadius: "8px",
-              textAlign: "center",
-              width: "200px",
-              boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
-            }}
-          >
-            <h3 style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
-            <h2 style={{ margin: "5px 0", fontSize: "22px" }}>{item.value}</h2>
-          </div>
-        ))}
-      </div>
-
-
-      <div style={{ display: "flex", gap: "20px" }}>
-
-        <div
+    <div className="flex">
+      <Sidebar isSidebarOpen={isSidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <div className="flex-1">
+        <Navbar isSidebarOpen={isSidebarOpen} />
+        <main
+          className="p-4"
           style={{
-            padding: "20px",
-            textAlign: "left",
-            width: "600px",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-            background: "#f9f9f9",
+            marginLeft: isSidebarOpen ? '250px' : '64px',
+            transition: 'margin 0.3s ease',
           }}
         >
-          <div
-            style={{
-              width: "540px",
-              height: "500px",
-              marginTop: "20px",
-              padding: "10px",
-              background: "#fff",
-              borderRadius: "8px",
-            }}
-          >
-            <Bar data={chartData} options={chartOptions} />
+          <div style={{ padding: "20px", fontFamily: "Arial, sans-serif" }}>
+            <div style={{ textAlign: "left", marginBottom: "20px" }}>
+              <h1 style={{ fontSize: "24px", marginBottom: "10px" }}>
+                {selectedMonth}
+              </h1>
+              <select
+                value={selectedMonth}
+                onChange={handleMonthChange}
+                style={{ padding: "8px", fontSize: "16px", borderRadius: "5px" }}
+              >
+                {months.map((month, index) => (
+                  <option key={index} value={month}>{month}</option>
+                ))}
+              </select>
+            </div>
 
-          </div>
-        </ div>
-
-        <div
-          style={{
-            padding: "20px",
-            width: "500px",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-            background: "#fff",
-          }}
-        >
-          <h2 style={{ fontSize: "18px", textAlign: "center", marginBottom: "10px" }}>
-            Production vs Rejection
-          </h2>
-
-          <select
-            value={selectedTool}
-            onChange={handleToolChange}
-            style={{ width: "100%", padding: "5px", fontSize: "14px", marginBottom: "10px" }}
-          >
-            {Object.keys(productionData).map((tool) => (
-              <option key={tool} value={tool}>
-                {tool}
-              </option>
-            ))}
-          </select>
-
-          <PieChart width={400} height={300}>
-            <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={80} outerRadius={130} label>
-              {pieChartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index]} />
-              ))}
-            </Pie>
-            <RechartsTooltip />
-            <Legend />
-          </PieChart>
-        </div>
-      </div>
-
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "20px",
-          padding: "20px",
-        }}
-      >
-        <div
-          style={{
-            padding: "20px",
-            textAlign: "left",
-            width: "690px",
-            borderRadius: "10px",
-            boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
-            background: "#f9f9f9",
-          }}
-        >
-          <div
-            style={{
-              width: "650px",
-              height: "380px",
-              marginTop: "20px",
-              padding: "10px",
-              background: "#fff",
-              borderRadius: "8px",
-            }}
-          >
-            <Bar data={dualAxisData} options={dualAxisOptions} />
-            <h1 style={{ fontSize: "20px", marginBottom: "10px", textAlign: "center" }}>
-              Toolmaker Process Status
-            </h1>
-          </div>
-        </div>
-
-        <div style={{ marginBottom: "10px", flexShrink: 0 }}>
-          <Calendar
-            onChange={setDate}
-            value={date}
-            minDate={firstDayOfMonth}
-            maxDate={lastDayOfMonth}
-            tileContent={({ date, view }) => {
-              const meeting = meetings.find(
-                (meeting) => meeting.date.toDateString() === date.toDateString()
-              );
-
-              return meeting ? (
-                <div style={{ fontSize: "10px", color: "red", textAlign: "center" }}>
-                  📅 {meeting.name}
+            {/* Metric Boxes */}
+            <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "20px" }}>
+              {[
+                { title: "Total enquiry", value: totalEnquiryGenerated, color: "#3498db" },
+                { title: "Number of enquiries Inprocess", value: noOfEnquiries, color: "#f1c40f" },
+                { title: "Completed Enquiries", value: completedEnquiries, color: "#2ecc71" },
+                { title: "Pending enquiries for feasibility", value: pendingEnquiries, color: "#e74c3c" },
+              ].map((item, index) => (
+                <div key={index} style={{
+                  background: item.color,
+                  color: "#fff",
+                  padding: "15px 20px",
+                  borderRadius: "8px",
+                  textAlign: "center",
+                  width: "200px",
+                  boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.2)",
+                }}>
+                  <h3 style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
+                  <h2 style={{ margin: "5px 0", fontSize: "22px" }}>{item.value}</h2>
                 </div>
-              ) : null;
-            }}
-            tileClassName={({ date, view }) => {
-              if (date.getDay() === 6) { // Saturday
-                return "saturday-black";
-              } else if (date.getDay() === 0) { // Sunday
-                return "sunday-red"; // You can change this to any color you want
-              }
-              return "";
-            }}
-            className="custom-calendar"
-            style={{
-              border: "1px solid #ccc",
-              borderRadius: "8px",
-              width: "400px", // Set your desired width
-              height: "500px" // Set your desired height
-            }}
-          />
-        </div>
+              ))}
+            </div>
 
+            {/* Charts */}
+            <div style={{ display: "flex", gap: "20px" }}>
+              <div style={{
+                padding: "20px",
+                textAlign: "left",
+                width: "600px",
+                borderRadius: "10px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                background: "#f9f9f9",
+              }}>
+                <div style={{
+                  width: "540px",
+                  height: "500px",
+                  marginTop: "20px",
+                  padding: "10px",
+                  background: "#fff",
+                  borderRadius: "8px",
+                }}>
+                  <Bar data={chartData} options={chartOptions} />
+                </div>
+              </div>
+
+              <div style={{
+                padding: "20px",
+                width: "500px",
+                borderRadius: "10px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                background: "#fff",
+              }}>
+                <h2 style={{ fontSize: "18px", textAlign: "center", marginBottom: "10px" }}>Production vs Rejection</h2>
+                <select
+                  value={selectedTool}
+                  onChange={handleToolChange}
+                  style={{ width: "100%", padding: "5px", fontSize: "14px", marginBottom: "10px" }}
+                >
+                  {Object.keys(productionData).map((tool) => (
+                    <option key={tool} value={tool}>{tool}</option>
+                  ))}
+                </select>
+                <PieChart width={400} height={300}>
+                  <Pie data={pieChartData} cx="50%" cy="50%" innerRadius={80} outerRadius={130} label>
+                    {pieChartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index]} />
+                    ))}
+                  </Pie>
+                  <RechartsTooltip />
+                  <Legend />
+                </PieChart>
+              </div>
+            </div>
+
+            {/* Toolmaker chart and calendar */}
+            <div style={{ display: "flex", justifyContent: "center", gap: "20px", padding: "20px" }}>
+              <div style={{
+                padding: "20px",
+                textAlign: "left",
+                width: "690px",
+                borderRadius: "10px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                background: "#f9f9f9",
+              }}>
+                <div style={{
+                  width: "650px",
+                  height: "380px",
+                  marginTop: "20px",
+                  padding: "10px",
+                  background: "#fff",
+                  borderRadius: "8px",
+                }}>
+                  <Bar data={dualAxisData} options={dualAxisOptions} />
+                  <h1 style={{ fontSize: "20px", marginBottom: "10px", textAlign: "center" }}>
+                    Toolmaker Process Status
+                  </h1>
+                </div>
+              </div>
+
+              <div style={{ marginBottom: "10px", flexShrink: 0 }}>
+                <Calendar
+                  onChange={setDate}
+                  value={date}
+                  minDate={firstDayOfMonth}
+                  maxDate={lastDayOfMonth}
+                  tileContent={({ date }) => {
+                    const meeting = meetings.find(m => m.date.toDateString() === date.toDateString());
+                    return meeting ? (
+                      <div style={{ fontSize: "10px", color: "red", textAlign: "center" }}>
+                        📅 {meeting.name}
+                      </div>
+                    ) : null;
+                  }}
+                  tileClassName={({ date }) => {
+                    if (date.getDay() === 6) return "saturday-black";
+                    if (date.getDay() === 0) return "sunday-red";
+                    return "";
+                  }}
+                  className="custom-calendar"
+                />
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
-
-
     </div>
   );
 };

@@ -202,100 +202,104 @@ const FeasibilityReview = () => {
         </div> */}
       </div>
 
-      {/* Table */}
-      <div className="relative">
-        <div className="overflow-y-auto max-h-[400px] border rounded-lg">
-          <table className="w-full border-collapse">
-            <thead className="sticky top-0 bg-gray-100 shadow text-gray-700">
-              <tr>
-                <th className="px-4 py-3 border">Sr No</th>
+         {/* Checkpoint Selection */}
+    <div className="mb-8">
+      <label className="block text-sm font-medium text-gray-700 mb-2">Checkpoint Type</label>
+      <select
+        value={selectedCheckpoint}
+        onChange={handleCheckpointChange}
+        className="block w-full py-2.5 px-3.5 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      >
+        <option value="">Select Checkpoint Type</option>
+        {checkpointOptions.map(option => (
+          <option key={option.DataValueField} value={option.DataValueField}>
+            {option.DataTextField}
+          </option>
+        ))}
+      </select>
+    </div>
 
-                {/* Checkpoints Header with Dropdown */}
-                <th className="px-4 py-3 border">
-                  <div className="flex flex-col items-center">
+    {/* Table Section */}
+    <div className="border border-gray-200 rounded-lg overflow-hidden shadow-xs">
+  <div className="max-h-[400px] overflow-y-auto">
+    <table className="min-w-full divide-y divide-gray-200">
+      <thead className="bg-gray-50 sticky top-0 z-10">
+        <tr>
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase w-12">Sr. No.</th>
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Checkpoint</th>
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Comments</th>
+          <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase">Responsible</th>
+          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Target Date</th>
+        </tr>
+      </thead>
+      <tbody className="bg-white divide-y divide-gray-200">
+        {rows.length > 0 ? (
+          rows.map((row, index) => (
+            <tr key={row.id} className="hover:bg-gray-50 transition-colors">
+              <td className="px-4 py-3.5 text-sm font-medium text-gray-900">{index + 1}</td>
+              <td className="px-4 py-3 text-sm text-gray-700 font-medium">{row.checkpoint}</td>
+              <td className="px-4 py-3">
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={row.comment}
+                  onChange={(e) => updateRow(row.id, "comment", e.target.value)}
+                  placeholder="Enter comments..."
+                />
+              </td>
+              <td className="px-4 py-3 text-center">
+                <select
+                  value={row.responsiblePersonId || ""}
+                  onChange={(e) => updateRow(row.id, "responsiblePersonId", e.target.value)}
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Select responsible</option>
+                  {responsibleData?.map(person => (
+                    <option key={person.DataValueField} value={person.DataValueField}>
+                      {person.DataTextField}
+                    </option>
+                  ))}
+                </select>
+              </td>
+              <td className="px-4 py-3">
+                <input
+                  type="date"
+                  className="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={row.targetDate}
+                  onChange={(e) => updateRow(row.id, "targetDate", e.target.value)}
+                />
+              </td>
+            </tr>
+          ))
+        ) : (
+          <tr>
+            <td colSpan="5" className="px-4 py-6 text-center text-gray-500">
+              No sub-checkpoints available. Please select a checkpoint type above.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
-                    <select
-                      value={selectedCheckpoint}
-                      onChange={handleCheckpointChange}
-                      className="mt-2 w-48 px-2 py-1 border rounded focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select Check Point</option>
-                      {checkpointOptions.map((option) => (
-                        <option key={option.DataValueField} value={option.DataValueField}>
-                          {option.DataTextField}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </th>
 
-                <th className="px-4 py-3 border">Comment / Action Required</th>
-                <th className="px-4 py-3 border">Person Responsible</th>
-                <th className="px-4 py-3 border">Target Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRows.length > 0 ? (
-                filteredRows.map((row, index) => (
-                  <tr key={row.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-2 border text-center">{index + 1}</td>
-                    <td className="px-4 py-2 border">{row.checkpoint}</td>
-                    <td className="px-4 py-2 border">
-                      <input
-                        type="text"
-                        className="w-full px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500"
-                        value={row.comment}
-                        onChange={(e) => updateRow(row.id, "comment", e.target.value)}
-                      />
-                    </td>
-                    <select
-                      value={row.responsiblePersonId || ""}
-                      onChange={(e) => updateRow(row.id, "responsiblePersonId", e.target.value)}
-                      className="w-full border rounded-md px-3 py-1.5 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      <option value="">Select</option>
-                      {responsiblePersons.map(person => (
-                        <option key={person.DataValueField} value={person.DataValueField}>
-                          {person.DataTextField}
-                        </option>
-                      ))}
-                    </select>
-
-
-                    <td className="px-4 py-2 border">
-                      <input
-                        type="date"
-                        className="w-full px-2 py-1 border rounded focus:ring-1 focus:ring-blue-500"
-                        value={row.targetDate}
-                        onChange={(e) => updateRow(row.id, "targetDate", e.target.value)}
-                      />
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan="5" className="text-center py-6 text-gray-400">
-                    No records found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Fixed Save Button */}
-        <div className="sticky bottom-0 bg-white p-4 border-t flex justify-end">
-        <button
-  onClick={handleSave}
-  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
->
-  Save
-</button>
-
-        </div>
-      </div>
+    {/* Save Button */}
+    <div className="mt-8 flex justify-end border-t border-gray-200 pt-6">
+      <button
+        onClick={handleSave}
+        className="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+      >
+        Save Review
+      </button>
+    </div>
     </div>
   );
 };
 
 export default FeasibilityReview;
+
+
+
+
+

@@ -38,7 +38,7 @@ const EnquiryTable = ({
   }
 
   return (
-    <div className=" max-w-7xl bg-white p-2 rounded-lg shadow-sm ml-2">
+    <div className=" max-w-7xl bg-white px-3 rounded-lg ml-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
         <h2 className="text-2xl font-bold text-gray-800">Enquiry List</h2>
         <div className="flex flex-col sm:flex-row items-center space-y-3 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
