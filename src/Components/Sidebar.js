@@ -9,7 +9,8 @@ import {
   FaSearch,
   FaRegCalendarCheck,
   FaTasks,
-  FaFileAlt
+  FaFileAlt,
+  FaTable
 } from 'react-icons/fa';
 import { ClipboardCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
@@ -121,12 +122,28 @@ const Sidebar = ({ isSidebarOpen, setSidebarOpen }) => {
               <DropdownLink to="/user" onClick={handleLinkClick} label="Users" />
             </Dropdown>
 
+            <Dropdown
+              label="Checklist"
+              icon={<FaTable className="w-6 h-6" />}
+              isSidebarOpen={isSidebarOpen}
+              isOpen={openDropdown === 'checklist'}
+              toggle={() => handleDropdown('checklist')}
+            >
+              <DropdownLink to="/mouldinspection" onClick={handleLinkClick} label="Mould Inspection" />
+              <DropdownLink to="/predispatched" onClick={handleLinkClick} label="PreDispatched" />
+              <DropdownLink to="/sampleinspection" onClick={handleLinkClick} label="Sample Inspection Checksheet" />
+              <DropdownLink to="/tooldesignreview" onClick={handleLinkClick} label="Tool Design Review" />
+              <DropdownLink to="/trialrequisition" onClick={handleLinkClick} label="Trial Requisition Report" />
+            </Dropdown>
+
             <li>
               <Link to="/account" onClick={handleLinkClick} className="flex items-center p-3 hover:bg-gray-600 rounded-lg transition-colors">
                 <FaFileAlt className="w-6 h-6" />
                 <span className={`ml-3 ${!isSidebarOpen && 'sr-only'}`}>Reports</span>
               </Link>
             </li>
+
+           
 
             {/* Logout */}
             <li>

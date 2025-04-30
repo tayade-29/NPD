@@ -18,7 +18,17 @@ import CustomerTable from "./Lookups/Customer";
 import UserPage from "./Lookups/User";
 import SupplierPage from "./Lookups/Supplier";
 import Cft from "./CFT/Cft"
-import FRT from "./Forms/FeasibilityReviewTable"
+import FRT from "./Forms/FeasibilityReviewTable";
+import CoreCavityTable from "./Tables/CoreCavityTable";
+import FeedingSystemTable from "./Tables/FeedingSystemTable";
+import GeneralTable from "./Tables/GeneralTable";
+import MouldInspection from "./Tables/MouldInspectionChecksheet";
+import MouldMaterial from "./Tables/MouldMaterialRelated";
+import PreDispatched from "./Tables/PreDispatchInspection";
+import SampleInspection from "./Tables/SampleInspectionReportForm";
+import ToolDesignReview from "./Tables/ToolDesignReview";
+import TrialReportForm from "./Tables/TrialReportForm";
+import TrialRequisition from "./Tables/TrialRequisitionNote";
 
 
 const PrivateRoute = ({ children }) => {
@@ -77,6 +87,16 @@ const AppContent = () => {
               <Route path="/user" element={<PrivateRoute><UserPage /></PrivateRoute>} />
               <Route path="/cft" element={<PrivateRoute><Cft /></PrivateRoute>} />
               <Route path="/frt" element={<PrivateRoute><FRT /></PrivateRoute>} />
+              <Route path="/corecavity" element={<PrivateRoute><CoreCavityTable /></PrivateRoute>} />
+              <Route path="/feedingsystem" element={<PrivateRoute><FeedingSystemTable /></PrivateRoute>} />
+              <Route path="/generalTable" element={<PrivateRoute><GeneralTable /></PrivateRoute>} />
+              <Route path="/mouldinspection" element={<PrivateRoute><MouldInspection /></PrivateRoute>} />
+              <Route path="/mouldmaterial" element={<PrivateRoute><MouldMaterial /></PrivateRoute>} />
+              <Route path="/predispatched" element={<PrivateRoute><PreDispatched/></PrivateRoute>} />
+              <Route path="/sampleinspection" element={<PrivateRoute><SampleInspection/></PrivateRoute>} />
+              <Route path="/tooldesignreview" element={<PrivateRoute><ToolDesignReview/></PrivateRoute>} />
+              <Route path="/trialreportform" element={<PrivateRoute><TrialReportForm/></PrivateRoute>} />
+              <Route path="/trialrequisition" element={<PrivateRoute><TrialRequisition/></PrivateRoute>} />
 
 
               {/* Root and catch-all routes */}

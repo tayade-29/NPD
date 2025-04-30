@@ -39,14 +39,14 @@ const Navbar = ({ isSidebarOpen }) => {
 
   return (
     <>
-     <nav
-  className="fixed top-0 z-50 bg-white shadow-md px-4 sm:px-6 flex justify-between items-center transition-all duration-300"
+    <nav
+  className="fixed top-0 z-50 bg-white shadow-md px-4 sm:px-6 flex justify-between items-center transition-all duration-300 py-4 sm:py-5"
   style={{
     left: isSidebarOpen ? '256px' : '64px',
     width: isSidebarOpen ? 'calc(100% - 256px)' : 'calc(100% - 64px)',
-    
   }}
 >
+
 
         {/* Company Logo and Name */}
         <div className="flex items-center space-x-2 sm:space-x-4">

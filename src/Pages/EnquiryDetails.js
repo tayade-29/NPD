@@ -8,7 +8,8 @@ import {
   CalendarDays,
   Eye,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  Check
 } from "lucide-react";
 import ProcessTracker from "../Components/ProcessTracker";
 import {
@@ -20,6 +21,8 @@ import { useAuth } from '../context/AuthContext';
 const EnquiryDetails = ({ enquiry, onClose }) => {
   const { userData } = useAuth();
   const [saveFeasibilityCheck] = useSaveFeasibilityCheckMutation();
+  const [poSubActiveTab, setPoSubActiveTab] = useState(0); // 0 for Supplier, 1 for Customer
+  const [subActiveTab, setSubActiveTab] = useState(0);
   const [selectedEnquiry, setSelectedEnquiry] = useState(enquiry);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
@@ -421,191 +424,228 @@ const EnquiryDetails = ({ enquiry, onClose }) => {
 
           {/* Quoatation */}
           {activeTab === 2 && (
-            <div className="bg-white p-8  border  w-full max-w-5xl mx-auto h-full">
+  <div className="bg-white p-6 border border-gray-200 rounded-lg w-full max-w-4xl mx-auto shadow-sm">
+    {/* Nested Tabs Header */}
+    <div className="mb-6 border-b border-gray-200">
+      <nav className="flex space-x-4">
+        {['Supplier Quotation', 'Customer Quotation'].map((tab, idx) => (
+          <button
+            key={tab}
+            onClick={() => setSubActiveTab(idx)}
+            className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${
+              subActiveTab === idx 
+                ? 'border-blue-600 text-blue-600' 
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </nav>
+    </div>
 
+    {/* Form Content */}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Quotation Number */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Quotation Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={selectedEnquiry.quotationNumber || ""}
+            onChange={(e) => handleInputChange(e, "quotationNumber")}
+            placeholder="Enter quotation number"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                {/* Quotation Number */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    Quotation Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedEnquiry.quotationNumber || ""}
-                    onChange={(e) => handleInputChange(e, "quotationNumber")}
-                    placeholder="Enter quotation number"
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+        {/* Quotation Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Quotation Date <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type="date"
+              value={selectedEnquiry.quotationDate || ""}
+              onChange={(e) => handleInputChange(e, "quotationDate")}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <CalendarDays className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
 
-                {/* Quotation Date */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    Quotation Date <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={selectedEnquiry.quotationDate || ""}
-                      onChange={(e) => handleInputChange(e, "quotationDate")}
-                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                      <CalendarDays size={18} />
-                    </div>
-                  </div>
-                </div>
+        {/* Costs Section */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Part Cost (₹)
+          </label>
+          <input
+            type="number"
+            value={selectedEnquiry.partCost || ""}
+            onChange={(e) => handleInputChange(e, "partCost")}
+            placeholder="Enter amount"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-                {/* Part Cost */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    Part Cost (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={selectedEnquiry.partCost || ""}
-                    onChange={(e) => handleInputChange(e, "partCost")}
-                    placeholder="Enter part cost"
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            Tool Cost (₹)
+          </label>
+          <input
+            type="number"
+            value={selectedEnquiry.toolCost || ""}
+            onChange={(e) => handleInputChange(e, "toolCost")}
+            placeholder="Enter amount"
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
+      </div>
 
-                {/* Tool Cost */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    Tool Cost (₹)
-                  </label>
-                  <input
-                    type="number"
-                    value={selectedEnquiry.toolCost || ""}
-                    onChange={(e) => handleInputChange(e, "toolCost")}
-                    placeholder="Enter tool cost"
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              {/* File Upload */}
-              <div className="mb-10">
-                <label className="block text-base font-medium text-gray-700 mb-2">
-                  Upload Quotation File
-                </label>
-                <div className="flex flex-wrap items-center gap-4">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "quotationFile")}
-                    className="hidden"
-                    id="quotation-upload"
-                  />
-                  <label
-                    htmlFor="quotation-upload"
-                    className="bg-blue-50 text-blue-600 px-5 py-2.5 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium flex items-center"
-                  >
-                    <Upload size={16} className="mr-2" /> Upload File
-                  </label>
-                  {selectedEnquiry.quotationFile && (
-                    <button
-                      type="button"
-                      className="flex items-center text-green-600 text-sm hover:underline"
-                    >
-                      <Eye size={16} className="mr-1" /> View File
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSubmitQuotation}
-                  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200"
-                >
-                  <Upload size={16} className="mr-2" /> Submit Quotation
-                </button>
-              </div>
-            </div>
+      {/* File Upload Section */}
+      <div className="border-t border-gray-100 pt-4">
+        <label className="block text-sm font-medium text-gray-600 mb-2">
+          Upload Quotation File
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="file"
+            onChange={(e) => handleFileChange(e, "quotationFile")}
+            className="hidden"
+            id="file-upload"
+          />
+          <label
+            htmlFor="file-upload"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-600 hover:bg-gray-50"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Choose File
+          </label>
+          {selectedEnquiry.quotationFile && (
+            <span className="text-sm text-gray-500 flex items-center">
+              <Check className="w-4 h-4 text-green-500 mr-1" />
+              File Selected
+            </span>
           )}
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="border-t border-gray-100 pt-4">
+        <button
+          onClick={handleSubmitQuotation}
+          className="w-full md:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          Submit Quotation
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
 
           {/* PO */}
           {activeTab === 3 && (
-            <div className="bg-white p-8 w-full border max-w-5xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-                {/* Purchase Order Number */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    Purchase Order Number <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={selectedEnquiry.customerPONo || ""}
-                    onChange={(e) => handleInputChange(e, "customerPONo")}
-                    placeholder="Enter P.O. number"
-                    className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+  <div className="bg-white p-6 border border-gray-200 rounded-lg w-full max-w-4xl mx-auto shadow-sm">
+    {/* Nested Tabs Header */}
+    <div className="mb-6 border-b border-gray-200">
+      <nav className="flex space-x-4">
+        {['Supplier P.O', 'Customer P.O'].map((tab, idx) => (
+          <button
+            key={tab}
+            onClick={() => setPoSubActiveTab(idx)}
+            className={`pb-2 px-1 text-sm font-medium border-b-2 transition-colors ${
+              poSubActiveTab === idx 
+                ? 'border-blue-600 text-blue-600' 
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </nav>
+    </div>
 
-                {/* P.O. Date */}
-                <div>
-                  <label className="block text-base font-medium text-gray-700 mb-2">
-                    P.O. Date <span className="text-red-500">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      value={selectedEnquiry.customerPODate || ""}
-                      onChange={(e) => handleInputChange(e, "customerPODate")}
-                      className="w-full px-4 py-3 text-sm border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                      <CalendarDays size={18} />
-                    </div>
-                  </div>
-                </div>
-              </div>
+    {/* Form Content */}
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* P.O Number */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            {poSubActiveTab === 0 ? 'Supplier' : 'Customer'} P.O Number <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={poSubActiveTab === 0 ? selectedEnquiry.supplierPONo : selectedEnquiry.customerPONo || ""}
+            onChange={(e) => handleInputChange(e, poSubActiveTab === 0 ? "supplierPONo" : "customerPONo")}
+            placeholder={`Enter ${poSubActiveTab === 0 ? 'Supplier' : 'Customer'} P.O number`}
+            className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </div>
 
-              {/* File Upload */}
-              <div className="mb-10">
-                <label className="block text-base font-medium text-gray-700 mb-2">
-                  Upload P.O. File
-                </label>
-                <div className="flex flex-wrap items-center gap-4">
-                  <input
-                    type="file"
-                    onChange={(e) => handleFileChange(e, "poFile")}
-                    className="hidden"
-                    id="po-upload"
-                  />
-                  <label
-                    htmlFor="po-upload"
-                    className="bg-blue-50 text-blue-600 px-5 py-2.5 rounded-md cursor-pointer hover:bg-blue-100 text-sm font-medium flex items-center"
-                  >
-                    <Upload size={16} className="mr-2" /> Upload File
-                  </label>
-                  {selectedEnquiry.poFile && (
-                    <button
-                      type="button"
-                      className="flex items-center text-green-600 text-sm hover:underline"
-                    >
-                      <Eye size={16} className="mr-1" /> View File
-                    </button>
-                  )}
-                </div>
-              </div>
+        {/* P.O Date */}
+        <div>
+          <label className="block text-sm font-medium text-gray-600 mb-1">
+            {poSubActiveTab === 0 ? 'Supplier' : 'Customer'} P.O Date <span className="text-red-500">*</span>
+          </label>
+          <div className="relative">
+            <input
+              type="date"
+              value={poSubActiveTab === 0 ? selectedEnquiry.supplierPODate : selectedEnquiry.customerPODate || ""}
+              onChange={(e) => handleInputChange(e, poSubActiveTab === 0 ? "supplierPODate" : "customerPODate")}
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <CalendarDays className="absolute right-3 top-2.5 h-4 w-4 text-gray-400 pointer-events-none" />
+          </div>
+        </div>
+      </div>
 
-              {/* Submit Button */}
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSubmitPO}
-                  className="inline-flex items-center bg-blue-600 text-white px-6 py-3 rounded-lg text-sm font-medium hover:bg-blue-700 transition duration-200"
-                >
-                  <Upload size={16} className="mr-2" /> Submit P.O.
-                </button>
-              </div>
-            </div>
+      {/* File Upload Section */}
+      <div className="border-t border-gray-100 pt-4">
+        <label className="block text-sm font-medium text-gray-600 mb-2">
+          Upload {poSubActiveTab === 0 ? 'Supplier' : 'Customer'} P.O File
+        </label>
+        <div className="flex items-center gap-3">
+          <input
+            type="file"
+            onChange={(e) => handleFileChange(e, poSubActiveTab === 0 ? "supplierPOFile" : "customerPOFile")}
+            className="hidden"
+            id="po-file-upload"
+          />
+          <label
+            htmlFor="po-file-upload"
+            className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md bg-white text-sm text-gray-600 hover:bg-gray-50"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Choose File
+          </label>
+          {selectedEnquiry[poSubActiveTab === 0 ? "supplierPOFile" : "customerPOFile"] && (
+            <span className="text-sm text-gray-500 flex items-center">
+              <Check className="w-4 h-4 text-green-500 mr-1" />
+              File Selected
+            </span>
           )}
+        </div>
+      </div>
+
+      {/* Submit Button */}
+      <div className="border-t border-gray-100 pt-4">
+        <button
+          onClick={handleSubmitPO}
+          className="w-full md:w-auto inline-flex justify-center items-center px-4 py-2.5 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+        >
+          <Upload className="w-4 h-4 mr-2" />
+          Submit {poSubActiveTab === 0 ? 'Supplier' : 'Customer'} P.O
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
 
 
