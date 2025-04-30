@@ -77,8 +77,7 @@ const ToolDesignReviewTable = ({ queryParams }) => {
     }
   };
 
-  if (isLoading) return <div className="p-4 text-lg">Loading...</div>;
-  if (isError) return <div className="p-4 text-red-500">Error fetching data</div>;
+ 
 
   return (
     <div className="p-6">
