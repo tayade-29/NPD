@@ -16,6 +16,61 @@ export const apiChecklist = createApi({
         body: formData,
       }),
     }),
+    mouldInspectionChecksheekFill: builder.query({
+      query: (userData) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 12,
+          pLookUpId: 0,
+          pLookUpType: 0,
+          pSelectionType: 1,
+          pClientId: userData?.clientId || 1,
+          pPlantId: userData?.plantId || 1,
+          pLocationId: userData?.locationId || 1
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          if (!response.d) return [];
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : JSON.parse(parsed);
+        } catch (error) {
+          console.error('Transform error for checksheet types:', error);
+          return [];
+        }
+      },
+    }),
+    
+    mouldInspectionCheckSheetTable: builder.query({
+      query: ({ userData, lookupId }) => ({
+        url: 'prc_master_fill',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pAction: 13,
+          pLookUpId: lookupId,
+          pLookUpType: 0,
+          pSelectionType: 0,
+          pClientId: userData?.clientId || 1,
+          pPlantId: userData?.plantId || 1,
+          pLocationId: userData?.locationId || 1
+        })
+      }),
+      transformResponse: (response) => {
+        try {
+          if (!response.d) return [];
+          const parsed = JSON.parse(response.d);
+          return Array.isArray(parsed) ? parsed : JSON.parse(parsed);
+        } catch (error) {
+          console.error('Transform error for table data:', error);
+          return [];
+        }
+      },
+    }),
+    
+
     toolDesignReview: builder.query({
       query: (userData) => ({
         url: 'prc_master_fill',
@@ -60,4 +115,6 @@ export const {
   useSubmitTrialRequisitionMutation,
   useToolDesignReviewQuery, 
   useSubmitToolDesignReviewMutation,
+  useLazyMouldInspectionCheckSheetTableQuery,
+  useMouldInspectionChecksheekFillQuery,
 } = apiChecklist;

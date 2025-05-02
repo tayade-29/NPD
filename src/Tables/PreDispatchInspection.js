@@ -2,44 +2,55 @@ import React from 'react';
 
 const PreDispatchInspection = () => {
   return (
-    <div className="p-8 bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-6">Pre-Dispatch Inspection Report</h1>
+    <div className="p-8 bg-white rounded-2xl shadow-lg">
+      <h1 className="text-3xl font-semibold mb-6 text-gray-800">Pre-Dispatch Inspection Report</h1>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full border border-gray-300 text-sm">
-          <thead className="bg-gray-100">
+        <table className="min-w-full text-sm border border-gray-300 rounded-lg overflow-hidden">
+          <thead className="bg-gray-100 text-gray-700">
             <tr>
-              <th className="border px-4 py-2 text-left">Sr. No.</th>
-              <th className="border px-4 py-2 text-left">Parameter</th>
-              <th className="border px-4 py-2 text-left">Specification</th>
-              <th className="border px-4 py-2 text-left">Checking Instrument/L.C.</th>
-              <th className="border px-4 py-2 text-left">Observation 1</th>
-              <th className="border px-4 py-2 text-left">Observation 2</th>
-              <th className="border px-4 py-2 text-left">Observation 3</th>
-              <th className="border px-4 py-2 text-left">Observation 4</th>
-              <th className="border px-4 py-2 text-left">Observation 5</th>
-              <th className="border px-4 py-2 text-left">Remarks</th>
+              {[
+                'Sr. No.', 'Parameter', 'Specification', 'Checking Instrument/L.C.',
+                'Observation 1', 'Observation 2', 'Observation 3',
+                'Observation 4', 'Observation 5', 'Remarks'
+              ].map((heading, index) => (
+                <th key={index} className="px-4 py-3 text-left font-semibold border border-gray-200">
+                  {heading}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
-            {/* Empty rows for now, to be filled dynamically later if needed */}
-            <tr>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-              <td className="border px-4 py-2"></td>
-            </tr>
+            {[...Array(3)].map((_, rowIndex) => (
+              <tr key={rowIndex} className={rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                {Array(10).fill('').map((_, cellIndex) => (
+                  <td key={cellIndex} className="border border-gray-200 px-4 py-2">
+                    {cellIndex === 0 ? (
+                      <div className="bg-gray-100 px-2 py-1 rounded text-center font-medium text-gray-700 w-8">
+                        {rowIndex + 1}
+                      </div>
+                    ) : cellIndex >= 4 && cellIndex <= 8 ? (
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        placeholder=""
+                      />
+                    ) : (
+                      <input
+                        type="text"
+                        className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                        placeholder=""
+                      />
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   );
-}
+};
 
 export default PreDispatchInspection;
